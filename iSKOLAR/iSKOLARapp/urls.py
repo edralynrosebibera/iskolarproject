@@ -14,6 +14,9 @@ urlpatterns = [
     path("applications/", views.applications_view, name="applications"),
     path("logout/", views.logout_view, name="logout"),
 
+    path("search-posts/", views.search_posts_view, name="search_posts"),
+
+
     # ✅ Admin section
     path("admin-page/", views.admin_view, name="admin_page"),
     path("admin-page/create-post/", views.create_post_view, name="create-post"),
@@ -22,6 +25,7 @@ urlpatterns = [
     path("get-posts/", views.get_posts_view, name="get_posts"),
     path("delete-post/<uuid:post_id>/", views.delete_post_view, name="delete_post"),
     path("edit-post/<uuid:post_id>/", views.edit_post_view, name="edit_post"),
+
 
     # ✅ password reset URLs
     path("forgot/", 

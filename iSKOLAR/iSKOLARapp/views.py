@@ -274,6 +274,17 @@ def delete_post_view(request, post_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": False, "error": "Invalid method"})
 
+@csrf_exempt
+def search_posts_view(request):
+    query = request.GET.get("q", "")
+    try:
+        response = supabase.table("posts").select("*").ilike("title", f"%{query}%").execute()
+        return JsonResponse({"success": True, "data": response.data})
+    except Exception as e:
+        print("⚠️ Search error:", e)
+        return JsonResponse({"success": False, "error": str(e)})
+
+
 def posts_view(request):
     return render(request, "posts.html")
 
