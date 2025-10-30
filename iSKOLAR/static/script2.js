@@ -150,37 +150,73 @@ const scholarshipsContainer = document.querySelector('.saved-scholarships-grid')
 
   loadScholarships();
 
-  // Search filter
-  searchInput?.addEventListener('input', function (e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const cards = document.querySelectorAll('.scholarship-card');
-  let anyVisible = false;
 
-  cards.forEach((card) => {
-    const title = card.querySelector('.scholarship-title')?.textContent.toLowerCase() || '';
-    const description = card.querySelector('.scholarship-description')?.textContent.toLowerCase() || '';
+  // Search scholarships from Supabase
+  searchInput?.addEventListener('input', async function (e) {
+    const searchTerm = e.target.value.trim().toLowerCase();
 
-    if (title.includes(searchTerm) || description.includes(searchTerm)) {
-      card.style.display = 'block';
-      anyVisible = true;
-    } else {
-      card.style.display = 'none';
+    if (searchTerm === '') {
+      loadScholarships();
+      return;
     }
-  });
 
-  // Handle "No scholarships found" message
-  let noMsg = document.querySelector('.no-scholarships');
-  if (!anyVisible) {
-    if (!noMsg) {
-      const msg = document.createElement('div');
-      msg.className = 'no-scholarships';
-      msg.innerHTML = '<p>No scholarships found.</p>';
-      scholarshipsContainer.appendChild(msg);
+    const res = await fetch(`/search-posts/?q=${encodeURIComponent(searchTerm)}`);
+    const json = await res.json();
+
+    if (!json.success || json.data.length === 0) {
+      scholarshipsContainer.innerHTML = `<div class="empty"><p>No scholarships found.</p></div>`;
+      return;
     }
-  } else {
-    if (noMsg) noMsg.remove();
-  }
-});
+
+    const posts = json.data;
+    scholarshipsContainer.innerHTML = posts.map((post) => {
+      const deadline = post.deadline ? new Date(post.deadline) : null;
+      return `
+        <div class="scholarship-card">
+          <div class="card-header">
+            <h3 class="scholarship-title">${post.title}</h3>
+            <div class="card-buttons">
+              <div class="tooltip">
+                <button class="icon-btn">
+                  <i class="fa-regular fa-bookmark"></i>
+                </button>
+                <span class="tooltiptext">Save this scholarship</span>
+              </div>
+              <div class="tooltip">
+                <button class="icon-btn">
+                  <i class="fa-solid fa-box-archive"></i>
+                </button>
+                <span class="tooltiptext">Archive this scholarship</span>
+              </div>
+              <div class="tooltip">
+                <button class="icon-btn">
+                  <i class="fa-regular fa-circle-check"></i>
+                </button>
+                <span class="tooltiptext">Apply for this scholarship</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="scholarship-description">${post.description}</p>
+          <p><i class="fa-solid fa-location-dot"></i> Location: ${post.location}</p>
+          <div class="deadline-tag" id="deadline-${post.id}">
+            <i class="fa-regular fa-calendar-check"></i> Due: ${deadline ? deadline.toDateString() : 'N/A'}
+          </div>
+          <a href="${post.scholarship_link}" target="_blank" class="view-link">View Scholarship Details</a>
+        </div>
+      `;
+    }).join('');
+
+    posts.forEach((post) => {
+      if (post.deadline) startDeadlineTimer(`deadline-${post.id}`, post.deadline);
+    });
+
+
+      //   posts.forEach((post) => {
+      //     if (post.deadline) startDeadlineTimer(`deadline-${post.id}`, post.deadline);
+      //   });
+      });
+
 
 
   // Handle Save / Archive / Apply (currently placeholder)
