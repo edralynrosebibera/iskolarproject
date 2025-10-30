@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarship Portal - Dashboard</title>
   <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <link rel="stylesheet" href="{% static 'homepage.css' %}?v=8">
+  <link rel="stylesheet" href="{% static 'homepage/homepage.css' %}?v=8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
@@ -96,7 +96,7 @@
   <main class="main-content">
     <div class="content-container">
       <div class="welcome-section">
-        <div class="welcome-box">
+          <div class="welcome-box" style="background: url(&quot;{% static 'images/sample.jpg' %}&quot;) center/cover no-repeat;">
           <h1 class="main-title">Welcome Future Scholars!</h1>
           <p class="main-subtitle">Discover and apply for scholarships that match your academic goals.</p>
         </div>
@@ -131,12 +131,15 @@
         {% empty %}
           <div class="empty">
             <p>No scholarships available yet.</p>
-          </div>
+          </div>  
         {% endfor %}
       </div>
     </div>
+    
   </main>
 
   <script type="module" src="{% static 'script2.js' %}?v=8"></script>
+ 
+
 </body>
 </html>

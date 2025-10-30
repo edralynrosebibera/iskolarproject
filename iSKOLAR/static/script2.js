@@ -81,7 +81,11 @@ document.addEventListener('DOMContentLoaded', function () {
   async function loadScholarships() {
     scholarshipsContainer.innerHTML = `<div class="empty"><p>Loading scholarships...</p></div>`;
 
-    const { data: posts, error } = await supabase.from('posts').select('*');
+    const { data: posts, error } = await supabase
+  .from('posts')
+  .select('*')
+  .eq('is_archived', false); // only non-archived posts
+
 
     if (error) {
       console.error('Error loading posts:', error);
@@ -102,25 +106,26 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="card-header">
             <h3 class="scholarship-title">${post.title}</h3>
             <div class="card-buttons">
-              <div class="tooltip">
-                <button class="icon-btn">
-                  <i class="fa-regular fa-bookmark"></i>
-                </button>
-                <span class="tooltiptext">Save this scholarship</span>
-              </div>
-              <div class="tooltip">
-                <button class="icon-btn">
-                  <i class="fa-solid fa-box-archive"></i>
-                </button>
-                <span class="tooltiptext">Archive this scholarship</span>
-              </div>
-              <div class="tooltip">
-                <button class="icon-btn">
-                  <i class="fa-regular fa-circle-check"></i>
-                </button>
-                <span class="tooltiptext">Apply for this scholarship</span>
-              </div>
-            </div>
+  <div class="tooltip">
+    <button class="icon-btn save-btn" data-id="${post.id}">
+      <i class="fa-regular fa-bookmark"></i>
+    </button>
+    <span class="tooltiptext">Save this scholarship</span>
+  </div>
+  <div class="tooltip">
+    <button class="icon-btn archive-btn" data-id="${post.id}">
+      <i class="fa-solid fa-box-archive"></i>
+    </button>
+    <span class="tooltiptext">Archive this scholarship</span>
+  </div>
+  <div class="tooltip">
+    <button class="icon-btn apply-btn" data-id="${post.id}">
+      <i class="fa-regular fa-circle-check"></i>
+    </button>
+    <span class="tooltiptext">Apply for this scholarship</span>
+  </div>
+</div>
+
           </div>
 
           <p class="scholarship-description">${post.description}</p>
@@ -195,3 +200,77 @@ document.addEventListener('DOMContentLoaded', function () {
 function showToast(message, type = 'info') {
   console.log(`${type.toUpperCase()}: ${message}`);
 }
+
+// --- helper to update a post in Supabase ---
+async function updatePostStatus(id, data) {
+    
+  try {
+    const { error } = await supabase
+      .from('posts')
+      .update(data)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      showToast('Failed to update post', 'error');
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Update error:', err);
+    showToast('Failed to update post', 'error');
+    return false;
+  }
+}
+
+// --- delegated click listener for action buttons ---
+document.addEventListener('click', async function (e) {
+  const saveBtn = e.target.closest('.save-btn');
+  const archiveBtn = e.target.closest('.archive-btn');
+  const applyBtn = e.target.closest('.apply-btn');
+
+  if (saveBtn) {
+  const id = saveBtn.dataset.id;
+
+  // Determine current saved state from button (optional)
+  const currentlySaved = saveBtn.classList.contains('saved'); // we'll add this class
+
+  const ok = await updatePostStatus(id, { is_saved: !currentlySaved });
+  if (ok) {
+    if (!currentlySaved) {
+      showToast('Saved!', 'success');
+      saveBtn.classList.add('saved');
+      saveBtn.querySelector('i').classList.replace('fa-regular', 'fa-solid'); // filled bookmark
+    } else {
+      showToast('Unsaved!', 'info');
+      saveBtn.classList.remove('saved');
+      saveBtn.querySelector('i').classList.replace('fa-solid', 'fa-regular'); // outline bookmark
+    }
+  }
+}
+
+  if (applyBtn) {
+    const id = applyBtn.dataset.id;
+    const ok = await updatePostStatus(id, { is_applied: true });
+    if (ok) {
+      showToast('Applied!', 'success');
+      // optional: redirect to applications page
+      // window.location.href = '/applications/';
+    }
+  }
+
+  if (archiveBtn) {
+    const id = archiveBtn.dataset.id;
+    const ok = await updatePostStatus(id, { is_archived: true });
+    if (ok) {
+      showToast('Archived!', 'success');
+      // remove card from DOM immediately:
+      archiveBtn.closest('.scholarship-card')?.remove();
+      // optional: redirect to archives page
+      // window.location.href = '/archives/';
+    }
+  }
+});
+
+
+

@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-1u^^_ww!%ov#alo)y#p50p#xkeh!$$()z-=xppkgc_4p2h9-b3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -47,6 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'iSKOLARapp',
+    'dashboard',
+    'login',
+    'signup',
+    'homepage',
+    'profile_app',
+    'admin_page',
 ]
 
 MIDDLEWARE = [

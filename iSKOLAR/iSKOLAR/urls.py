@@ -20,4 +20,12 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('iSKOLARapp.urls')),
+    path('dashboard/', include('dashboard.urls')),
+    path("login/", include("login.urls")),
+    path("signup/", include("signup.urls")),
+    path("homepage/", include("homepage.urls")),
+    path("profile/", include("profile_app.urls")),
+    path('admin-page/', include('admin_page.urls')),  # include admin_page URLs
+
+
 ]

@@ -111,7 +111,7 @@ saveBtn.addEventListener("click", async e => {
   let successMessage = "🎉 Scholarship created successfully!";
 
   if (editId) {
-    endpoint = `/edit-post/${editId}/`;
+    endpoint = `/admin-page/edit-post/${editId}/`;
     successMessage = "✅ Scholarship updated successfully!";
   }
 
