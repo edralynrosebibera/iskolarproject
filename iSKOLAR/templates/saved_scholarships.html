@@ -7,7 +7,7 @@
     <title>Scholarship Portal - Saved Scholarships</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
-    <link rel="stylesheet" href="{% static 'saved_scholarship.css' %}?v4">
+    <link rel="stylesheet" href="{% static 'saved_scholarship.css' %}?v3">
 </head>
 <body>
     <!-- Header -->
@@ -108,6 +108,7 @@
 
     <!-- Saved Scholarships Section -->
     <div class="saved-scholarships-container">
+
         <h2 class="section-title">
             <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
@@ -116,16 +117,7 @@
         </h2>
         <p class="section-subtitle">Manage and view your saved scholarship opportunities.</p>
 
-        <div class="header-saved">
-            <div class="search-saved">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="search" placeholder="Search saved scholarships..." class="search-input">
-            </div>
-        </div>
-
+        
         <!-- Dynamic scholarship list -->
         <div class="saved-scholarships-grid">
             {% for post in posts %}
@@ -141,9 +133,7 @@
                         </div>
                     </div>
 
-                    <div class="scholarship-tags">
-                        <span class="tag">{{ post.category }}</span>
-                    </div>
+                    
                     <p class="scholarship-description">{{ post.description }}</p>
 
                     <div class="scholarship-meta">
@@ -160,7 +150,7 @@
         </div>
     </div>
 
-    <script src="{% static 'script2.js' %}"></script>
+  <script type="module" src="{% static 'script2.js' %}?v=1"></script>
     
 </body>
 </html>

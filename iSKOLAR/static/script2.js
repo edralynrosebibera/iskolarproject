@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const profileToggle = document.getElementById('profileToggle');
   const profileDropdown = document.getElementById('profileDropdown');
-  const scholarshipsContainer = document.querySelector('.scholarships-grid');
+const scholarshipsContainer = document.querySelector('.saved-scholarships-grid');
   const searchInput = document.querySelector('.search-input');
 
   // Sidebar toggle
@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const deadline = post.deadline ? new Date(post.deadline) : null;
 
       return `
+
         <div class="scholarship-card">
           <div class="card-header">
             <h3 class="scholarship-title">${post.title}</h3>
@@ -255,7 +256,7 @@ document.addEventListener('click', async function (e) {
     if (ok) {
       showToast('Applied!', 'success');
       // optional: redirect to applications page
-      // window.location.href = '/applications/';
+      window.location.href = '/applications/';
     }
   }
 
@@ -267,7 +268,7 @@ document.addEventListener('click', async function (e) {
       // remove card from DOM immediately:
       archiveBtn.closest('.scholarship-card')?.remove();
       // optional: redirect to archives page
-      // window.location.href = '/archives/';
+       window.location.href = '/archives/';
     }
   }
 });

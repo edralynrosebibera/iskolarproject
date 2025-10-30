@@ -53,13 +53,13 @@ body {
 }
 
 
+
 /* Header Styles */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 50;
     height: 64px;
     background-color: rgba(255, 255, 255, 0.895);
     border-bottom: 1px solid var(--header-border);
@@ -79,10 +79,8 @@ body {
 }
 
 .logo-icon {
-    height: 80px;
-    width: auto;
-    object-fit: contain;
-    margin: 0 8px;
+    height: 150px;
+    width: 150px;
 }
 
 .header-center {
@@ -297,7 +295,7 @@ body {
     z-index: 50;
     height: 100vh;
     width: 256px;
-    background-color: var(--background);
+    background-color:hsla(210 100% 95%);
     transform: translateX(-100%);
     transition: var(--transition-slide);
 }
@@ -347,58 +345,61 @@ body {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 8px;
+    padding: 10px 16px;
+    margin-bottom: 5px;
     border: none;
     background: none;
     color: var(--sidebar-text);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 450;
     border-radius: 8px;
+    color: #06b6d4;
     cursor: pointer;
     transition: var(--transition-smooth);
     text-align: left;
+    text-decoration: none;
+}
+.sidebar-btn i {
+  margin-right: 8px;
 }
 
 .sidebar-btn:hover {
     background-color: var(--sidebar-hover);
-    color:var(--accent);
+    color: rgb(22, 22, 88);
 }
 
 .sidebar-icon {
     height: 20px;
-    width: 20px;
+    width: 30px;
     margin-right: 12px;
 }
-
 /* Menu Toggle Button */
 .menu-toggle {
-    position: fixed;
-    top: 80px;
-    left: 16px;
-    z-index: 30;
-    padding: 8px;
-    background-color: white;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px hsla(0, 0%, 0%, 0.1);
-    cursor: pointer;
-    transition: var(--transition-smooth);
+  position: relative; /* not fixed */
+  background-color: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px hsla(0, 0%, 0%, 0.1);
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 10px; /* space between button and logo */
+  transition: var(--transition-smooth);
 }
 
 .menu-toggle:hover {
-    background-color: var(--accent);
+  background-color: lightblue;
 }
 
 .menu-toggle svg {
-    height: 20px;
-    width: 20px;
-    color: var(--academic-text);
+  height: 20px;
+  width: 20px;
+  color: var(--academic-text);
 }
 
 .saved-scholarships-container {
     padding: 2rem;
     border-radius: 10px;
+    padding-top: 16px; /* small gap below header */
 }
 .section-title {
     font-size: 28px;
@@ -455,21 +456,26 @@ body {
 }
 
 .scholarship-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .scholarship-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
 .scholarship-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #222;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #0047AB; /* same as homepage */
 }
 
 .scholarship-tags {
@@ -526,8 +532,11 @@ body {
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
+    text-align: center;
     font-size: 15px;
     font-weight: 500;
+        text-decoration: none;
+
 }
 
 .btn-view:hover {
