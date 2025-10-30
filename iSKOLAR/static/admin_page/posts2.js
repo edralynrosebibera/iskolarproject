@@ -13,7 +13,7 @@ function logout() {
 }
 
 async function fetchPosts() {
-  const res = await fetch("/get-posts/");
+  const res = await fetch("/admin-page/get-posts/");
   const data = await res.json();
   postsContainer.innerHTML = "";
 
@@ -119,7 +119,7 @@ cancelBtn.onclick = () => {
 
 deleteBtn.onclick = async () => {
   if (!deleteId) return;
-  const res = await fetch(`/delete-post/${deleteId}/`, { method: "DELETE" });
+  const res = await fetch(`/admin-page/delete-post/${deleteId}/`, { method: "DELETE" });
   const data = await res.json();
   if (data.success) {
     dialog.classList.add("hidden");

@@ -1,19 +1,13 @@
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 from . import views  # if you keep forgot_view or others
 
 urlpatterns = [
     path("", views.iSKOLARapp_view, name="iSKOLARapp"),
-    path("login/", views.login_view, name="login"),
-    path("signup/", views.signup_view, name="signup"),
-    path("homepage/", views.homepage, name="homepage"),
-    path("profile/", views.profile_view, name="profile"),
-    path('profile/view/', views.view_profile, name='view_profile'),
     path("archives/", views.archives_view, name="archives"),
     path("saved_scholarships/", views.saved_scholarships_view, name="saved_scholarships"),
     path("applications/", views.applications_view, name="applications"),
-    path("logout/", views.logout_view, name="logout"),
-
+   
     path("search-posts/", views.search_posts_view, name="search_posts"),
 
 
