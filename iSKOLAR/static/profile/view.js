@@ -1,286 +1,275 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Lucide icons
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Initialization and Element Setup
     lucide.createIcons();
 
-    // --- Form Edit/Save/Cancel Logic Elements ---
-    const editBtn = document.getElementById('editBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const formActions = document.getElementById('formActions');
-    const profileForm = document.getElementById('profileForm');
-    const inputs = profileForm.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea');
-    const radios = profileForm.querySelectorAll('input[type="radio"]');
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const formActions = document.getElementById("formActions");
+    const profileForm = document.getElementById("profileForm");
 
-    // --- Sidebar Display Elements ---
-    const displayName = document.getElementById('displayName');
-    const displayMajor = document.getElementById('displayMajor');
-    const displayEmail = document.getElementById('displayEmail');
-    const displayPhone = document.getElementById('displayPhone');
-    const displayLocation = document.getElementById('displayLocation');
-    const displayGraduation = document.getElementById('displayGraduation');
+    const profileAvatar = document.getElementById("profileAvatar");
+    const avatarEditIcon = document.getElementById("avatarEditIcon");
+    const avatarInput = document.getElementById("avatarInput");
 
-    // --- Educational Background Elements ---
-    const yearLevel = document.getElementById('yearLevel');
-    const currentSchool = document.getElementById('currentSchool');
-    const course = document.getElementById('course');
-    const gwa = document.getElementById('gwa');
-    const courseLabel = document.querySelector('label[for="course"]');
-    const gwaLabel = document.querySelector('label[for="gwa"]');
-    const eduBtns = document.querySelectorAll('.edu-btn');
+    // Display elements
+    const displayName = document.getElementById("displayName");
+    const displayMajor = document.getElementById("displayMajor");
+    const displayEmail = document.getElementById("displayEmail");
+    const displayPhone = document.getElementById("displayPhone");
+    const displayLocation = document.getElementById("displayLocation");
+    const displayGraduation = document.getElementById("displayGraduation");
 
-    // --- Completeness Elements ---
-    const completenessBar = document.getElementById('completenessBar');
-    const completenessPercent = document.getElementById('completenessPercent');
-    const missingInfoList = document.querySelector('.missing-info ul');
+    // Form inputs
+    const yearLevel = document.getElementById("yearLevel");
+    const course = document.getElementById("course");
 
-    // --- Avatar Upload Elements ---
-    const profileAvatar = document.getElementById('profileAvatar');
-    const avatarInput = document.getElementById('avatarInput');
-    const avatarEditIcon = document.getElementById('avatarEditIcon');
+    let isEditing = false;
 
-    // --- State Storage ---
-    const originalValues = {};
-
-    const COMPLETENESS_FIELDS = [
-        { id: 'firstName', name: 'First Name' },
-        { id: 'lastName', name: 'Last Name' },
-        { id: 'address', name: 'Address' },
-        { id: 'birthdate', name: 'Birthdate' },
-        { id: 'citizenship', name: 'Citizenship' },
-        { id: 'gender', name: 'Gender' },
-        { id: 'email', name: 'Email Address' },
-        { id: 'phone', name: 'Phone Number' },
-        { id: 'currentSchool', name: 'Current School' },
-        { id: 'yearLevel', name: 'Year Level' },
-        { id: 'course', name: 'College Course' },
-        { id: 'gwa', name: 'GPA/GWA' },
-        { id: 'bio', name: 'Complete Bio', minLength: 20 },
-    ];
-    const TOTAL_FIELDS = COMPLETENESS_FIELDS.length + 1;
-
-    // --- Helper Functions ---
-    const storeOriginalValues = () => {
-        inputs.forEach(input => { originalValues[input.id] = input.value; });
-        radios.forEach(radio => { if (radio.checked) originalValues[radio.name] = radio.id; });
-
-        originalValues['displayName'] = displayName.textContent;
-        originalValues['displayMajor'] = displayMajor.textContent;
-        originalValues['displayEmail'] = displayEmail.textContent;
-        originalValues['displayPhone'] = displayPhone.textContent;
-        originalValues['displayLocation'] = displayLocation.textContent;
-        originalValues['displayGraduation'] = displayGraduation.textContent;
-
-        originalValues['avatarBackground'] = profileAvatar.style.backgroundImage;
-        originalValues['avatarContent'] = profileAvatar.innerHTML;
-    };
-
+    // 2. State Toggling Functions
     const disableForm = (disabled) => {
-        inputs.forEach(input => input.disabled = disabled);
-        radios.forEach(radio => radio.disabled = disabled);
-        yearLevel.disabled = disabled;
+        profileForm.querySelectorAll("input, select, textarea").forEach(input => input.disabled = disabled);
     };
 
-    const toggleFormState = (isEditing) => {
-        disableForm(!isEditing);
-        formActions.style.display = isEditing ? 'flex' : 'none';
-        editBtn.style.display = isEditing ? 'none' : 'flex';
+    const toggleFormState = (editing) => {
+        disableForm(!editing);
+        formActions.style.display = editing ? "flex" : "none";
+        editBtn.style.display = editing ? "none" : "flex";
+        isEditing = editing;
+
+        // Lock/unlock avatar edit icon
+        avatarEditIcon.style.pointerEvents = editing ? "auto" : "none";
+        avatarEditIcon.style.opacity = editing ? "1" : "0.5";
     };
+    
+    // --- PROFILE COMPLETENESS FUNCTIONS (NEW) ---
 
-    const updateCompleteness = (hasAvatar) => {
-        let completedCount = hasAvatar ? 1 : 0;
-        let missingItems = [];
+    const updateMissingInfoList = (profileData) => {
+        const missingItems = [];
+        // Define key fields and the criteria to check for their completeness
+        const checks = {
+            'Upload Profile Photo': (data) => data.avatar && data.avatar.includes('url('),
+            'Address': (data) => data.address && data.address.trim() !== '',
+            'Birthdate': (data) => data.birthdate && data.birthdate.trim() !== '',
+            'GPA/GWA': (data) => data.gwa && data.gwa.trim() !== '',
+            'Complete Bio': (data) => data.bio && data.bio.trim().length >= 20, // Require 20+ chars
+            // Check other mandatory fields
+            'Year Level & Course': (data) => data.yearLevel && data.yearLevel.trim() !== '' && data.course && data.course.trim() !== '',
+        };
 
-        if (!hasAvatar) missingItems.push("Upload Profile Photo");
-
-        COMPLETENESS_FIELDS.forEach(field => {
-            let isComplete = false;
-            const element = document.getElementById(field.id);
-
-            if (element) {
-                if (element.tagName === 'TEXTAREA' && field.minLength) isComplete = element.value.trim().length >= field.minLength;
-                else isComplete = element.value.trim() !== '';
-            } else if (field.id === 'citizenship' || field.id === 'gender') {
-                isComplete = !!document.querySelector(`input[name="${field.id}"]:checked`);
+        for (const [name, isComplete] of Object.entries(checks)) {
+            if (!isComplete(profileData)) {
+                missingItems.push(name);
             }
+        }
 
-            if (isComplete) completedCount++;
-            else {
-                let missingName = field.name;
-                if (field.id === 'gwa') missingName = 'Add GPA/GWA';
-                if (field.id === 'bio') missingName = 'Complete Bio (min 20 chars)';
-                missingItems.push(missingName);
+        const missingInfoUl = document.querySelector('.missing-info ul');
+        if (missingInfoUl) {
+            // Update the list visually
+            missingInfoUl.innerHTML = missingItems.map(item => `<li>${item}</li>`).join('');
+        }
+    };
+    
+    const updateProfileCompleteness = (profileData) => {
+        // Total points available for mandatory fields
+        const totalPoints = 12; // Example total (adjust this based on your complete list)
+        let earnedPoints = 0;
+
+        // 1. Basic Personal Info (7 points)
+        if (profileData.firstName && profileData.firstName.trim() !== '') earnedPoints++;
+        if (profileData.lastName && profileData.lastName.trim() !== '') earnedPoints++;
+        if (profileData.email && profileData.email.trim() !== '') earnedPoints++;
+        if (profileData.phone && profileData.phone.trim() !== '') earnedPoints++;
+        if (profileData.address && profileData.address.trim() !== '') earnedPoints++;
+        if (profileData.birthdate && profileData.birthdate.trim() !== '') earnedPoints++;
+        if (profileData.gender && profileData.gender.trim() !== '') earnedPoints++; // Gender radio button
+
+        // 2. Educational Info (3 points)
+        if (profileData.course && profileData.course.trim() !== '') earnedPoints++;
+        if (profileData.yearLevel && profileData.yearLevel.trim() !== '') earnedPoints++;
+        if (profileData.gwa && profileData.gwa.trim() !== '') earnedPoints++;
+
+        // 3. Media & Bio (2 points)
+        if (profileData.avatar && profileData.avatar.includes('url(')) earnedPoints++;
+        if (profileData.bio && profileData.bio.trim().length >= 20) earnedPoints++; 
+
+        const completeness = Math.min(100, Math.round((earnedPoints / totalPoints) * 100));
+
+        // Update the HTML display elements
+        document.getElementById("completenessPercent").textContent = `${completeness}%`;
+        document.getElementById("completenessBar").style.width = `${completeness}%`;
+        
+        updateMissingInfoList(profileData);
+
+        console.log(`📊 Profile completeness calculated: ${completeness}% (${earnedPoints}/${totalPoints} fields).`);
+    };
+
+    // 3. Persistence Functions
+    const saveProfileToLocalStorage = () => {
+        const profileData = {};
+        
+        // Save all form input values
+        profileForm.querySelectorAll("input, select, textarea").forEach(input => {
+            if (input.type === 'radio' && !input.checked) return;
+            profileData[input.id] = input.value;
+        });
+
+        // Save radio button states manually
+        profileData.gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+        profileData.citizenship = document.querySelector('input[name="citizenship"]:checked')?.value || "";
+
+        // Save the avatar URL string
+        profileData.avatar = profileAvatar.style.backgroundImage || "";
+
+        try {
+            localStorage.setItem("userProfile", JSON.stringify(profileData));
+            console.log("✅ Profile data saved successfully to Local Storage.");
+            return profileData; // Return the saved data
+        } catch (e) {
+            console.error("❌ Error saving to Local Storage:", e);
+            alert("Could not save profile. Local Storage may be full or disabled.");
+            return profileData;
+        }
+    };
+
+    const loadProfileFromLocalStorage = () => {
+        const savedDataJson = localStorage.getItem("userProfile");
+        
+        // Get initial form values as a fallback/default
+        const initialData = {};
+        profileForm.querySelectorAll("input, select, textarea").forEach(input => {
+            if (input.type !== 'radio' || input.checked) {
+                initialData[input.id] = input.value;
             }
         });
 
-        const percentage = Math.round((completedCount / TOTAL_FIELDS) * 100);
-        completenessBar.style.width = `${percentage}%`;
-        completenessPercent.textContent = `${percentage}%`;
+        if (!savedDataJson) {
+            console.log("ℹ️ No profile data found in Local Storage. Using default HTML values.");
+            
+            // Populate display elements and completeness from initial HTML values
+            updateDisplayElements();
+            updateProfileCompleteness(initialData); 
+            return;
+        }
 
-        missingInfoList.innerHTML = '';
-        missingItems.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            missingInfoList.appendChild(li);
+        const savedData = JSON.parse(savedDataJson);
+        console.log("✅ Profile data loaded from Local Storage.");
+
+        // A. Restore form inputs
+        profileForm.querySelectorAll("input, select, textarea").forEach(input => {
+            if (savedData[input.id] !== undefined) {
+                if (input.type === 'radio') {
+                    if (input.value === savedData[input.name]) {
+                        input.checked = true;
+                    }
+                } else {
+                    input.value = savedData[input.id];
+                }
+            }
         });
-    };
+        
+        // B. Restore avatar
+        if (savedData.avatar && savedData.avatar.includes('url(')) {
+            profileAvatar.style.backgroundImage = savedData.avatar;
+            profileAvatar.innerHTML = "";
+        } else {
+            const currentFirstName = document.getElementById("firstName")?.value || "";
+            const currentLastName = document.getElementById("lastName")?.value || "";
+            const initials = (currentFirstName[0] || '') + (currentLastName[0] || '');
+            profileAvatar.style.backgroundImage = 'none';
+            profileAvatar.innerHTML = initials.toUpperCase() || 'AJ';
+        }
 
-    // --- Avatar Upload ---
-    avatarEditIcon.addEventListener('click', () => avatarInput.click());
-    avatarInput.addEventListener('change', e => {
+        // C. Update display elements and completeness score
+        updateDisplayElements();
+        updateProfileCompleteness(savedData); 
+    };
+    
+    // 4. Dedicated function to update display elements from the current form values
+    const updateDisplayElements = () => {
+        const currentFirstName = document.getElementById("firstName")?.value.trim() || "";
+        const currentLastName = document.getElementById("lastName")?.value.trim() || "";
+        const currentCourse = document.getElementById("course")?.value || "";
+        const currentEmail = document.getElementById("email")?.value || "";
+        const currentPhone = document.getElementById("phone")?.value || "";
+        const currentAddress = document.getElementById("address")?.value || "";
+        
+        const graduationYearText = yearLevel.options[yearLevel.selectedIndex]?.text || "";
+        const graduationYear = graduationYearText.match(/\d{4}/)?.[0] || "";
+
+        // Update display elements
+        displayName.textContent = `${currentFirstName} ${currentLastName}`;
+        displayMajor.textContent = currentCourse;
+        displayEmail.textContent = currentEmail;
+        displayPhone.textContent = currentPhone;
+        displayLocation.textContent = currentAddress;
+        displayGraduation.textContent = `Class of ${graduationYear}`;
+        
+        // Update avatar initials if no custom avatar is set
+        if (!profileAvatar.style.backgroundImage) {
+            const initials = (currentFirstName[0] || '') + (currentLastName[0] || '');
+            profileAvatar.innerHTML = initials.toUpperCase() || 'AJ';
+        }
+    }
+
+
+    // 5. Avatar Upload Logic
+    avatarEditIcon.style.pointerEvents = "none";
+    avatarEditIcon.style.opacity = "0.5";
+
+    avatarEditIcon.addEventListener("click", () => {
+        if (!isEditing) return;
+        avatarInput.click();
+    });
+
+    avatarInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = function (ev) {
             profileAvatar.style.backgroundImage = `url(${ev.target.result})`;
-            profileAvatar.innerHTML = '';
-            updateCompleteness(true);
+            profileAvatar.innerHTML = "";
+            // Immediately save the profile data to persist the avatar change
+            const profileData = saveProfileToLocalStorage();
+            updateProfileCompleteness(profileData);
         };
         reader.readAsDataURL(file);
     });
 
-    // --- Edit / Cancel / Save ---
-    let isEditing = false;
-
-    editBtn.addEventListener('click', () => { isEditing = true; storeOriginalValues(); toggleFormState(true); });
-    cancelBtn.addEventListener('click', () => {
-        isEditing = false;
-        inputs.forEach(input => { input.value = originalValues[input.id]; });
-        radios.forEach(radio => { radio.checked = radio.id === originalValues[radio.name]; });
-        displayName.textContent = originalValues['displayName'];
-        displayMajor.textContent = originalValues['displayMajor'];
-        displayEmail.textContent = originalValues['displayEmail'];
-        displayPhone.textContent = originalValues['displayPhone'];
-        displayLocation.textContent = originalValues['displayLocation'];
-        displayGraduation.textContent = originalValues['displayGraduation'];
-        profileAvatar.style.backgroundImage = originalValues['avatarBackground'];
-        profileAvatar.innerHTML = originalValues['avatarContent'];
-        updateCompleteness(originalValues['avatarBackground'] !== '');
-        toggleFormState(false);
+    // 6. Button Event Handlers
+    editBtn.addEventListener("click", () => {
+        toggleFormState(true);
     });
 
-    saveBtn.addEventListener('click', () => {
-        isEditing = false;
-        if (!document.getElementById('firstName').value || !document.getElementById('lastName').value) {
-            alert('First Name and Last Name are required.');
+    saveBtn.addEventListener("click", () => {
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+
+        if (!firstName || !lastName) {
+            alert("First Name and Last Name are required.");
             return;
         }
-        const graduationYearText = yearLevel.options[yearLevel.selectedIndex].text;
-        const graduationYear = graduationYearText.match(/\d{4}/)?.[0] || 'N/A';
 
-        displayName.textContent = `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`;
-        displayMajor.textContent = course.value || 'N/A';
-        displayEmail.textContent = document.getElementById('email').value;
-        displayPhone.textContent = document.getElementById('phone').value;
-        displayLocation.textContent = document.getElementById('address').value;
-        displayGraduation.textContent = `Class of ${graduationYear}`;
+        // Update display elements 
+        updateDisplayElements(); 
 
-        updateCompleteness(profileAvatar.style.backgroundImage !== '');
-        toggleFormState(false);
-        storeOriginalValues();
-    });
-
-    // --- Educational Background Dynamic Logic ---
-// --- Educational Background Dynamic Logic ---
-function setYearLevels(level) {
-    // Check if the yearLevel element exists before proceeding
-    if (!yearLevel) return;
-
-    // Clear existing options
-    yearLevel.innerHTML = '';
-    // Enable the dropdown when a level is selected
-    yearLevel.disabled = false; 
-
-    // Reset values to clear previous selection
-    yearLevel.value = "";
-    course.value = "";
-    gwa.value = "";
-
-    // Add a default "Select Grade/Year" option
-    const defaultOption = document.createElement('option');
-    defaultOption.textContent = `Select ${level === 'COLLEGE' ? 'Year' : 'Grade'}`;
-    defaultOption.value = "";
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    yearLevel.appendChild(defaultOption);
-
-
-    if (level === "JUNIOR HIGH") {
-        courseLabel.style.display = "none";
-        course.style.display = "none";
-        gwaLabel.textContent = "General Average";
-        currentSchool.placeholder = "e.g., Example National High School";
-
-        // JUNIOR HIGH: Grades 7 to 10
-        ["Grade 7","Grade 8","Grade 9","Grade 10"].forEach(g => {
-            const o = document.createElement('option');
-            o.textContent = g;
-            o.value = g; // Use the grade as the value
-            yearLevel.appendChild(o);
-        });
-    } else if (level === "SENIOR HIGH") {
-        courseLabel.style.display = "block";
-        course.style.display = "block";
-        courseLabel.textContent = "Academic Track / Strand";
-        gwaLabel.textContent = "Average Grade";
-        currentSchool.placeholder = "e.g., Example Senior High School";
-
-        // SENIOR HIGH: Grades 11 to 12
-        ["Grade 11","Grade 12"].forEach(g => {
-            const o = document.createElement('option');
-            o.textContent = g;
-            o.value = g; // Use the grade as the value
-            yearLevel.appendChild(o);
-        });
-    } else if (level === "COLLEGE") {
-        courseLabel.style.display = "block";
-        course.style.display = "block";
-        courseLabel.textContent = "College Course / Major";
-        gwaLabel.textContent = "GPA / GWA";
-        currentSchool.placeholder = "e.g., Example University";
-
-        // COLLEGE: 1st Year to 5th Year
-        // Note: I'm removing the (YYYY) graduation year from the text and value here,
-        // as you have it calculated in the saveBtn logic based on text content.
-        ["1st Year","2nd Year","3rd Year","4th Year","5th Year"].forEach(y => {
-            const o = document.createElement('option');
-            o.textContent = y;
-            o.value = y;
-            yearLevel.appendChild(o);
-        });
-    }
-}
-
-// Remove the 'isEditing' check so buttons always work
-eduBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Only allow selection if the form is currently being edited
-        // You might want to re-add this logic if the buttons shouldn't work when disabled:
-        // if (!isEditing) return; 
+        // Save data and get the saved profileData object
+        const profileData = saveProfileToLocalStorage();
         
-        eduBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        setYearLevels(btn.textContent.trim());
+        // Update completeness based on the newly saved data
+        updateProfileCompleteness(profileData);
+
+        toggleFormState(false);
     });
-});
 
+    cancelBtn.addEventListener("click", () => {
+        // Loads the last SAVED data, resetting any unsaved changes in the form
+        loadProfileFromLocalStorage();
+        toggleFormState(false);
+    });
 
-
-
-    // --- Phone Number Logic ---
-    const countrySelect = document.getElementById('countrySelect');
-    const phoneInput = document.getElementById('phone');
-    countrySelect.addEventListener('change', () => phoneInput.value = countrySelect.value + ' ');
-    phoneInput.addEventListener('input', () => { if (!phoneInput.value.startsWith(countrySelect.value)) phoneInput.value = countrySelect.value + ' '; });
-
-    // --- Birthdate Logic ---
-    const birthdateInput = document.getElementById('birthdate');
-    const today = new Date();
-    const maxDate = today.toISOString().split('T')[0];
-    const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()).toISOString().split('T')[0];
-    birthdateInput.setAttribute('max', maxDate);
-    birthdateInput.setAttribute('min', minDate);
-
-    // --- Initial Setup ---
-    updateCompleteness(profileAvatar.style.backgroundImage !== '');
-    storeOriginalValues();
+    // 7. Initialize: This MUST run on page load
+    loadProfileFromLocalStorage();
+    toggleFormState(false);
 });
