@@ -26,16 +26,17 @@
                         <i data-lucide="camera" width="16" height="16"></i>
                     </div>
                 </div>
-                <h2 class="profile-name-display" id="displayName">Alex Johnson</h2>
-                <p class="profile-major-display" id="displayMajor">Computer Science</p>
-            </div>
+                
+                <h2 class="profile-name-display" id="displayName"></h2>
+                <p class="profile-major-display" id="displayMajor"></p>
+                </div>
             
             <ul class="contact-info">
-                <li class="info-item"><i data-lucide="mail"></i> <span id="displayEmail">alex.johnson@email.com</span></li>
-                <li class="info-item"><i data-lucide="phone"></i> <span id="displayPhone">+1 (555) 123-4567</span></li>
-                <li class="info-item"><i data-lucide="map-pin"></i> <span id="displayLocation">New York, NY</span></li>
-                <li class="info-item"><i data-lucide="graduation-cap"></i> <span id="displayGraduation">Class of 2026</span></li>
-            </ul>
+                <li class="info-item"><i data-lucide="mail"></i> <span id="displayEmail"></span></li>
+                <li class="info-item"><i data-lucide="phone"></i> <span id="displayPhone"></span></li>
+                <li class="info-item"><i data-lucide="map-pin"></i> <span id="displayLocation"></span></li>
+                <li class="info-item"><i data-lucide="graduation-cap"></i> <span id="displayGraduation"></span></li>
+                </ul>
         </div>
 
         <div class="profile-content">
@@ -76,25 +77,25 @@
 
                         <div class="form-group"><label for="middleName">Middle Name</label><input type="text" id="middleName" value="" disabled></div>
                         <div class="form-group">
-  <label for="birthdate">Birthdate *</label>
-  <input type="date" id="birthdate" value="" disabled required>
-</div>
+                            <label for="birthdate">Birthdate *</label>
+                            <input type="date" id="birthdate" value="" disabled required>
+                        </div>
                         
                         <div class="form-group">
-  <label for="email">Email *</label>
-  <input type="email" id="email" value="alex.johnson@email.com" disabled required>
-</div>
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" value="alex.johnson@email.com" disabled required>
+                        </div>
                         <div class="form-group">
-  <label for="phone">Phone *</label>
-  <select id="countrySelect">
-  <option value="+63">Philippines (+63)</option>
-  <option value="+1">United States (+1)</option>
-  <option value="+44">United Kingdom (+44)</option>
-</select>
+                            <label for="phone">Phone *</label>
+                            <select id="countrySelect">
+                                <option value="+63">Philippines (+63)</option>
+                                <option value="+1">United States (+1)</option>
+                                <option value="+44">United Kingdom (+44)</option>
+                            </select>
 
-<input type="text" id="phone" placeholder="Enter phone number" />
+                            <input type="text" id="phone" placeholder="Enter phone number" />
 
-</div>
+                        </div>
 
                         <div class="form-group form-grid-full"><label for="address">Address / Location *</label><input type="text" id="address" value="New York, NY" disabled required></div>
 
@@ -154,8 +155,7 @@
         </div>
     </div>
 </div>
-
-<script src="{% static 'view.js' %}"></script>
+<script src="{% static 'profile/view.js' %}"></script>
 
 </body>
 </html>
