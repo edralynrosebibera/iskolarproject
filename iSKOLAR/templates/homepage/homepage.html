@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarship Portal - Dashboard</title>
   <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <link rel="stylesheet" href="{% static 'homepage/homepage.css' %}?v=8">
+  <link rel="stylesheet" href="{% static 'homepage/homepage.css' %}?v=10">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
@@ -120,7 +120,6 @@
 
       <!-- Scholarship Cards (Django preloaded) -->
       <div class="scholarships-grid">
-        {% for post in posts %}
           <div class="scholarship-card">
             <h3 class="scholarship-title">{{ post.title }}</h3>
             <p class="scholarship-description">{{ post.description }}</p>
@@ -128,17 +127,16 @@
             <p><strong>🗓️ Deadline:</strong> {{ post.deadline }}</p>
             <a href="${post.scholarship_link}" target="_blank" class="view-link">View Scholarship</a>
           </div>
-        {% empty %}
           <div class="empty">
             <p>No scholarships available yet.</p>
           </div>  
-        {% endfor %}
+        
       </div>
     </div>
     
   </main>
 
-  <script type="module" src="{% static 'script2.js' %}?v=8"></script>
+  <script type="module" src="{% static 'script2.js' %}?v=10"></script>
  
 
 </body>
