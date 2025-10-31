@@ -9,6 +9,7 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
+from django.contrib.auth import logout
 
 url: str = settings.SUPABASE_URL
 key: str = settings.SUPABASE_KEY
@@ -43,3 +44,6 @@ def archives_view(request):
     posts = resp.data if resp.data else []
     return render(request, "archives.html", {"posts": posts})
 
+def logout_view(request):
+    logout(request)
+    return redirect('/login/')

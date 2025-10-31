@@ -9,7 +9,7 @@ function goToCreatePost() {
 }
 
 function logout() {
-  window.location.href = "/logout/";
+  window.location.href = "/admin-page/logout/";
 }
 
 async function fetchPosts() {
