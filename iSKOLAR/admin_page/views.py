@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from supabase import create_client, Client
 import json
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 # Initialize Supabase
 url: str = settings.SUPABASE_URL
@@ -95,3 +97,7 @@ def delete_post_view(request, post_id):
 # Posts page
 def posts_view(request):
     return render(request, "admin_page/posts.html")
+
+def logout_view(request):
+    logout(request)
+    return redirect('/login/')

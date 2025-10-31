@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from iSKOLARapp import views as admin_views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,7 +29,9 @@ urlpatterns = [
     path("signup/", include("signup.urls")),
     path("homepage/", include("homepage.urls")),
     path("profile/", include("profile_app.urls")),
-    path('admin-page/', include('admin_page.urls')),  # include admin_page URLs
+    path('admin-page/', include('admin_page.urls')),  
+    path('logout/', admin_views.logout_view, name='logout'),
+# include admin_page URLs
 ]
 
 # Serve static and media files in development

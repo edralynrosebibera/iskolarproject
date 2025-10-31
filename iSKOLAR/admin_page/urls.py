@@ -8,4 +8,5 @@ urlpatterns = [
     path("get-posts/", views.get_posts_view, name="get_posts"),
     path("edit-post/<uuid:post_id>/", views.edit_post_view, name="edit_post"),
     path("delete-post/<uuid:post_id>/", views.delete_post_view, name="delete_post"),
+    path('logout/', views.logout_view, name='logout'),
 ]
