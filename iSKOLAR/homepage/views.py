@@ -15,7 +15,7 @@ supabase: Client = create_client(url, key)
 
 def homepage_view(request):
     try:
-        response = supabase.table("posts").select("*").eq("is_archived", False).order("id", desc=True).execute()
+        response = supabase.table("posts").select("*").order("id", desc=True).execute()
         posts = response.data if response.data else []
     except Exception as e:
         print("⚠️ Error fetching posts:", e)

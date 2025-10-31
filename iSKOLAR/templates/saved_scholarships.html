@@ -7,7 +7,7 @@
     <title>Scholarship Portal - Saved Scholarships</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
-    <link rel="stylesheet" href="{% static 'saved_scholarship.css' %}?v3">
+    <link rel="stylesheet" href="{% static 'saved.css' %}?v4">
 </head>
 <body>
     <!-- Header -->
@@ -125,7 +125,7 @@
                     <div class="scholarship-header">
                         <h3 class="scholarship-title">{{ post.title }}</h3>
                         <div class="detail-icons">
-                            <div class="detail-icon-wrapper" data-tooltip="Saved Scholarship">
+                            <div class="detail-icon-wrapper" data-tooltip="  Scholarship">
                                 <svg class="detail-icon" viewBox="0 0 24 24" fill="blue" stroke="currentColor" stroke-width="2">
                                     <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
                                 </svg>
@@ -150,8 +150,8 @@
         </div>
     </div>
 
-   
-  <script type="module" src="{% static 'script2.js' %}?v=1"></script>
+       <script src="{% static 'saved.js' %}"></script>
+    <script src="{% static 'script2.js' %}"></script>
     
 </body>
 </html>
