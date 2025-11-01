@@ -18,9 +18,7 @@ supabase: Client = create_client(url, key)
 def profile_view(request):
     return render(request, "profile/profile.html")
 
-def logout_view(request):
-    logout(request)
-    return redirect("iSKOLARapp")
+
 
 def view_profile(request):
     return render(request, 'profile/view-profile.html')
