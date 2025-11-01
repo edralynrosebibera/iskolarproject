@@ -9,7 +9,7 @@ urlpatterns = [
     path("applications/", views.applications_view, name="applications"),
 
    
-    path("search-posts/", views.search_posts_view, name="search_posts"),
+    # path("search-posts/", views.search_posts_view, name="search_posts"),
 
 
 
