@@ -348,3 +348,26 @@ p.subtitle {
 .btn:hover {
     opacity: 0.9;
 }
+
+.back-arrow {
+    margin-bottom: 20px;
+}
+
+.back-arrow a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* space between arrow and text */
+    text-decoration: none;
+    color: hsl(210, 100%, 45%); /* light blue */
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.back-arrow a:hover {
+    color: hsl(210, 100%, 45%); /* darker blue on hover */
+}
+
+.back-arrow i {
+    vertical-align: middle;
+}
