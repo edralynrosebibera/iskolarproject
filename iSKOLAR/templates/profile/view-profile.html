@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>My Profile - ScholarFinder</title>
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
   <link rel="stylesheet" href="{% static 'profile/view_profile.css' %}">
@@ -12,6 +13,12 @@
 <body>
 
 <div class="main-wrapper">
+    <div class="back-arrow-btn">
+    <a href="{% url 'homepage' %}">
+        <i data-lucide="arrow-left" width="28" height="28"></i>
+    </a>
+</div>
+
     <h1>My Profile</h1>
     <p class="subtitle">Manage your personal information and track your profile completeness</p>
     
