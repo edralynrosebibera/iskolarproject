@@ -27,19 +27,19 @@
         <div class="profile-sidebar">
             <div class="profile-card-header">
                 <div class="avatar-wrapper">
-                    <div class="avatar" id="profileAvatar">AJ</div>
+                   <div class="avatar" id="profileAvatar">{{ first_name|slice:":1" }}{{ last_name|slice:":1" }}</div>
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;">
                     <div class="avatar-edit-icon" id="avatarEditIcon">
                         <i data-lucide="camera" width="16" height="16"></i>
                     </div>
                 </div>
                 
-                <h2 class="profile-name-display" id="displayName"></h2>
+                <h2 class="profile-name-display" id="displayName">{{ first_name }} {{ last_name }}</h2>
                 <p class="profile-major-display" id="displayMajor"></p>
                 </div>
             
             <ul class="contact-info">
-                <li class="info-item"><i data-lucide="mail"></i> <span id="displayEmail"></span></li>
+                 <li class="info-item"><i data-lucide="mail"></i> <span id="displayEmail">{{ email }}</span></li>
                 <li class="info-item"><i data-lucide="phone"></i> <span id="displayPhone"></span></li>
                 <li class="info-item"><i data-lucide="map-pin"></i> <span id="displayLocation"></span></li>
                 <li class="info-item"><i data-lucide="graduation-cap"></i> <span id="displayGraduation"></span></li>
@@ -79,8 +79,8 @@
 
                     <div class="form-grid-2-col">
                         
-                        <div class="form-group"><label for="firstName">First Name *</label><input type="text" id="firstName" value="Alex" disabled required></div>
-                        <div class="form-group"><label for="lastName">Last Name *</label><input type="text" id="lastName" value="Johnson" disabled required></div>
+                        <div class="form-group"><label for="firstName">First Name *</label>  <input type="text" id="firstName" value="{{ first_name }}" disabled required></div>
+                        <div class="form-group"><label for="lastName">Last Name *</label><input type="text" id="lastName" value="{{ last_name }}" disabled required> </div>
 
                         <div class="form-group"><label for="middleName">Middle Name</label><input type="text" id="middleName" value="" disabled></div>
                         <div class="form-group">
@@ -90,7 +90,8 @@
                         
                         <div class="form-group">
                             <label for="email">Email *</label>
-                            <input type="email" id="email" value="alex.johnson@email.com" disabled required>
+                            
+                             <input type="email" id="email" value="{{ email }}" disabled required>
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone *</label>
