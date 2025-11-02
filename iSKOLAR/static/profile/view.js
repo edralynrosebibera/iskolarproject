@@ -24,11 +24,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const yearLevel = document.getElementById("yearLevel");
     const course = document.getElementById("course");
 
+    // --- NEW --- Selectors for education level functionality
+    const educationButtons = document.querySelectorAll(".education-buttons .edu-btn");
+    const yearLevelLabel = document.querySelector('label[for="yearLevel"]');
+    const courseGroup = document.querySelector('label[for="course"]').closest('.form-group');
+
     let isEditing = false;
 
+    // --- NEW --- Options for the dynamic year level dropdown
+    const yearLevelOptions = {
+        "JUNIOR HIGH": [
+            { value: "7", text: "Grade 7" },
+            { value: "8", text: "Grade 8" },
+            { value: "9", text: "Grade 9" },
+            { value: "10", text: "Grade 10" }
+        ],
+        "SENIOR HIGH": [
+            { value: "11", text: "Grade 11" },
+            { value: "12", text: "Grade 12" }
+        ],
+        "COLLEGE": [
+            { value: "2027", text: "1st Year (2027)" },
+            { value: "2026", text: "2nd Year (2026)" },
+            { value: "2025", text: "3rd Year (2025)" },
+            { value: "2024", text: "4th Year (2024)" }
+            // Add more college years if needed
+        ]
+    };
+
     // 2. State Toggling Functions
+    
+    // --- MODIFIED --- Added ".edu-btn" to the querySelectorAll
     const disableForm = (disabled) => {
-        profileForm.querySelectorAll("input, select, textarea").forEach(input => input.disabled = disabled);
+        profileForm.querySelectorAll("input, select, textarea, .edu-btn").forEach(el => el.disabled = disabled);
     };
 
     const toggleFormState = (editing) => {
@@ -41,9 +69,43 @@ document.addEventListener("DOMContentLoaded", () => {
         avatarEditIcon.style.pointerEvents = editing ? "auto" : "none";
         avatarEditIcon.style.opacity = editing ? "1" : "0.5";
     };
-    
-    // --- PROFILE COMPLETENESS FUNCTIONS (NEW) ---
 
+    // --- NEW --- Function to update the year level dropdown
+    const updateYearLevelOptions = (level) => {
+        const options = yearLevelOptions[level]; // Get the array of options for the selected level
+
+        // Clear current options
+        yearLevel.innerHTML = ''; 
+
+        // Add a placeholder
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.text = "Select Year";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        yearLevel.appendChild(placeholder);
+
+        // Populate new options
+        if (options) {
+            options.forEach(opt => {
+                const optionElement = document.createElement("option");
+                optionElement.value = opt.value;
+                optionElement.textContent = opt.text;
+                yearLevel.appendChild(optionElement);
+            });
+        }
+
+        // --- NEW --- Also update the label and show/hide the "Course" field
+        if (level === "COLLEGE") {
+            yearLevelLabel.textContent = "Year Level";
+            courseGroup.style.display = "block"; // Show "College Course / Major"
+        } else {
+            yearLevelLabel.textContent = "Grade Level";
+            courseGroup.style.display = "none"; // Hide "College Course / Major"
+        }
+    };
+    
+    // 3. Profile Completeness Functions
     const updateMissingInfoList = (profileData) => {
         const missingItems = [];
         // Define key fields and the criteria to check for their completeness
@@ -53,9 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
             'Birthdate': (data) => data.birthdate && data.birthdate.trim() !== '',
             'GPA/GWA': (data) => data.gwa && data.gwa.trim() !== '',
             'Complete Bio': (data) => data.bio && data.bio.trim().length >= 20, // Require 20+ chars
-            // Check other mandatory fields
-            'Year Level & Course': (data) => data.yearLevel && data.yearLevel.trim() !== '' && data.course && data.course.trim() !== '',
+            'Year Level': (data) => data.yearLevel && data.yearLevel.trim() !== '',
         };
+
+        // Only require 'Course' if education level is 'COLLEGE'
+        if (profileData.educationLevel === "COLLEGE") {
+            checks['College Course'] = (data) => data.course && data.course.trim() !== '';
+        }
 
         for (const [name, isComplete] of Object.entries(checks)) {
             if (!isComplete(profileData)) {
@@ -65,14 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const missingInfoUl = document.querySelector('.missing-info ul');
         if (missingInfoUl) {
-            // Update the list visually
             missingInfoUl.innerHTML = missingItems.map(item => `<li>${item}</li>`).join('');
         }
     };
     
     const updateProfileCompleteness = (profileData) => {
-        // Total points available for mandatory fields
-        const totalPoints = 12; // Example total (adjust this based on your complete list)
+        let totalPoints = 11; // Base points
         let earnedPoints = 0;
 
         // 1. Basic Personal Info (7 points)
@@ -84,10 +148,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (profileData.birthdate && profileData.birthdate.trim() !== '') earnedPoints++;
         if (profileData.gender && profileData.gender.trim() !== '') earnedPoints++; // Gender radio button
 
-        // 2. Educational Info (3 points)
-        if (profileData.course && profileData.course.trim() !== '') earnedPoints++;
+        // 2. Educational Info (2 points base, +1 for college)
         if (profileData.yearLevel && profileData.yearLevel.trim() !== '') earnedPoints++;
         if (profileData.gwa && profileData.gwa.trim() !== '') earnedPoints++;
+        
+        // --- MODIFIED --- Only count 'course' if College is selected
+        if (profileData.educationLevel === "COLLEGE") {
+            totalPoints++; // Add 1 to total points if college
+            if (profileData.course && profileData.course.trim() !== '') earnedPoints++;
+        }
 
         // 3. Media & Bio (2 points)
         if (profileData.avatar && profileData.avatar.includes('url(')) earnedPoints++;
@@ -95,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const completeness = Math.min(100, Math.round((earnedPoints / totalPoints) * 100));
 
-        // Update the HTML display elements
         document.getElementById("completenessPercent").textContent = `${completeness}%`;
         document.getElementById("completenessBar").style.width = `${completeness}%`;
         
@@ -104,27 +172,27 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(`📊 Profile completeness calculated: ${completeness}% (${earnedPoints}/${totalPoints} fields).`);
     };
 
-    // 3. Persistence Functions
+    // 4. Persistence Functions
     const saveProfileToLocalStorage = () => {
         const profileData = {};
         
-        // Save all form input values
         profileForm.querySelectorAll("input, select, textarea").forEach(input => {
             if (input.type === 'radio' && !input.checked) return;
             profileData[input.id] = input.value;
         });
 
-        // Save radio button states manually
         profileData.gender = document.querySelector('input[name="gender"]:checked')?.value || "";
         profileData.citizenship = document.querySelector('input[name="citizenship"]:checked')?.value || "";
-
-        // Save the avatar URL string
         profileData.avatar = profileAvatar.style.backgroundImage || "";
+
+        // --- NEW --- Save the active education level
+        const activeEduBtn = document.querySelector(".education-buttons .edu-btn.active");
+        profileData.educationLevel = activeEduBtn ? activeEduBtn.textContent.trim() : "COLLEGE";
 
         try {
             localStorage.setItem("userProfile", JSON.stringify(profileData));
             console.log("✅ Profile data saved successfully to Local Storage.");
-            return profileData; // Return the saved data
+            return profileData;
         } catch (e) {
             console.error("❌ Error saving to Local Storage:", e);
             alert("Could not save profile. Local Storage may be full or disabled.");
@@ -135,18 +203,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadProfileFromLocalStorage = () => {
         const savedDataJson = localStorage.getItem("userProfile");
         
-        // Get initial form values as a fallback/default
         const initialData = {};
         profileForm.querySelectorAll("input, select, textarea").forEach(input => {
             if (input.type !== 'radio' || input.checked) {
                 initialData[input.id] = input.value;
             }
         });
+        // --- NEW --- Get initial education level from the active button in HTML
+        initialData.educationLevel = document.querySelector(".education-buttons .edu-btn.active")?.textContent.trim() || "COLLEGE";
+        initialData.avatar = profileAvatar.style.backgroundImage || "";
+
 
         if (!savedDataJson) {
             console.log("ℹ️ No profile data found in Local Storage. Using default HTML values.");
             
-            // Populate display elements and completeness from initial HTML values
+            // --- NEW --- Ensure correct year levels are shown for the default (COLLEGE)
+            updateYearLevelOptions(initialData.educationLevel);
             updateDisplayElements();
             updateProfileCompleteness(initialData); 
             return;
@@ -154,6 +226,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const savedData = JSON.parse(savedDataJson);
         console.log("✅ Profile data loaded from Local Storage.");
+
+        // --- NEW --- Load education level *first*
+        const savedLevel = savedData.educationLevel || "COLLEGE";
+        
+        // 1. Set the active button
+        educationButtons.forEach(btn => {
+            if (btn.textContent.trim() === savedLevel) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+
+        // 2. Populate the year level options *before* setting the form values
+        updateYearLevelOptions(savedLevel);
 
         // A. Restore form inputs
         profileForm.querySelectorAll("input, select, textarea").forEach(input => {
@@ -182,10 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // C. Update display elements and completeness score
         updateDisplayElements();
-        updateProfileCompleteness(savedData); 
+        updateProfileCompleteness(savedData); // Pass the loaded data
     };
     
-    // 4. Dedicated function to update display elements from the current form values
+    // 5. Dedicated function to update display elements from the current form values
     const updateDisplayElements = () => {
         const currentFirstName = document.getElementById("firstName")?.value.trim() || "";
         const currentLastName = document.getElementById("lastName")?.value.trim() || "";
@@ -194,8 +281,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const currentPhone = document.getElementById("phone")?.value || "";
         const currentAddress = document.getElementById("address")?.value || "";
         
+        // --- MODIFIED --- This logic is now more generic
         const graduationYearText = yearLevel.options[yearLevel.selectedIndex]?.text || "";
-        const graduationYear = graduationYearText.match(/\d{4}/)?.[0] || "";
+        let graduationDisplay = "N/A";
+
+        if (graduationYearText.includes("Year")) { // College
+             const graduationYear = graduationYearText.match(/\d{4}/)?.[0] || "";
+             graduationDisplay = `Class of ${graduationYear}`;
+        } else if (graduationYearText.includes("Grade")) { // JHS/SHS
+            graduationDisplay = graduationYearText;
+        }
 
         // Update display elements
         displayName.textContent = `${currentFirstName} ${currentLastName}`;
@@ -203,9 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
         displayEmail.textContent = currentEmail;
         displayPhone.textContent = currentPhone;
         displayLocation.textContent = currentAddress;
-        displayGraduation.textContent = `Class of ${graduationYear}`;
+        displayGraduation.textContent = graduationDisplay;
         
-        // Update avatar initials if no custom avatar is set
         if (!profileAvatar.style.backgroundImage) {
             const initials = (currentFirstName[0] || '') + (currentLastName[0] || '');
             profileAvatar.innerHTML = initials.toUpperCase() || 'AJ';
@@ -213,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // 5. Avatar Upload Logic
+    // 6. Avatar Upload Logic
     avatarEditIcon.style.pointerEvents = "none";
     avatarEditIcon.style.opacity = "0.5";
 
@@ -230,14 +324,33 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.onload = function (ev) {
             profileAvatar.style.backgroundImage = `url(${ev.target.result})`;
             profileAvatar.innerHTML = "";
-            // Immediately save the profile data to persist the avatar change
             const profileData = saveProfileToLocalStorage();
             updateProfileCompleteness(profileData);
         };
         reader.readAsDataURL(file);
     });
 
-    // 6. Button Event Handlers
+    // --- NEW --- 7. Education Level Button Logic
+    educationButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            // 1. Handle the 'active' class
+            educationButtons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            // 2. Get the level from the button's text
+            const selectedLevel = button.textContent.trim(); 
+
+            // 3. Call the update function
+            updateYearLevelOptions(selectedLevel);
+
+            // 4. If switching away from college, clear the course field
+            if (selectedLevel !== "COLLEGE") {
+                course.value = "";
+            }
+        });
+    });
+
+    // 8. Button Event Handlers (Save, Cancel, Edit)
     editBtn.addEventListener("click", () => {
         toggleFormState(true);
     });
@@ -251,25 +364,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Update display elements 
         updateDisplayElements(); 
-
-        // Save data and get the saved profileData object
         const profileData = saveProfileToLocalStorage();
-        
-        // Update completeness based on the newly saved data
         updateProfileCompleteness(profileData);
-
         toggleFormState(false);
     });
 
     cancelBtn.addEventListener("click", () => {
-        // Loads the last SAVED data, resetting any unsaved changes in the form
         loadProfileFromLocalStorage();
         toggleFormState(false);
     });
 
-    // 7. Initialize: This MUST run on page load
+    // 9. Initialize: This MUST run on page load
     loadProfileFromLocalStorage();
     toggleFormState(false);
 });
