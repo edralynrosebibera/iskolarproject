@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scholarship Details</title>
+  <link rel="stylesheet" href="{% static 'admin_page/style.css' %}?v=2">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="viewTitle">Scholarship Details</h1>
+      <nav>
+        <!-- Back button (dynamic destination) -->
+        <button id="backBtn" class="ghost">⬅️ Back</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <!-- Description content -->
+      <section id="contentContainer"></section>
+
+      <!-- Requirements upload area -->
+      <section class="view-box">
+        <h2>📁 File Requirements</h2>
+        <div class="total-progress-container">
+          <div class="total-progress-text" id="progressText">Progress: 0/0 files uploaded</div>
+          <div class="total-progress-bar">
+            <div class="total-progress-fill"></div>
+          </div>
+        </div>
+        <div id="requirementsContainer"></div>
+      </section>
+    </main>
+
+    <div style="max-width:900px;margin:0 auto;padding:12px;">
+      <button id="submitAllBtn" class="submit-all">Submit All Files</button>
+      <div id="submitMsg" class="text-muted" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- User info passed from Django session -->
+  <script>
+    const loggedInUser = {
+      id: "{{ user_id|escapejs }}",
+      name: "{{ user_fullname|escapejs }}",
+      email: "{{ user_email|escapejs }}"
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const backBtn = document.getElementById("backBtn");
+
+      if (!backBtn) {
+        console.error("❌ Back button not found!");
+        return;
+      }
+
+      backBtn.addEventListener("click", () => {
+        console.log("🔎 Logged in user email:", loggedInUser.email);
+
+        if (loggedInUser.email === "iskolarAdmin@gmail.com") {
+          // 👑 Admin goes to posts
+          window.location.href = "/admin-page/description-posts/";
+        } else {
+          // 👤 Regular user goes to homepage
+          window.location.href = "/homepage/";
+        }
+      });
+    });
+  </script>
+
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Your JS logic -->
+  <script src="{% static 'admin_page/view.js' %}?v=31"></script>
+</body>
+</html>

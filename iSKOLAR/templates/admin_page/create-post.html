@@ -39,6 +39,15 @@
       <label>Scholarship Link</label>
       <input type="text" id="scholarshipLink" placeholder="https://example.com" />
 
+      <button id="createDescriptionBtn" class="desc-btn">📝 Create Description Page</button>
+
+      <script>
+      document.getElementById("createDescriptionBtn").onclick = () => {
+        window.location.href = "/admin-page/create-description/";
+      };
+      </script>
+
+
       <button id="savePostBtn">Create Scholarship</button>
     </section>
 
@@ -63,6 +72,6 @@
     </section>
   </main>
   
-  <script src="{% static 'admin_page/create-post2.js' %}?v=10"></script>
+  <script src="{% static 'admin_page/create-post2.js' %}?v=15"></script>
 </body>
 </html>

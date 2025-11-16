@@ -7,8 +7,8 @@ const preview = {
   location: document.getElementById("preview-location"),
   qualifications: document.getElementById("preview-qualifications"),
   deadline: document.getElementById("preview-deadline"),
-  posted: document.getElementById("preview-posted"),
-  remaining: document.getElementById("preview-remaining"),
+  // posted: document.getElementById("preview-posted"),
+  // remaining: document.getElementById("preview-remaining"),
   link: document.getElementById("preview-link"),
 };
 
@@ -71,27 +71,84 @@ function updatePreview() {
 
 function updateTimers() {
   const now = new Date();
-  if (postedDate) {
-    const diffPosted = now - postedDate;
-    preview.posted.textContent = `Posted ${formatTime(diffPosted)} ago`;
-  }
+  // if (postedDate) {
+  //   const diffPosted = now - postedDate;
+  //   preview.posted.textContent = `Posted ${formatTime(diffPosted)} ago`;
+  // }
 
-  if (deadlineDate) {
-    const diffDeadline = deadlineDate - now;
-    if (diffDeadline <= 0) {
-      preview.remaining.textContent = "Expired";
-      preview.remaining.classList.add("expired");
-    } else {
-      preview.remaining.textContent = `Remaining ${formatTime(diffDeadline)}`;
-      const daysLeft = Math.floor(diffDeadline / (1000 * 60 * 60 * 24));
-      preview.remaining.classList.remove("expired", "warning");
-      if (daysLeft <= 3) preview.remaining.classList.add("warning");
-    }
-  }
+  // if (deadlineDate) {
+  //   const diffDeadline = deadlineDate - now;
+  //   if (diffDeadline <= 0) {
+  //     preview.remaining.textContent = "Expired";
+  //     preview.remaining.classList.add("expired");
+  //   } else {
+  //     preview.remaining.textContent = `Remaining ${formatTime(diffDeadline)}`;
+  //     const daysLeft = Math.floor(diffDeadline / (1000 * 60 * 60 * 24));
+  //     preview.remaining.classList.remove("expired", "warning");
+  //     if (daysLeft <= 3) preview.remaining.classList.add("warning");
+  //   }
+  // }
 }
 
-setInterval(updateTimers, 1000);
+// setInterval(updateTimers, 1000);
 document.querySelectorAll("input, textarea").forEach(el => el.addEventListener("input", updatePreview));
+
+// saveBtn.addEventListener("click", async e => {
+//   e.preventDefault();
+
+//   const post = {
+//     title: document.getElementById("title").value.trim(),
+//     description: document.getElementById("description").value.trim(),
+//     location: document.getElementById("location").value.trim(),
+//     qualifications: document.getElementById("qualifications").value.trim(),
+//     postedDate: postedDate.toISOString(),
+//     deadline: document.getElementById("deadline").value,
+//     scholarshipLink: document.getElementById("scholarshipLink").value.trim(),
+//   };
+
+//   const editId = editingIdField.value;
+//   let endpoint = "/admin-page/create-post/";
+//   let successMessage = "🎉 Scholarship created successfully!";
+
+//   if (editId) {
+//     endpoint = `/admin-page/edit-post/${editId}/`;
+//     successMessage = "✅ Scholarship updated successfully!";
+//   }
+
+// try {
+//   const res = await fetch(endpoint, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(post),
+//   });
+
+//   const data = await res.json();
+
+//   if (data.success) {
+//     alert(successMessage);
+
+//     // ✅ Store the new post ID
+//     const newPostId = data.data[0].id;
+//     document.getElementById("editingId").value = newPostId;
+
+//     // ✅ Ask if the admin wants to make a description page now
+//     const goToDescription = confirm("Do you want to create a Description Page for this post?");
+//     if (goToDescription) {
+//       window.location.href = `/admin-page/create-description/?id=${newPostId}`;
+//     } else {
+//       window.location.href = "/admin-page/posts/";
+//     }
+
+//   } else {
+//     alert("❌ Failed: " + (data.error || "Unknown error"));
+//   }
+
+// } catch (err) {
+//   console.error(err);
+//   alert("⚠️ Error saving post.");
+// }
+
+// });
 
 saveBtn.addEventListener("click", async e => {
   e.preventDefault();
@@ -101,7 +158,7 @@ saveBtn.addEventListener("click", async e => {
     description: document.getElementById("description").value.trim(),
     location: document.getElementById("location").value.trim(),
     qualifications: document.getElementById("qualifications").value.trim(),
-    postedDate: postedDate.toISOString(),
+    postedDate: new Date().toISOString(),
     deadline: document.getElementById("deadline").value,
     scholarshipLink: document.getElementById("scholarshipLink").value.trim(),
   };
@@ -123,9 +180,28 @@ saveBtn.addEventListener("click", async e => {
     });
 
     const data = await res.json();
+    console.log("FRONTEND RECEIVED:", data);
     if (data.success) {
       alert(successMessage);
-      window.location.href = "/admin-page/posts/";
+
+      // ✅ Get the new post ID (the one Django/Supabase returns)
+      // const newPostId = data.data?.id || data.data?.[0]?.id || null;
+      const newPostId = data.data && data.data.length > 0 ? data.data[0].id : null;
+
+
+      if (!newPostId) {
+        alert("⚠️ Post saved but no post ID was returned.");
+        return;
+      }
+
+      // ✅ Ask if user wants to create a description page now
+      const goToDescription = confirm("Do you want to create a Description Page for this post?");
+      if (goToDescription) {
+        // Auto redirect and pass the post ID
+        window.location.href = `/admin-page/create-description/?id=${newPostId}`;
+      } else {
+        window.location.href = "/admin-page/posts/";
+      }
     } else {
       alert("❌ Failed: " + (data.error || "Unknown error"));
     }
@@ -135,6 +211,25 @@ saveBtn.addEventListener("click", async e => {
   }
 });
 
+
+
 function viewAllPosts() {
   window.location.href = "/admin-page/posts/";
+}
+
+const createDescBtn = document.getElementById("createDescriptionBtn");
+if (createDescBtn) {
+  createDescBtn.addEventListener("click", e => {
+    e.preventDefault();
+
+    // Get the post ID from the hidden editing field (if editing)
+    const editId = document.getElementById("editingId").value;
+
+    if (editId) {
+      // If editing an existing post, link it directly to the description builder
+      window.open(`/admin-page/create-description/?id=${editId}`, "_blank");
+    } else {
+      alert("⚠️ Please save the scholarship post first before creating a description page.");
+    }
+  });
 }

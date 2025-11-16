@@ -23,6 +23,13 @@ def login_view(request):
                 admin_user.set_password(password)
                 admin_user.save()
             login(request, admin_user)
+
+     # ✅ Store session info for admin
+            request.session["user_email"] = "iskolarAdmin@gmail.com"
+            request.session["user_fullname"] = "Iskolar Admin"
+            request.session["user_id"] = admin_user.id
+            request.session["user_role"] = "admin"  
+            
             return redirect("admin_page")  
 
         user = authenticate(request, username=username, password=password)
