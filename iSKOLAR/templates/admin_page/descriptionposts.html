@@ -1,0 +1,55 @@
+<!-- {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Description Pages</title>
+  <link rel="stylesheet" href="{% static 'admin_page/style.css' %}">
+</head>
+<body>
+  <header>
+    <h1>📘 All Description Pages</h1>
+    <nav>
+      <button onclick="window.location.href='/admin-page/create-description/'">+ Create New</button>
+      <button class="ghost" onclick="window.location.href='/admin-page/posts/'">← Back to Posts</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="descriptionPostsContainer" class="card"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{% static 'admin_page/descriptionposts.js' %}?v=2"></script>
+</body>
+</html>
+ -->
+
+ {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>All Scholarship Descriptions</title>
+  <link rel="stylesheet" href="{% static 'admin_page/style.css' %}">
+</head>
+<body>
+  <header>
+    <h1>📚 All Scholarship Description Pages</h1>
+    <nav>
+      <button onclick="window.location.href='/admin-page/create-post/'" class="ghost">+ Create New Post</button>
+      <button onclick="window.location.href='/admin-page/posts/'">Back to Posts</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="descriptionListContainer"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{% static 'admin_page/descriptionposts.js' %}?v=8"></script>
+</body>
+</html>
+

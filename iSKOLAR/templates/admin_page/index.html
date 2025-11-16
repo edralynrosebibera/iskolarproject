@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Create Scholarship Description Page</title>
+  <link rel="stylesheet" href="{% static 'admin_page/style.css' %}">
+</head>
+<body>
+  <header>
+    <h1 id="pageTitle">Create Scholarship Description Page</h1>
+    <nav>
+      <button class="ghost" onclick="window.location.href='/admin-page/description-posts/'">
+        All Description Pages
+      </button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div id="blocksContainer"></div>
+    <!-- <button id="addBlockBtn" class="primary-btn">+ Add Content Block</button> -->
+  </main>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Local JS -->
+  <script src="{% static 'admin_page/content-section.js' %}?v=2"></script>
+  <script src="{% static 'admin_page/file-requirement.js' %}?v=2"></script>
+  <script src="{% static 'admin_page/content-block.js' %}?v=17"></script>
+</body>
+</html>

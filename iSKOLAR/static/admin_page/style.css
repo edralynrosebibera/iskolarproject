@@ -1,0 +1,189 @@
+/* Basic layout & theme */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg,#f3f4f6 0%, #eef2f7 100%);
+  color:#0f1724;
+  margin:0;
+  padding:20px;
+}
+
+/* Header */
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+button {
+  background:#0b5cff;
+  border:none;
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+}
+button.ghost {
+  background:transparent;
+  color:#0b5cff;
+  border:1px solid rgba(11,92,255,0.12);
+}
+
+/* Card wrappers */
+.container {
+  max-width:1100px;
+  margin:0 auto;
+}
+
+/* Editor card (slightly darker) */
+.card {
+  border-radius:10px;
+  padding:18px;
+  margin-bottom:16px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(14,30,37,0.06);
+  border: 1px solid rgba(15,23,36,0.06);
+}
+
+/* Section item: each section has its own tintable inner box */
+.section-item {
+  margin-bottom:12px;
+  padding:12px;
+  border-radius:10px;
+  background: #ffffff;
+  border: 2px solid rgba(15,23,36,0.06);
+  box-shadow: none;
+}
+
+/* Section title/desc */
+.section-item input,
+.section-item textarea {
+  width:100%;
+  padding:8px;
+  margin-top:8px;
+  margin-bottom:8px;
+  border-radius:6px;
+  border:1px solid rgba(15,23,36,0.06);
+}
+
+/* Color palette inside a section */
+.color-palette {
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.color-dot {
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid transparent;
+  box-sizing:border-box;
+}
+.color-dot.selected { box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+
+/* Colors (visual background used in control; actual section tint uses CSS classes below) */
+.color-dot.blue   { background: #dbeafe; }
+.color-dot.green  { background: #dcfce7; }
+.color-dot.orange { background: #ffedd5; }
+.color-dot.pink   { background: #fce7f3; }
+.color-dot.purple { background: #e9d5ff; }
+.color-dot.gray   { background: #f3f4f6; }
+
+/* Section tint classes (background + border + text color) */
+.tint-blue  { background:#dbeafe; border-color:#93c5fd; color:#08203a; }
+.tint-green { background:#dcfce7; border-color:#86efac; color:#07220f; }
+.tint-orange{ background:#ffedd5; border-color:#fdba74; color:#3b1f00; }
+.tint-pink  { background:#fce7f3; border-color:#f9a8d4; color:#311123; }
+.tint-purple{ background:#e9d5ff; border-color:#c084fc; color:#2d143a; }
+.tint-gray  { background:#ffffff; border-color:#e5e7eb; color:#0f1724; }
+
+/* Files/UI in view page: white content area */
+/* .view-box {
+  background: #ffffff;
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 8px 24px rgba(14,30,37,0.06);
+  border:1px solid rgba(15,23,36,0.06);
+  margin-bottom:14px;
+} */
+
+.view-box {
+  background: transparent; /* make it see-through so tint shows */
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(14, 30, 37, 0.06);
+  border: 1px solid rgba(15, 23, 36, 0.06);
+  margin-bottom: 16px;
+}
+
+/* Requirement item */
+.requirement-row {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  padding:10px;
+  border-radius:8px;
+  background:#f8fafc;
+  border:1px solid rgba(15,23,36,0.04);
+  margin-bottom:8px;
+}
+.requirement-row .label { font-weight:600; color:#0f1724; }
+.requirement-row input[type="file"] { display:none; }
+.requirement-row .file-name { font-size:13px; color:#334155; margin-left:10px; }
+
+/* Submit All button */
+.submit-all {
+  display:inline-block;
+  margin-top:10px;
+  background:#0b5cff;
+  color:white;
+  padding:10px 14px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+}
+
+/* small helpers */
+.text-muted { color:#64748b; font-size:13px; }
+.row { display:flex; gap:8px; align-items:center; }
+
+/* Progress bar for student uploads */
+.req-progress-bar {
+  width:100%;
+  height:8px;
+  background:#e2e8f0;
+  border-radius:4px;
+  overflow:hidden;
+  margin-top:6px;
+}
+.req-progress {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#0b5cff,#06b6d4);
+  transition:width 0.6s ease;
+  border-radius:4px;
+}
+
+/* Overall requirements progress */
+.total-progress-container {
+  margin-bottom: 12px;
+}
+.total-progress-text {
+  font-weight: 600;
+  color: #0f1724;
+  margin-bottom: 4px;
+}
+.total-progress-bar {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.total-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0b5cff, #06b6d4);
+  transition: width 0.4s ease;
+}
