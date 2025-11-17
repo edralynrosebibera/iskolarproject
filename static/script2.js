@@ -186,33 +186,147 @@ document.addEventListener('DOMContentLoaded', function () {
   loadScholarships();
 
   // ------------------------------
-  // search filter
+  // search filter + suggestions dropdown
   // ------------------------------
-  searchInput?.addEventListener('input', function (e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const cards = document.querySelectorAll('.scholarship-card');
+  function debounce(fn, delay = 200) {
+    let t;
+    return function (...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), delay);
+    };
+  }
+
+  // create suggestions container (placed inside the search-container if available)
+  let suggestionsRoot = null;
+  function ensureSuggestionsRoot() {
+    if (suggestionsRoot) return suggestionsRoot;
+    const container = searchInput?.closest('.search-container') || document.body;
+    const root = document.createElement('div');
+    root.className = 'search-suggestions';
+    root.setAttribute('aria-hidden', 'true');
+    // basic inline styles so it appears; you can move to CSS file later
+    root.style.position = 'absolute';
+    root.style.zIndex = 9999;
+    root.style.minWidth = '40rem';
+    root.style.maxWidth = '560px';
+    root.style.boxSizing = 'border-box';
+    root.style.background = '#eef7fb';
+    root.style.borderRadius = '10px';
+    root.style.boxShadow = '0 6px 18px rgba(10,20,40,0.08)';
+    root.style.padding = '12px';
+    root.style.display = 'none';
+
+    // append to container's parent so absolute positioning works
+    container.style.position = container.style.position || 'relative';
+    container.appendChild(root);
+    suggestionsRoot = root;
+    return suggestionsRoot;
+  }
+
+  let suggestionItems = [];
+  let selectedSuggestionIndex = -1;
+
+  function positionSuggestions() {
+    const root = ensureSuggestionsRoot();
+    if (!searchInput || !root) return;
+    const rect = searchInput.getBoundingClientRect();
+    // position relative to the search container
+    // position and size to match the search input exactly
+    root.style.top = (searchInput.offsetTop + searchInput.offsetHeight + 8) + 'px';
+    root.style.left = searchInput.offsetLeft + 'px';
+    // use the input's computed width so the suggestion box matches it exactly
+    const inputWidth = Math.round(searchInput.getBoundingClientRect().width);
+    root.style.width = inputWidth + 'px';
+  }
+
+  function buildSuggestions(matches) {
+    const root = ensureSuggestionsRoot();
+    root.innerHTML = '';
+    suggestionItems = [];
+    selectedSuggestionIndex = -1;
+
+    if (!matches || matches.length === 0) {
+      root.style.display = 'none';
+      root.setAttribute('aria-hidden', 'true');
+      return;
+    }
+
+    matches.slice(0, 6).forEach((m, i) => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.style.padding = '12px 14px';
+      item.style.borderRadius = '8px';
+      item.style.cursor = 'pointer';
+      item.style.marginBottom = '6px';
+      item.style.color = '#0f0f0fff';
+      item.style.fontSize = '15px';
+      item.innerHTML = `<div style="font-weight:600;margin-bottom:4px">Scholarship ${i+1}: ${escapeHtml(m.title)}</div>`;
+      item.addEventListener('click', () => selectSuggestion(i));
+      item.addEventListener('mousemove', () => setSelectedSuggestion(i));
+      root.appendChild(item);
+      suggestionItems.push({ el: item, targetCard: m.card });
+    });
+
+    positionSuggestions();
+    root.style.display = 'block';
+    root.setAttribute('aria-hidden', 'false');
+  }
+
+  function escapeHtml(str) {
+    return (str || '').replace(/[&<>"']/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c];
+    });
+  }
+
+  function setSelectedSuggestion(index) {
+    if (index < -1 || index >= suggestionItems.length) return;
+    suggestionItems.forEach((s, i) => {
+      s.el.style.background = i === index ? 'rgba(10,40,60,0.06)' : 'transparent';
+    });
+    selectedSuggestionIndex = index;
+  }
+
+  function selectSuggestion(index) {
+    const s = suggestionItems[index];
+    if (!s) return;
+    const title = s.el.textContent.replace(/^Result \d+:\s*/, '').trim();
+    searchInput.value = title;
+    // hide suggestions
+    const root = ensureSuggestionsRoot();
+    root.style.display = 'none';
+    root.setAttribute('aria-hidden', 'true');
+    // show only the selected card and scroll to it
+    if (s.targetCard) {
+      document.querySelectorAll('.scholarship-card').forEach((c) => (c.style.display = 'none'));
+      s.targetCard.style.display = '';
+      s.targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      s.targetCard.classList.add('highlighted-search-result');
+      setTimeout(() => s.targetCard.classList.remove('highlighted-search-result'), 2000);
+    }
+  }
+
+  // performSearch: filters cards and returns an array of matches {title, card}
+  function performSearch(query) {
+    const searchTerm = (query || '').trim().toLowerCase();
+    const cards = Array.from(document.querySelectorAll('.scholarship-card'));
+    if (!cards || cards.length === 0) return buildSuggestions([]);
+
     let anyVisible = false;
+    const matches = [];
 
     cards.forEach((card) => {
-      const title =
-        card.querySelector('.scholarship-title')?.textContent.toLowerCase() ||
-        '';
-      const description =
-        card
-          .querySelector('.scholarship-description')
-          ?.textContent.toLowerCase() || '';
+      const title = (card.querySelector('.scholarship-title')?.textContent || '').toLowerCase();
+      const description = (card.querySelector('.scholarship-description')?.textContent || '').toLowerCase();
 
-      if (title.includes(searchTerm) || description.includes(searchTerm)) {
-        card.style.display = 'block';
-        anyVisible = true;
-      } else {
-        card.style.display = 'none';
-      }
+      const isMatch = searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm);
+      card.style.display = isMatch ? '' : 'none';
+      if (isMatch) anyVisible = true;
+      if (isMatch && title) matches.push({ title: card.querySelector('.scholarship-title')?.textContent || title, card });
     });
 
     let noMsg = document.querySelector('.no-scholarships');
     if (!anyVisible) {
-      if (!noMsg) {
+      if (!noMsg && scholarshipsContainer) {
         const msg = document.createElement('div');
         msg.className = 'no-scholarships';
         msg.innerHTML = '<p>No scholarships found.</p>';
@@ -221,7 +335,49 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       if (noMsg) noMsg.remove();
     }
-  });
+
+    // build suggestions from matches (titles)
+    buildSuggestions(matches.map(m => ({ title: m.title, card: m.card })));
+  }
+
+  // wire input with debounce
+  if (searchInput) {
+    // update position on resize/scroll
+    window.addEventListener('resize', debounce(positionSuggestions, 150));
+    window.addEventListener('scroll', debounce(positionSuggestions, 150), true);
+
+    searchInput.addEventListener('input', debounce((e) => performSearch(e.target.value), 180));
+
+    // keyboard navigation for suggestions
+    searchInput.addEventListener('keydown', (e) => {
+      const root = ensureSuggestionsRoot();
+      if (!root || root.style.display === 'none') return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedSuggestion(Math.min(selectedSuggestionIndex + 1, suggestionItems.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedSuggestion(Math.max(selectedSuggestionIndex - 1, 0));
+      } else if (e.key === 'Enter') {
+        if (selectedSuggestionIndex >= 0) {
+          e.preventDefault();
+          selectSuggestion(selectedSuggestionIndex);
+        }
+      } else if (e.key === 'Escape') {
+        root.style.display = 'none';
+        root.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // click outside to close
+    document.addEventListener('click', (ev) => {
+      const root = ensureSuggestionsRoot();
+      if (!root) return;
+      if (ev.target === searchInput || root.contains(ev.target)) return;
+      root.style.display = 'none';
+      root.setAttribute('aria-hidden', 'true');
+    });
+  }
 
   // sidebar closes when clicking a link
   document.addEventListener('click', function (e) {
