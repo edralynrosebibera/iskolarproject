@@ -7,14 +7,4 @@ urlpatterns = [
     path("archives/", views.archives_view, name="archives"),
     path("saved_scholarships/", views.saved_scholarships_view, name="saved_scholarships"),
     path("applications/", views.applications_view, name="applications"),
-
-   
- #profile-display-feature
-    #path("search-posts/", views.search_posts_view, name="search_posts"),
-
-
-
-
-
-  
 ]
