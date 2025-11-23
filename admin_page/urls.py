@@ -19,4 +19,9 @@ urlpatterns = [
     # Optional advanced endpoints
     path("get-submissions/<uuid:post_id>/", views.get_submissions, name="get_submissions"),
     path("save-description/", views.save_description, name="save_description"),
+
+
+
+    path("analytics/", views.analytics_view, name="analytics"),
 ]
+

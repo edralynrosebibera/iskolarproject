@@ -292,3 +292,21 @@ body {
 .logout-btn span {
   font-size: 1rem;
 }
+
+
+.analytics-btn {
+  background: linear-gradient(to right, #4f46e5, #06b6d4);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.analytics-btn:hover {
+ transform: scale(1.05);
+  
+}
+

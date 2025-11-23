@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholarship Analytics</title>
+  <link rel="stylesheet" href="{% static 'admin_page/analytics.css' %}?v=1">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo-area">
+      <div class="logo">📊</div>
+      <div class="header-text">
+        <h1>Analytics Dashboard</h1>
+        <p>Real-time overview of your platform</p>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button class="back-btn" onclick="goBack()">⬅ Back to Posts</button>
+    </div>
+  </header>
+
+  <main class="content">
+    
+    <div class="welcome-banner">
+      <h2>👋 Hello, Admin</h2>
+      <p>Here is what is happening with your scholarships today.</p>
+    </div>
+
+    <div class="stats-grid">
+      
+      <div class="stat-card">
+        <div class="icon-box blue">⚡</div>
+        <div class="stat-info">
+          <h3>Active Scholarships</h3>
+          <div class="number">{{ active_count }}</div>
+          <p class="subtext">Deadlines are in the future</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box purple">📂</div>
+        <div class="stat-info">
+          <h3>Total Posted</h3>
+          <div class="number">{{ total_count }}</div>
+          <p class="subtext">All time history</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box orange">👥</div>
+        <div class="stat-info">
+          <h3>Total Users</h3>
+          <div class="number">{{ user_count }}</div>
+          <p class="subtext">Registered accounts</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="{% static 'admin_page/analytics.js' %}"></script>
+</body>
+</html>

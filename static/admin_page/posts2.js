@@ -8,6 +8,11 @@ function goToCreatePost() {
   window.location.href = "/admin-page/create-post/";
 }
 
+function goToAnalytics() {
+    // This matches the URL name we will set up in Step 2
+    window.location.href = "/analytics/";
+}
+
 function logout() {
   window.location.href = "/admin-page/logout/";
 }

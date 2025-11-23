@@ -6,6 +6,7 @@ from supabase import create_client, Client
 import json
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from datetime import datetime # <--- ADD THIS
 
 # Initialize Supabase
 url: str = settings.SUPABASE_URL
@@ -165,3 +166,45 @@ def save_description(request):
     
 def description_posts_view(request):
     return render(request, "admin_page/descriptionposts.html")
+
+
+
+
+
+def analytics_view(request):
+    try:
+        # 1. Total Posts (Count all rows in 'posts')
+        total_res = supabase.table("posts").select("id", count="exact").execute()
+        total_count = total_res.count
+
+        # 2. Active Posts (Count where deadline is greater than today)
+        # We get the current time in ISO format for Supabase comparison
+        now = datetime.now().isoformat()
+        active_res = supabase.table("posts").select("id", count="exact").gte("deadline", now).execute()
+        active_count = active_res.count
+
+        # 3. Total Users (Assuming you want to count a 'users' table)
+        # Note: If your users are only in Supabase Auth and not a public table, 
+        # this might fail without a Service Role key. 
+        # For now, let's try counting a 'users' table if you have one, otherwise set to 0.
+        try:
+            user_res = supabase.table("users").select("id", count="exact").execute()
+            user_count = user_res.count
+        except:
+            user_count = 0 # Fallback if 'users' table doesn't exist
+
+        context = {
+            'active_count': active_count,
+            'total_count': total_count,
+            'user_count': user_count
+        }
+        
+        return render(request, "admin_page/analytics.html", context)
+      
+
+    except Exception as e:
+        print("Error fetching analytics:", e)
+        # Return 0s so the page still loads even if Supabase fails
+        return render(request, "admin_page/analytics.html", {
+            'active_count': 0, 'total_count': 0, 'user_count': 0
+        })
