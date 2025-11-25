@@ -3,6 +3,8 @@ const dialog = document.getElementById("confirmDialog");
 const cancelBtn = document.getElementById("cancelBtn");
 const deleteBtn = document.getElementById("deleteBtn");
 let deleteId = null;
+const searchInput = document.getElementById("searchInput");
+const archiveBtn = document.getElementById("archiveExpired");
 
 function goToCreatePost() {
   window.location.href = "/admin-page/create-post/";
@@ -23,51 +25,62 @@ async function fetchPosts() {
   postsContainer.innerHTML = "";
 
   if (data.success && data.data.length > 0) {
-    data.data.forEach(post => {
-      const div = document.createElement("div");
-      div.className = "post-card";
-
-      const postedDate = new Date(post.created_at || Date.now());
-      const deadlineDate = post.deadline ? new Date(post.deadline) : null;
-
-      const countdownId = `countdown-${post.id}`;
-      const postedAgoId = `posted-${post.id}`;
-
-      div.innerHTML = `
-        <div class="card-actions" data-id="${post.id}">
-          <button onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')">✏️</button>
-          <button onclick="confirmDelete('${post.id}')">🗑️</button>
-        </div>
-
-        <div class="post-content">
-          <div class="post-title">${post.title}</div>
-
-          
-
-          <div class="post-meta">
-            <p><strong>📍 Location:</strong> ${post.location || "Not specified"}</p>
-            <p><strong>📅 Posted:</strong> ${postedDate.toISOString().split("T")[0]}</p>
-            <p><strong>⏰ Deadline:</strong> ${post.deadline || "N/A"}</p>
-          </div>
-
-          <p class="post-desc">${post.description || "No description available."}</p>
-          <div class="qualifications"><strong>📄 Qualifications:</strong> ${post.qualifications || "None"}</div>
-
-          <a href="${post.link || "#"}" target="_blank" class="link-btn">Link for Scholarship</a>
-        </div>
-      `;
-
-      postsContainer.appendChild(div);
-
-      startTimers(postedAgoId, countdownId, postedDate, deadlineDate);
-    });
+    // store posts for search/filtering
+    window._adminPosts = data.data;
+    renderTableRows(data.data);
   } else {
-    postsContainer.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">📭</div>
-        <p>No posts found.</p>
-      </div>`;
+    postsContainer.innerHTML = `<tr class="empty-row"><td colspan="6" class="empty">No posts found.</td></tr>`;
   }
+}
+
+function renderTableRows(posts) {
+  postsContainer.innerHTML = "";
+  posts.forEach(post => {
+    const postedDate = new Date(post.created_at || Date.now());
+    const deadlineDate = post.deadline ? new Date(post.deadline) : null;
+
+    const countdownId = `countdown-${post.id}`;
+    const postedAgoId = `posted-${post.id}`;
+
+    const amount = post.amount || post.salary || post.stipend || "-";
+    const applicants = post.applicants != null ? post.applicants : "-";
+    const status = post.status || (deadlineDate && deadlineDate < new Date() ? 'expired' : 'active');
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-title">
+        <div class="title-line">
+          <div class="title-text">${post.title}</div>
+          <div class="title-sub">${(post.location || '')}</div>
+        </div>
+      </td>
+      <td class="td-amount">${amount}</td>
+      <td class="td-deadline" id="${countdownId}">${post.deadline || 'N/A'}</td>
+      <td class="td-applicants">${applicants}</td>
+      <td class="td-status"><span class="status-pill ${status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'neutral'}">${status}</span></td>
+      <td class="td-actions">
+        <button class="icon-btn edit" title="Edit" data-tooltip="Edit" onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')" aria-label="Edit">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2.5" y="3.5" width="15" height="15" rx="3" stroke="currentColor" stroke-width="1.6" fill="none" />
+            <path d="M8.5 13.5l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14.5 6.5l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button class="icon-btn delete" title="Delete" data-tooltip="Delete" onclick="confirmDelete('${post.id}')" aria-label="Delete">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </td>
+    `;
+
+    postsContainer.appendChild(tr);
+    startTimers(postedAgoId, countdownId, postedDate, deadlineDate);
+  });
 }
 
 function formatTime(ms) {
@@ -149,3 +162,39 @@ async function editPost(id, title, description, location, qualifications, deadli
 }
 
 document.addEventListener("DOMContentLoaded", fetchPosts);
+
+// client-side search
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    const all = window._adminPosts || [];
+    if (!q) return renderTableRows(all);
+    const filtered = all.filter(p => {
+      return (p.title && p.title.toLowerCase().includes(q)) ||
+             (p.description && p.description.toLowerCase().includes(q)) ||
+             (p.location && p.location.toLowerCase().includes(q));
+    });
+    renderTableRows(filtered);
+  });
+}
+
+// archive expired (client-side toggle or endpoint call if exists)
+if (archiveBtn) {
+  archiveBtn.addEventListener('click', async () => {
+    // try server endpoint, fallback to client-side filter UI
+    try {
+      const res = await fetch('/admin-page/archive-expired/', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) fetchPosts();
+      else alert(data.error || 'Could not archive expired posts');
+    } catch (err) {
+      // client-side: remove expired from view
+      const all = window._adminPosts || [];
+      const remaining = all.filter(p => {
+        const d = p.deadline ? new Date(p.deadline) : null;
+        return !(d && d < new Date());
+      });
+      renderTableRows(remaining);
+    }
+  });
+}

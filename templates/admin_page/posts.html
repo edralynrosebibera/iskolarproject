@@ -8,26 +8,45 @@
   <link rel="stylesheet" href="{% static 'admin_page/posts.css' %}?v=5">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo">✨</div>
-    <div class="header-text">
-      <h1>Posts Created</h1>
-      <p>Manage your scholarship posts</p>
-    </div>
-    <div style="display: flex; gap: 10px;">
-      <button class="create-btn" onclick="goToCreatePost()">➕ Create Post</button>
-      <a href="{% url 'analytics' %}" 
-       class="analytics-btn"
-       style="text-decoration: none; display: flex; align-items: center; gap: 6px;"
-    >
-        📊 Analytics
-    </a>
-      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <h1>Manage Scholarships</h1>
+        <p class="subtitle">Create, edit, and manage scholarship listings</p>
+
+        <div class="controls">
+          <div class="search-wrap">
+            <input id="searchInput" type="search" placeholder="Search scholarships...">
+          </div>
+          <button id="archiveExpired" class="archive-btn">Archive Expired</button>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <a href="{% url 'analytics' %}" class="analytics-btn" style="margin-right:12px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">📊 Analytics</a>
+        <button class="create-btn" onclick="goToCreatePost()">➕ Add Scholarship</button>
+      </div>
     </div>
   </header>
 
   <main class="content">
-    <div id="postsContainer" class="posts-grid"></div>
+    <div class="table-wrap">
+      <table id="postsTable" class="posts-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Deadline</th>
+            <th>Applicants</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="postsContainer">
+          <!-- rows injected by posts2.js -->
+        </tbody>
+      </table>
+    </div>
   </main>
 
   <div id="confirmDialog" class="dialog hidden">
