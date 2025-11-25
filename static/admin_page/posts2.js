@@ -40,7 +40,7 @@ async function fetchPosts() {
     window._adminPosts = data.data;
     renderTableRows(data.data);
   } else {
-    postsContainer.innerHTML = `<tr class="empty-row"><td colspan="6" class="empty">No posts found.</td></tr>`;
+    postsContainer.innerHTML = `<tr class="empty-row"><td colspan="5" class="empty">No posts found.</td></tr>`;
   }
 }
 
@@ -53,7 +53,6 @@ function renderTableRows(posts) {
     const countdownId = `countdown-${post.id}`;
     const postedAgoId = `posted-${post.id}`;
 
-    const amount = post.amount || post.salary || post.stipend || "-";
     const applicants = post.applicants != null ? post.applicants : "-";
     const status = post.status || (deadlineDate && deadlineDate < new Date() ? 'expired' : 'active');
 
@@ -66,7 +65,6 @@ function renderTableRows(posts) {
           <div class="title-sub">${(post.location || '')}</div>
         </div>
       </td>
-      <td class="td-amount">${amount}</td>
       <td class="td-deadline" id="${countdownId}">${post.deadline || 'N/A'}</td>
       <td class="td-applicants">${applicants}</td>
       <td class="td-status"><span id="status-${post.id}" class="status-pill ${status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'neutral'}">${status}</span></td>
