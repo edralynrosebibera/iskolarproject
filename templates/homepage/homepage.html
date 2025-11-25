@@ -120,17 +120,21 @@
 
       <!-- Scholarship Cards (Django preloaded) -->
       <div class="scholarships-grid">
-          <div class="scholarship-card">
-            <h3 class="scholarship-title">{{ post.title }}</h3>
-            <p class="scholarship-description">{{ post.description }}</p>
-            <p><strong>📍 Location:</strong> {{ post.location }}</p>
-            <p><strong>🗓️ Deadline:</strong> {{ post.deadline }}</p>
-            <a href="${post.scholarship_link}" target="_blank" class="view-link">View Scholarship</a>
-          </div>
+        {% if posts and posts|length > 0 %}
+          {% for post in posts %}
+            <div class="scholarship-card">
+              <h3 class="scholarship-title">{{ post.title }}</h3>
+              <p class="scholarship-description">{{ post.description }}</p>
+              <p><strong>📍 Location:</strong> {{ post.location }}</p>
+              <p><strong>🗓️ Deadline:</strong> {{ post.deadline }}</p>
+              <a href="{{ post.scholarship_link }}" target="_blank" class="view-link">View Scholarship Details</a>
+            </div>
+          {% endfor %}
+        {% else %}
           <div class="empty">
             <p>No scholarships available yet.</p>
-          </div>  
-        
+          </div>
+        {% endif %}
       </div>
     </div>
     

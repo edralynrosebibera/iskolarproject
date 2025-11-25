@@ -5,6 +5,17 @@ const deleteBtn = document.getElementById("deleteBtn");
 let deleteId = null;
 const searchInput = document.getElementById("searchInput");
 const archiveBtn = document.getElementById("archiveExpired");
+let archiveFilterActive = false;
+
+// CSRF helper for Django: read csrftoken cookie
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+const csrftoken = getCookie('csrftoken');
 
 function goToCreatePost() {
   window.location.href = "/admin-page/create-post/";
@@ -47,6 +58,7 @@ function renderTableRows(posts) {
     const status = post.status || (deadlineDate && deadlineDate < new Date() ? 'expired' : 'active');
 
     const tr = document.createElement('tr');
+    tr.setAttribute('data-id', '${post.id}');
     tr.innerHTML = `
       <td class="td-title">
         <div class="title-line">
@@ -57,7 +69,7 @@ function renderTableRows(posts) {
       <td class="td-amount">${amount}</td>
       <td class="td-deadline" id="${countdownId}">${post.deadline || 'N/A'}</td>
       <td class="td-applicants">${applicants}</td>
-      <td class="td-status"><span class="status-pill ${status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'neutral'}">${status}</span></td>
+      <td class="td-status"><span id="status-${post.id}" class="status-pill ${status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'neutral'}">${status}</span></td>
       <td class="td-actions">
         <button class="icon-btn edit" title="Edit" data-tooltip="Edit" onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')" aria-label="Edit">
           <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -79,7 +91,7 @@ function renderTableRows(posts) {
     `;
 
     postsContainer.appendChild(tr);
-    startTimers(postedAgoId, countdownId, postedDate, deadlineDate);
+    startTimers(postedAgoId, countdownId, postedDate, deadlineDate, post.id);
   });
 }
 
@@ -92,7 +104,7 @@ function formatTime(ms) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-function startTimers(postedId, remainingId, postedDate, deadlineDate) {
+function startTimers(postedId, remainingId, postedDate, deadlineDate, postId) {
   function update() {
     const postedEl = document.getElementById(postedId);
     const remainingEl = document.getElementById(remainingId);
@@ -106,8 +118,18 @@ function startTimers(postedId, remainingId, postedDate, deadlineDate) {
     if (remainingEl && deadlineDate) {
       const diffDeadline = deadlineDate - now;
       if (diffDeadline <= 0) {
+        // mark as expired in UI (show archived status locally)
         remainingEl.textContent = "Expired";
         remainingEl.classList.add("expired");
+
+        // update status pill to archived (local UI only)
+        if (postId) {
+          const statusEl = document.getElementById(`status-${postId}`);
+          if (statusEl) {
+            statusEl.textContent = 'archived';
+            statusEl.className = 'status-pill expired';
+          }
+        }
       } else {
         remainingEl.textContent = `Remaining ${formatTime(diffDeadline)}`;
         const daysLeft = Math.floor(diffDeadline / (1000 * 60 * 60 * 24));
@@ -137,13 +159,28 @@ cancelBtn.onclick = () => {
 
 deleteBtn.onclick = async () => {
   if (!deleteId) return;
-  const res = await fetch(`/admin-page/delete-post/${deleteId}/`, { method: "DELETE" });
-  const data = await res.json();
-  if (data.success) {
+  const res = await fetch(`/admin-page/delete-post/${deleteId}/`, {
+    method: "DELETE",
+    headers: {
+      'X-CSRFToken': csrftoken,
+      'Content-Type': 'application/json'
+    },
+    credentials: 'same-origin'
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    console.error('Delete failed', res.status, res.statusText, text);
+    alert(`Delete failed: ${res.status} ${res.statusText}\n${text}`);
+    return;
+  }
+
+  const data = await res.json().catch(() => null);
+  if (data && data.success) {
     dialog.classList.add("hidden");
     fetchPosts();
   } else {
-    alert("Failed to delete post: " + data.error);
+    console.error('Delete response not success', data);
+    alert('Failed to delete post: ' + (data && data.error ? data.error : 'unknown error'));
   }
 };
 
@@ -180,21 +217,38 @@ if (searchInput) {
 
 // archive expired (client-side toggle or endpoint call if exists)
 if (archiveBtn) {
+  // Toggle client-side filter: show only archived/expired posts when active
   archiveBtn.addEventListener('click', async () => {
-    // try server endpoint, fallback to client-side filter UI
-    try {
-      const res = await fetch('/admin-page/archive-expired/', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) fetchPosts();
-      else alert(data.error || 'Could not archive expired posts');
-    } catch (err) {
-      // client-side: remove expired from view
-      const all = window._adminPosts || [];
-      const remaining = all.filter(p => {
-        const d = p.deadline ? new Date(p.deadline) : null;
-        return !(d && d < new Date());
-      });
-      renderTableRows(remaining);
+    archiveFilterActive = !archiveFilterActive;
+    const all = window._adminPosts || [];
+    if (archiveFilterActive) {
+      // change button label to allow returning to full list
+      archiveBtn.textContent = 'Show All';
+      archiveBtn.classList.add('active');
+
+      const now = new Date();
+      // Filter posts that are expired (deadline passed) or already marked archived
+      const filtered = all
+        .filter(p => {
+          const deadlineDate = p.deadline ? new Date(p.deadline) : null;
+          const isExpired = deadlineDate && deadlineDate < now;
+          const isArchived = p.status && p.status.toLowerCase() === 'archived';
+          return isExpired || isArchived;
+        })
+        .map(p => {
+          // present expired items as archived in the UI
+          const np = Object.assign({}, p);
+          const deadlineDate = np.deadline ? new Date(np.deadline) : null;
+          if (deadlineDate && deadlineDate < now) np.status = 'archived';
+          return np;
+        });
+
+      renderTableRows(filtered);
+    } else {
+      // restore full list
+      archiveBtn.textContent = 'Archive Expired';
+      archiveBtn.classList.remove('active');
+      renderTableRows(all);
     }
   });
 }

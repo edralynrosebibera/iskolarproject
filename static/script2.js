@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
       query = query.eq('is_archived', false);
     }
 
-    const { data: posts, error } = await query;
+    let { data: posts, error } = await query;
 
     if (error) {
       console.error('Error loading posts:', error);
@@ -124,6 +124,25 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!posts || posts.length === 0) {
       scholarshipsContainer.innerHTML = `<div class="empty"><p>No scholarships available yet.</p></div>`;
       return;
+    }
+    // If we're on the homepage (not saved, applications, or archives),
+    // automatically archive any posts whose deadline already passed so
+    // they won't appear on the homepage but will be available on /archives.
+    // This updates Supabase and removes them from the local posts array.
+    if (path && !path.includes('/saved_scholarships') && !path.includes('/archives') && !path.includes('/applications')) {
+      try {
+        const now = new Date();
+        const expired = posts.filter(p => p.deadline && new Date(p.deadline) < now && !p.is_archived);
+        if (expired.length > 0) {
+          console.info(`Auto-archiving ${expired.length} expired post(s)`);
+          // mark them archived in the DB in parallel
+          await Promise.all(expired.map(p => updatePostStatus(p.id, { is_archived: true })));
+          // remove expired posts from the local list so they don't render on homepage
+          posts = posts.filter(p => !(p.deadline && new Date(p.deadline) < now));
+        }
+      } catch (err) {
+        console.error('Error auto-archiving expired posts:', err);
+      }
     }
 
     scholarshipsContainer.innerHTML = posts
