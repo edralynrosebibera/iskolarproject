@@ -1,0 +1,91 @@
+/* Scoped styles for applications card layout — tuned to match the provided screenshot */
+
+:root{
+  --page-bg: #eaf6ff;
+  --heading: #0b3b57;
+  --muted: #6b7a86;
+  --accent: #00a3d6;
+  --accent-dark: #007ea7;
+  --card-bg: #ffffff;
+}
+
+.cards-container{
+  padding: 96px 36px 48px;
+  background: var(--page-bg);
+}
+
+.cards-hero{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:18px; }
+.cards-hero-left{ display:flex; gap:16px; align-items:flex-start; }
+.hero-icon{ width:44px; height:44px; color:var(--accent); flex-shrink:0; }
+.cards-hero h1{ font-size:28px; margin:0; color:var(--heading); }
+.hero-sub{ margin:6px 0 0 0; color:var(--muted); font-size:14px; }
+
+.cards-tabs{ display:flex; gap:14px; align-items:center; margin:18px 0 6px 0; background: rgba(255,255,255,0.65); padding:8px; border-radius:14px; }
+.cards-tab{ background:transparent; border:none; padding:10px 18px; border-radius:10px; font-weight:600; color:var(--muted); cursor:pointer; }
+.cards-tab.active{ background:var(--card-bg); color:var(--heading); box-shadow:0 6px 18px rgba(4,120,160,0.06); }
+
+.cards-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:20px; margin-top:10px; align-items:stretch; }
+
+.cards-card{ position:relative; background:var(--card-bg); border-radius:12px; padding:20px 20px 22px 20px; box-shadow:0 6px 18px rgba(12,58,86,0.05); display:flex; flex-direction:column; }
+.cards-card:hover{ transform: translateY(-3px); transition: transform 180ms ease; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.card-title{ font-size:20px; margin:0; color:var(--accent-dark); font-weight:700; }
+
+.card-right{ display:flex; align-items:center; gap:8px; }
+.card-actions{ display:flex; gap:10px; align-items:center; }
+.card-actions button{ background:transparent; border:none; cursor:pointer; font-size:18px; }
+
+.card-status{ display:inline-block; padding:6px 10px; border-radius:16px; font-weight:700; font-size:13px; }
+.card-status.pending{ background:#dff3fb; color:#0b6b86; }
+.card-status.review{ background:var(--accent); color:white; }
+.card-status.accepted{ background:#166534; color:white; }
+.card-status.rejected{ background:#d02020; color:white; }
+
+/* card-icons removed — actions hidden in the compact applications view */
+
+.card-tags{ display:flex; gap:8px; margin:10px 0; }
+.chip{ background:#dbeafe; color:#0369a1; padding:4px 8px; border-radius:999px; font-size:12px; }
+
+.card-desc{ color:#5b6b73; font-size:14px; line-height:1.5; margin:6px 0 10px 0; }
+
+.card-meta{ list-style:none; padding:0; margin:0 0 14px 0; display:flex; flex-direction:column; gap:8px; color:var(--muted); font-size:14px; }
+.card-meta li{ display:flex; align-items:center; gap:8px; }
+.card-meta .meta-money strong{ color:var(--accent-dark); font-weight:700; }
+
+.card-cta{ display:block; background:var(--accent); color:#fff; padding:12px 18px; border-radius:10px; text-align:center; font-weight:700; text-decoration:none; margin-top:auto; font-size:15px; }
+.card-cta:hover{ background:var(--accent-dark); }
+
+/* location and due styles */
+.meta-icon { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; font-size:14px; }
+.location-icon { color: #0b3b57; }
+.meta-location { color: #0b3b57; font-weight:600; }
+.meta-location .meta-location-text { font-weight:500; color:#25303a; margin-left:6px; }
+.due-icon { color: inherit; background: transparent; border: none; padding:0; font-size:13px; line-height:1; }
+.meta-due {
+  color: #e54676; /* match homepage pink */
+  font-weight:600;
+  font-size:0.9rem;
+  border-radius:8px;
+  display:inline-block;
+  margin-top:5px;
+  margin-bottom:5px;
+}
+.meta-due .meta-due-text { color:inherit; margin-left:6px; font-weight:600; }
+
+/* ensure inline SVGs size and inherit color */
+.meta-icon svg { width: 16px; height: 16px; display:block; }
+.money-icon { color: var(--accent-dark); }
+.applied-icon { color: #6b7a86; }
+
+
+/* position small bookmark icon top-right like screenshot */
+.cards-card .bookmark{ position:absolute; top:18px; right:18px; width:18px; height:18px; background:#0047AB; border-radius:2px; }
+
+@media (max-width: 980px){
+  .cards-grid{ grid-template-columns: 1fr; }
+  .cards-hero{ flex-direction:column; align-items:flex-start; }
+}
+
+/* Hidden state for filtered cards */
+.cards-card.hidden { display: none !important; }

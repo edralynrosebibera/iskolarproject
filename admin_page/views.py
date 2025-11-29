@@ -7,6 +7,8 @@ import json
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from datetime import datetime # <--- ADD THIS
+from django.contrib import messages
+
 
 # Initialize Supabase
 url: str = settings.SUPABASE_URL
@@ -139,10 +141,12 @@ def create_description(request):
 
 def view_description(request, post_id):
     return render(request, "admin_page/view.html", {
-        "user_email": request.session.get("user_email", ""),  # ✅ send user email
-        "user_fullname": request.session.get("user_fullname", ""),
-        "user_id": request.session.get("user_id", "")
+        "django_user_id": request.session.get("user_id"),
+        "django_user_email": request.session.get("user_email"),
+        "django_user_name": request.session.get("user_fullname"),
     })
+
+
 
 # Example: get all submissions for a post
 def get_submissions(request, post_id):
@@ -208,3 +212,54 @@ def analytics_view(request):
         return render(request, "admin_page/analytics.html", {
             'active_count': 0, 'total_count': 0, 'user_count': 0
         })
+
+
+
+@csrf_exempt
+def submit_requirements(request, post_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+    try:
+        body = request.body.decode("utf-8")
+        data = json.loads(body)
+
+        user_id = data.get("user_id")
+        reqs = data.get("requirements", [])
+
+        if not user_id:
+            return JsonResponse({"success": False, "error": "Missing user ID"}, status=400)
+
+        # 1. FIND OR CREATE APPLICATION
+        existing = supabase.table("applications") \
+            .select("id") \
+            .eq("user_id", str(user_id)) \
+            .eq("post_id", str(post_id)) \
+            .limit(1) \
+            .execute()
+
+        if existing.data:
+            application_id = existing.data[0]["id"]
+        else:
+            new_app = supabase.table("applications").insert({
+                "user_id": str(user_id),
+                "post_id": str(post_id),
+                "status": "Pending"
+            }).execute()
+
+            application_id = new_app.data[0]["id"]
+
+        # 2. SAVE EACH FILE
+        for req in reqs:
+            supabase.table("application_files").insert({
+                "application_id": application_id,
+                "requirement_name": req["name"],
+                "file_url": req["file_url"],
+            }).execute()
+
+        # 3. 🔥 Return redirect so fetch() detects it
+        return redirect("/applications/")
+
+    except Exception as e:
+        print("SUBMIT ERROR:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)

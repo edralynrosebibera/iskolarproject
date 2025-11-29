@@ -42,33 +42,31 @@
 
   <!-- User info passed from Django session -->
   <script>
-    const loggedInUser = {
-      id: "{{ user_id|escapejs }}",
-      name: "{{ user_fullname|escapejs }}",
-      email: "{{ user_email|escapejs }}"
-    };
+  window.loggedInUser = {
+    id: "{{ django_user_id|escapejs }}",
+    name: "{{ django_user_name|escapejs }}",
+    email: "{{ django_user_email|escapejs }}"
+  };
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const backBtn = document.getElementById("backBtn");
+  document.addEventListener("DOMContentLoaded", () => {
+    const backBtn = document.getElementById("backBtn");
 
-      if (!backBtn) {
-        console.error("❌ Back button not found!");
-        return;
+    if (!backBtn) {
+      console.error("❌ Back button not found!");
+      return;
+    }
+
+    backBtn.addEventListener("click", () => {
+      console.log("🔎 Logged in user email:", window.loggedInUser.email);
+
+      if (window.loggedInUser.email === "iskolarAdmin@gmail.com") {
+        window.location.href = "/admin-page/description-posts/";
+      } else {
+        window.location.href = "/homepage/";
       }
-
-      backBtn.addEventListener("click", () => {
-        console.log("🔎 Logged in user email:", loggedInUser.email);
-
-        if (loggedInUser.email === "iskolarAdmin@gmail.com") {
-          // 👑 Admin goes to posts
-          window.location.href = "/admin-page/description-posts/";
-        } else {
-          // 👤 Regular user goes to homepage
-          window.location.href = "/homepage/";
-        }
-      });
     });
-  </script>
+  });
+</script>
 
 
   <!-- Supabase SDK -->

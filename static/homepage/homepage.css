@@ -228,13 +228,13 @@ body {
 /* Profile Dropdown */
 .profile-dropdown {
   position: absolute;
-  top: 60px;
-  right: 10px;
+  top: 64px;
+  right: 14px;
   background: #fff;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  width: 320px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  border: 1px solid #eef3f6;
+  border-radius: 12px;
+  width: 220px; /* compact width to match screenshot */
+  box-shadow: 0 12px 30px rgba(16,24,40,0.08);
   display: none;
   z-index: 1000;
   padding: 0;
@@ -244,28 +244,28 @@ body {
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 24px 16px 24px;
-  background: #f7fafd;
-  border-bottom: 1px solid #eee;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f7fbfd;
+  border-bottom: 1px solid #f0f6f8;
 }
 
 .profile-header .avatar {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .profile-name {
   font-weight: 700;
-  font-size: 18px;
-  color: #222;
+  font-size: 16px;
+  color: #0f1724;
 }
 
 .profile-email {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 
@@ -276,66 +276,72 @@ body {
 }
 
 .profile-menu li {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f2f6f8;
 }
 
 .profile-menu li a {
-  display: block;
-  padding: 14px 24px 8px 24px;
-  color: #222;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #111827;
   text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.12s;
 }
 
 .profile-menu li a .icon {
-  margin-right: 8px;
-  font-size: 18px;
-  vertical-align: middle;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
 }
 
 .profile-menu li a small {
   display: block;
-  color: #888;
+  color: #8b97a3;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
   margin-top: 2px;
 }
 
 .profile-menu li a:hover {
-  background: #f7fafd;
+  background: #f5fbfc;
 }
 
 .logout-link {
   display: block;
-  padding: 14px 24px 14px 24px;
-  color: #000000;
+  padding: 10px 14px 12px 14px;
+  color: #111827;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 16px;
-  border-top: 1px solid #f0f0f0;
-  transition: background 0.2s;
+  font-weight: 700;
+  font-size: 15px;
+  border-top: 1px solid #f2f6f8;
+  transition: background 0.12s;
 }
 
 .logout-link .icon {
   margin-right: 8px;
-  font-size: 18px;
+  font-size: 16px;
   vertical-align: middle;
 }
 
 .logout-link small {
   display: block;
-  color: #888;
+  color: #8b97a3;
   font-size: 12px;
   font-weight: 400;
   margin-top: 2px;
 }
 
-.logout-link:hover {
-  color: #d32f2f;
- 
-}
+.logout-link.danger { color: #e11d48; }
+
+.logout-link.danger .icon { color: #e11d48; }
+
+.profile-dropdown hr { margin: 8px 0; border: none; border-top: 1px solid #f2f6f8; }
 
 /* Sidebar Styles */
 .sidebar-overlay {
@@ -884,16 +890,17 @@ html {
 
 
 .welcome-box {
-  background: url('/static/homepage/sample.jpg') center/cover no-repeat;
-  border-radius: 10px;
-  padding: 100px 40px;
-  text-align: center;
-  color: white;
-  position: relative;
-  overflow: hidden;
-  margin: -20px;
-  margin-bottom: 20px;
-  
+    /* Use correct static path for the sample background image */
+    background: url('/static/images/sample.jpg') center/cover no-repeat;
+    background-size: cover;
+    border-radius: 10px;
+    padding: 100px 40px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin: -20px;
+    margin-bottom: 20px;
 }
 
 .welcome-box::after {

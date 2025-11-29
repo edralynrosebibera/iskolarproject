@@ -19,9 +19,11 @@ urlpatterns = [
     # Optional advanced endpoints
     path("get-submissions/<uuid:post_id>/", views.get_submissions, name="get_submissions"),
     path("save-description/", views.save_description, name="save_description"),
+    path("submit-requirements/<uuid:post_id>/", views.submit_requirements, name="submit_requirements"),
 
 
 
     path("analytics/", views.analytics_view, name="analytics"),
+
 ]
 

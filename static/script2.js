@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', function () {
           </div>
 
           <!-- ✅ always show button -->
-          <a href="${safeLink}" target="_blank" class="view-link">View Scholarship Details</a>
+<a href="/admin-page/view-description/${post.id}/" class="view-link">
+    View Scholarship Details
+</a>
         </div>
       `;
       })
@@ -460,11 +462,10 @@ document.addEventListener('click', async function (e) {
   // APPLY
   if (applyBtn) {
     const id = applyBtn.dataset.id;
-    const ok = await updatePostStatus(id, { is_applied: true });
-    if (ok) {
-      showToast('Applied!', 'success');
-      window.location.href = '/applications/';
-    }
+    // Redirect to the scholarship details page so the user can submit
+    // requirements there (the submission endpoint will create the
+    // application record). Do not mark as applied here.
+    window.location.href = `/admin-page/view-description/${id}/?from=apply`;
   }
 
   // ARCHIVE

@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
     <link rel="stylesheet" href="{% static 'applications.css' %}?v4">
+    <link rel="stylesheet" href="{% static 'applications_cards.css' %}">
 </head>
 <body>
     <!-- Header -->
@@ -106,51 +107,164 @@
         </a>
     </nav>
 
-    <!-- Saved Scholarships Section -->
-    <div class="saved-scholarships-container">
-
-        <h2 class="section-title">
-            <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-            </svg>
-            Applied Scholarships
-        </h2>
-        <p class="section-subtitle">Manage and view your applied scholarship opportunities.</p>
-
-        
-        <!-- Dynamic scholarship list -->
-        <div class="saved-scholarships-grid">
-            {% for post in posts %}
-                <div class="scholarship-card">
-                    <div class="scholarship-header">
-                        <h3 class="scholarship-title">{{ post.title }}</h3>
-                        <div class="detail-icons">
-                            <div class="detail-icon-wrapper" data-tooltip="Saved Scholarship">
-                                <svg class="detail-icon" viewBox="0 0 24 24" fill="blue" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-                    <p class="scholarship-description">{{ post.description }}</p>
-
-                    <div class="scholarship-meta">
-                        <div class="meta-item meta-deadline">🕒 {{ post.deadline }}</div>
-                        <div class="meta-item meta-location">📍 {{ post.location }}</div>
-                    </div>
-
-        <a href="{{ post.scholarship_link }}" target="_blank" class="btn-view">View Scholarship Details</a>
+    <!-- Applications (card layout) -->
+    <main class="cards-container">
+        <section class="cards-hero">
+            <div class="cards-hero-left">
+                <svg class="hero-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
+                </svg>
+                <div>
+                    <h1>My Applications</h1>
+                    <p class="hero-sub">Track your scholarship applications and their status</p>
                 </div>
+            </div>
+            <div class="cards-tabs" role="tablist" aria-label="Application status tabs">
+                <button class="cards-tab active" data-status="all" role="tab" aria-selected="true">All ({{ posts|length }})</button>
+                <button class="cards-tab" data-status="pending" role="tab">Pending ({{ pending_count|default:0 }})</button>
+                <button class="cards-tab" data-status="review" role="tab">Review ({{ review_count|default:0 }})</button>
+                <button class="cards-tab" data-status="accepted" role="tab">Accepted ({{ accepted_count|default:0 }})</button>
+                <button class="cards-tab" data-status="rejected" role="tab">Rejected ({{ rejected_count|default:0 }})</button>
+            </div>
+        </section>
+
+        <section class="cards-grid">
+            {% for post in posts %}
+            <article class="cards-card" data-status="{{ post.status|default:'pending' }}">
+                <div class="card-head">
+                    <h2 class="card-title">{{ post.title }}</h2>
+                    <div class="card-right">
+                        <span class="card-status {{ post.status|default:'pending' }}">{{ post.status|default:'Pending' }}</span>
+                    </div>
+                </div>
+
+                <div class="card-tags">
+                    {% for tag in post.tags.all|default:'' %}
+                        <span class="chip">{{ tag.name }}</span>
+                    {% empty %}
+                        {% if post.tag_list %}{% for t in post.tag_list %}<span class="chip">{{ t }}</span>{% endfor %}{% endif %}
+                    {% endfor %}
+                </div>
+
+                <p class="card-desc">{{ post.description }}</p>
+
+                <ul class="card-meta">
+                    <li class="meta-location">
+                        <span class="meta-icon location-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+                        </span>
+                        <span class="meta-location-text">Location: {{ post.location|default:'Location not set' }}</span>
+                    </li>
+
+                    <li class="meta-due" data-deadline="{{ post.deadline|date:'c' }}">
+                        <span class="meta-icon due-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V9h14v9z"/></svg>
+                        </span>
+                        <span class="meta-due-text">Due {{ post.deadline|date:'F j, Y' }}</span>
+                    </li>
+
+                    <li class="meta-money">
+                        <span class="meta-icon money-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1v2.07A7 7 0 0 0 9 5.91 7 7 0 0 0 12 7a7 7 0 0 0 3-1.09V1h-3zM6 9v6a6 6 0 0 0 6 6v-2a4 4 0 0 1-4-4V9H6zm12 0h-2v6a4 4 0 0 1-4 4v2a6 6 0 0 0 6-6V9z"/></svg>
+                        </span>
+                        <strong>{{ post.amount|default:'—' }}</strong>
+                    </li>
+
+                    <li class="meta-applied">
+                        <span class="meta-icon applied-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm8 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                        </span>
+                        {{ post.applied_count|default:0 }} applied
+                    </li>
+                </ul>
+
+                <a class="card-cta" href="{{ post.get_absolute_url|default:post.scholarship_link }}">View Scholarship Details</a>
+            </article>
             {% empty %}
-                <p>No saved scholarships yet.</p>
+                <p class="no-cards">You have no applications yet.</p>
             {% endfor %}
-        </div>
-    </div>
+        </section>
+    </main>
 
    <script src="{% static 'appscript.js' %}"></script>
     <script src="{% static 'script2.js' %}"></script>
+        <script>
+        // Countdown "Due in ..." update for each card
+        (function(){
+            function pad(n){return n<10?('0'+n):n}
+            function updateCountdown(el){
+                var dl = el.getAttribute('data-deadline');
+                if(!dl) return;
+                var d = new Date(dl);
+                if(isNaN(d)) return;
+                var now = new Date();
+                var diff = d - now;
+                var textEl = el.querySelector('.meta-due-text');
+                if(diff <= 0){
+                    // past due: show date
+                    textEl.textContent = 'Due ' + d.toLocaleDateString();
+                    return;
+                }
+                var secs = Math.floor(diff/1000);
+                var days = Math.floor(secs/86400); secs -= days*86400;
+                var hrs = Math.floor(secs/3600); secs -= hrs*3600;
+                var mins = Math.floor(secs/60); secs -= mins*60;
+                // Format like: 'Due in 1d 17h 33m 55s'
+                var parts = [];
+                if(days>0) parts.push(days+'d');
+                if(hrs>0 || days>0) parts.push(hrs+'h');
+                parts.push(mins+'m');
+                parts.push(secs+'s');
+                textEl.textContent = 'Due in ' + parts.join(' ');
+            }
+
+            function tick(){
+                var nodes = document.querySelectorAll('.meta-due');
+                nodes.forEach(function(n){ updateCountdown(n); });
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                tick();
+                setInterval(tick, 1000);
+            });
+        })();
+        </script>
+        <script>
+        // Tabs: client-side filtering of .cards-card by data-status
+        (function(){
+            function activateTab(tab){
+                document.querySelectorAll('.cards-tab').forEach(function(t){
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+            }
+
+            function filterCards(status){
+                var cards = document.querySelectorAll('.cards-card');
+                cards.forEach(function(card){
+                    var s = (card.getAttribute('data-status') || '').toLowerCase();
+                    if(status === 'all' || s === status){
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                var tabs = document.querySelectorAll('.cards-tab');
+                tabs.forEach(function(tab){
+                    tab.addEventListener('click', function(){
+                        var status = (tab.getAttribute('data-status') || 'all').toLowerCase();
+                        activateTab(tab);
+                        filterCards(status);
+                    });
+                });
+            });
+        })();
+        </script>
     
 </body>
 </html>

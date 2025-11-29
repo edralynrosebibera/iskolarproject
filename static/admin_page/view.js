@@ -2,6 +2,8 @@
 const supabaseUrl = "https://ionsrqiqludrojmpbhfa.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvbnNycWlxbHVkcm9qbXBiaGZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTIxNjYsImV4cCI6MjA3NDM4ODE2Nn0.RTrfB5Og1gDARYQGDb6maqekH6DHfZykP55FGAY8gDs";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+// --- LOAD LOGGED-IN USER FROM DJANGO ---
+
 
 // --- GET POST ID FROM URL ---
 const pathParts = window.location.pathname.split("/");
@@ -47,20 +49,6 @@ async function loadDescription() {
 }
 
 // --- RENDER SECTIONS ---
-// function renderSections(sections) {
-//   container.innerHTML = "";
-
-//   sections.forEach((sec) => {
-//     const div = document.createElement("div");
-//     div.className = `view-box tint-${sec.color || "gray"}`;
-//     div.innerHTML = `
-//       <h2>${sec.title || ""}</h2>
-//       <p>${(sec.description || "").replace(/\n/g, "<br>")}</p>
-//     `;
-//     container.appendChild(div);
-//   });
-// }
-
 function renderSections(sections) {
   const container = document.getElementById("contentContainer");
   container.innerHTML = "";
@@ -69,11 +57,9 @@ function renderSections(sections) {
     const validColors = ["blue", "pink", "green", "orange", "purple", "gray"];
     const colorClass = validColors.includes(sec.color) ? sec.color : "gray";
 
-    // Outer box (white frame)
     const wrapper = document.createElement("div");
     wrapper.className = "view-box";
 
-    // Inner tinted section
     const tinted = document.createElement("div");
     tinted.className = `tint-${colorClass}`;
     tinted.style.padding = "16px";
@@ -89,7 +75,6 @@ function renderSections(sections) {
   });
 }
 
-
 // --- RENDER REQUIREMENTS ---
 function renderRequirements(reqs) {
   requirementsContainer.innerHTML = "";
@@ -100,7 +85,11 @@ function renderRequirements(reqs) {
     return;
   }
 
-  requirements = reqs.map((r) => ({ name: r.name, uploaded: false }));
+  requirements = reqs.map((r) => ({
+    name: r.name,
+    uploaded: false,
+    file_url: null
+  }));
 
   reqs.forEach((r, i) => {
     const row = document.createElement("div");
@@ -131,55 +120,7 @@ function selectFile(i) {
   });
 }
 
-// // --- UPLOAD TO SUPABASE STORAGE ---
-// async function uploadFile(i, file) {
-//   const req = requirements[i];
-//   const filePath = `post_${postId}/${Date.now()}_${file.name}`;
-//   const status = document.getElementById(`status-${i}`);
-//   const uploadBtn = document.querySelectorAll(".upload-btn")[i];
-
-//   uploadBtn.disabled = true;
-//   status.textContent = "⏳ Uploading...";
-
-//   try {
-//     const { error: uploadError } = await supabase.storage
-//       .from("student_uploads")
-//       .upload(filePath, file);
-
-//     if (uploadError) throw uploadError;
-
-//     const { data: urlData } = supabase.storage
-//       .from("student_uploads")
-//       .getPublicUrl(filePath);
-
-//     await supabase.from("submissions").insert([
-//       {
-//         post_id: postId,
-//         requirement_name: req.name,
-//         file_url: urlData.publicUrl,
-//         student_id: loggedInUser?.id || null,
-//         student_name: loggedInUser?.name || "Unknown User",
-//         student_email: loggedInUser?.email || null,
-//         uploaded_at: new Date().toISOString()
-//       },
-//     ]);
-
-//     req.uploaded = true;
-//     status.textContent = `✅ Uploaded: ${file.name}`;
-//     uploadBtn.textContent = "Uploaded";
-//     uploadBtn.disabled = true;
-//     req.file_url = urlData.publicUrl;
-//     document.getElementById(`viewBtn-${i}`).style.display = "inline-block";
-//     document.getElementById(`deleteBtn-${i}`).style.display = "inline-block";
-//     updateProgress();
-//   } catch (err) {
-//     console.error("Upload error:", err);
-//     status.textContent = "❌ Upload failed.";
-//     uploadBtn.disabled = false;
-//   }
-// }
-
-
+// --- UPLOAD FILE ---
 async function uploadFile(i, file) {
   const req = requirements[i];
   const filePath = `post_${postId}/${Date.now()}_${file.name}`;
@@ -201,25 +142,29 @@ async function uploadFile(i, file) {
       .getPublicUrl(filePath);
 
     const fileUrl = urlData.publicUrl;
-    req.uploaded = true;
-    req.file_url = fileUrl; // ✅ important!
 
-    // show buttons
+    req.uploaded = true;
+    req.file_url = fileUrl;
+
     document.getElementById(`viewBtn-${i}`).style.display = "inline-block";
     document.getElementById(`deleteBtn-${i}`).style.display = "inline-block";
 
-    // store metadata
-    await supabase.from("submissions").insert([
-      {
-        post_id: postId,
-        requirement_name: req.name,
-        file_url: fileUrl,
-        student_id: loggedInUser?.id || null,
-        student_name: loggedInUser?.name || "Unknown User",
-        student_email: loggedInUser?.email || null,
-        uploaded_at: new Date().toISOString()
-      },
-    ]);
+   const { data: insertData, error: insertError } = await supabase
+  .from("submissions")
+  .insert([{
+    post_id: postId,
+    requirement_name: req.name,
+    file_url: fileUrl,
+    student_id: window.loggedInUser?.id || null,
+    student_name: window.loggedInUser?.name || "Unknown User",
+    student_email: window.loggedInUser?.email || null,
+    uploaded_at: new Date().toISOString()
+  }]);
+
+console.log("📤 SUBMISSIONS INSERT DATA:", insertData);
+console.log("❌ SUBMISSIONS INSERT ERROR:", insertError);
+
+
 
     status.textContent = `✅ Uploaded: ${file.name}`;
     uploadBtn.textContent = "Uploaded";
@@ -234,36 +179,28 @@ async function uploadFile(i, file) {
 
 function viewFile(i) {
   const req = requirements[i];
-  if (!req.file_url) {
-    alert("No file to view yet.");
-    return;
-  }
+  if (!req.file_url) return alert("No file to view yet.");
   window.open(req.file_url, "_blank");
 }
 
 async function deleteFile(i) {
   const req = requirements[i];
-  if (!req.file_url) {
-    alert("No file to delete.");
-    return;
-  }
+  if (!req.file_url) return alert("No file to delete.");
 
   if (!confirm("Are you sure you want to delete this file?")) return;
 
   try {
-    // Extract file path from the URL
     const fileName = req.file_url.split("/").pop();
     await supabase.storage.from("student_uploads").remove([`post_${postId}/${fileName}`]);
 
-    // Delete record from submissions table
     await supabase.from("submissions")
       .delete()
       .eq("post_id", postId)
       .eq("requirement_name", req.name);
 
-    // Reset UI state
     req.uploaded = false;
     req.file_url = null;
+
     document.getElementById(`status-${i}`).textContent = "🗑️ File deleted.";
     document.getElementById(`viewBtn-${i}`).style.display = "none";
     document.getElementById(`deleteBtn-${i}`).style.display = "none";
@@ -279,7 +216,6 @@ async function deleteFile(i) {
   }
 }
 
-
 // --- UPDATE PROGRESS BAR ---
 function updateProgress() {
   const done = requirements.filter((r) => r.uploaded).length;
@@ -290,36 +226,52 @@ function updateProgress() {
   if (progressFill) progressFill.style.width = percent + "%";
 }
 
-// --- SUBMIT ALL FILES ---
+// --- SUBMIT ALL FILES TO DJANGO ---
 document.getElementById("submitAllBtn").addEventListener("click", async () => {
   if (requirements.some(r => !r.uploaded)) {
     alert("⚠️ Please upload all required files before submitting.");
     return;
   }
 
+  const payload = {
+    post_id: postId,
+    user_id: window.loggedInUser?.id || null,   // ✅ FIXED
+    requirements: requirements.map(r => ({
+      name: r.name,
+      file_url: r.file_url
+    }))
+};
+
+
   try {
-    const { error } = await supabase
-      .from("final_submissions")
-      .insert([{
-        post_id: postId,
-        student_id: loggedInUser.id,
-        student_name: loggedInUser.name,
-        student_email: loggedInUser.email,
-        submitted_at: new Date().toISOString()
-      }]);
-
-    if (error) throw error;
-
-    document.getElementById("submitMsg").textContent =
-      "✅ All files submitted successfully!";
-  } catch (err) {
-    console.error("❌ Submit error:", err);
-    document.getElementById("submitMsg").textContent =
-      "⚠️ Submission failed.";
-  }
+    const res = await fetch(`/admin-page/submit-requirements/${postId}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
 });
 
 
+    // 🔥 FIX #1 — detect redirect BEFORE parsing JSON
+    if (res.redirected) {
+      window.location.href = res.url;
+      return;
+    }
+
+    // Parse JSON only if not redirected
+    const result = await res.json();
+
+    if (result.success) {
+      window.location.href = "/applications/";
+      return;
+    }
+
+    document.getElementById("submitMsg").textContent = "⚠️ Submission failed.";
+
+  } catch (err) {
+    console.error("❌ Submit error:", err);
+    document.getElementById("submitMsg").textContent = "⚠️ Submission failed.";
+  }
+});
 
 // --- START ---
 loadDescription();

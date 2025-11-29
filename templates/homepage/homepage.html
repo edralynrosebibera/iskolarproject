@@ -37,23 +37,24 @@
 
       <div class="header-right">
         <button class="profile-btn" id="profileToggle">
-          <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:32px;height:32px;border-radius:50%;">
+          <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:32px;height:32px;border-radius:50%;border:3px solid #33c3f0;">
         </button>
         <div class="profile-dropdown" id="profileDropdown" style="display: none;">
           <div class="profile-header">
-            <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:56px;height:56px;">
+            <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:52px;height:52px;">
             <div>
               <div class="profile-name">{{ user.first_name }}</div>
               <div class="profile-email">{{ user.email }}</div>
             </div>
           </div>
           <ul class="profile-menu">
-            <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
-            
-            <li><a href="#">Settings<br><small>Manage your preferences</small></a></li>
+            <li><a href="{% url 'view_profile' %}"><span class="icon">👤</span> View Profile<br><small>See your profile information</small></a></li>
+            <li><a href="{% url 'profile' %}"><span class="icon">👤</span> Edit Profile<br><small>Update your information</small></a></li>
+            <li><a href="#"><span class="icon">⚙️</span> Settings<br><small>Manage your preferences</small></a></li>
+            <li><a href="#" id="darkModeToggle"><span class="icon">🌙</span> Dark Mode</a></li>
           </ul>
           <hr>
-          <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
+          <a href="{% url 'login' %}" class="logout-link danger"><span class="icon">➡</span> Log Out<br><small>Sign out of your account</small></a>
         </div>
       </div>
     </div>
@@ -127,7 +128,9 @@
               <p class="scholarship-description">{{ post.description }}</p>
               <p><strong>📍 Location:</strong> {{ post.location }}</p>
               <p><strong>🗓️ Deadline:</strong> {{ post.deadline }}</p>
-              <a href="{{ post.scholarship_link }}" target="_blank" class="view-link">View Scholarship Details</a>
+<a href="/admin-page/view-description/{{ post.id }}/" class="view-link">
+    View Scholarship Details
+</a>
             </div>
           {% endfor %}
         {% else %}
@@ -140,8 +143,25 @@
     
   </main>
 
-  <script type="module" src="{% static 'script2.js' %}?v=10"></script>
- 
+  <script type="module" src="{% static 'script2.js' %}?v=12"></script>
+
+  <script>
+    // Toggle profile dropdown and close on outside click
+    (function(){
+      const toggle = document.getElementById('profileToggle');
+      const dropdown = document.getElementById('profileDropdown');
+      document.addEventListener('click', function(e){
+        if (!toggle || !dropdown) return;
+        if (toggle.contains(e.target)) {
+          dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+          return;
+        }
+        if (!dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    })();
+  </script>
 
 </body>
 </html>
