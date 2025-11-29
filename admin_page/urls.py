@@ -24,6 +24,6 @@ urlpatterns = [
 
 
     path("analytics/", views.analytics_view, name="analytics"),
-
+    path("admin-dashboard/", views.dashboard_view, name="admin_dashboard"),
 ]
 

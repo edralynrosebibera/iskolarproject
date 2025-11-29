@@ -36,8 +36,12 @@
 .card-actions{ display:flex; gap:10px; align-items:center; }
 .card-actions button{ background:transparent; border:none; cursor:pointer; font-size:18px; }
 
-.card-status{ display:inline-block; padding:6px 10px; border-radius:16px; font-weight:700; font-size:13px; }
-.card-status.pending{ background:#dff3fb; color:#0b6b86; }
+.card-status{ display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:18px; font-weight:700; font-size:13px; }
+.card-status.pending{ background:#dff3fb; color:#0b6b86; box-shadow: 0 4px 10px rgba(12,58,86,0.04); }
+
+.card-status.expired { background: #f44336; color: #fff; box-shadow: 0 6px 18px rgba(244,67,54,0.12); }
+
+.card-status.active { background: #e6ffed; color: #086a2d; box-shadow: 0 6px 18px rgba(8,106,45,0.06); }
 .card-status.review{ background:var(--accent); color:white; }
 .card-status.accepted{ background:#166534; color:white; }
 .card-status.rejected{ background:#d02020; color:white; }

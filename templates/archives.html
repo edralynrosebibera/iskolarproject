@@ -8,6 +8,32 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
     <link rel="stylesheet" href="{% static 'applications.css' %}?v4">
+    <link rel="stylesheet" href="{% static 'applications_cards.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <style>
+        /* Header layout: place filter on the same row as the title and subtitle below it */
+        .saved-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+        /* stack title, subtitle and filter in the left column and align to left */
+        .saved-header-left{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+        .saved-subtitle{margin:8px 0 18px 0;font-size:0.95rem;color:#5a6b7a}
+        .search-filter-saved{padding:6px 10px;border-radius:8px;border:1px solid #e6eef8;background:#fff;color:#0b67a4;box-shadow:0 1px 2px rgba(11,103,164,0.06);align-self:center}
+        @media (max-width:720px){
+            .saved-header-row{flex-direction:row;align-items:center}
+            .search-filter-saved{margin-top:10px}
+            .saved-subtitle{margin-top:8px}
+        }
+        /* Pill filter styles */
+        .filter-pills{display:inline-flex;gap:10px;padding:8px;border-radius:18px;background:#eaf6ff;border:1px solid #d7eefb}
+        .filter-pill{background:transparent;border:none;padding:8px 16px;border-radius:12px;color:#415a6b;font-weight:600;cursor:pointer}
+        .filter-pill:hover{background:rgba(255,255,255,0.6)}
+        .filter-pill.active{background:#fff;color:#0b67a4;box-shadow:0 6px 18px rgba(11,103,164,0.06)}
+        /* Unarchive button styling */
+        .unarchive-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;border:1px solid rgba(11,103,164,0.12);background:#fff;color:#0b67a4;cursor:pointer;margin-left:12px;box-shadow:0 4px 10px rgba(11,103,164,0.03);transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+        .unarchive-btn i{font-size:14px}
+        .unarchive-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(11,103,164,0.08);background:#f8fdff}
+        .unarchive-btn:active{transform:translateY(0)}
+        .unarchive-btn[disabled]{opacity:.6;cursor:not-allowed}
+        </style>
 </head>
 <body>
     <!-- Header -->
@@ -78,7 +104,7 @@
                 <circle cx="12" cy="8" r="7"/>
                 <polyline points="8.21,13.89 7,23 12,20 17,23 15.79,13.88"/>
             </svg>
-            Scholarships
+           Browse Scholarships
         </a>
 
         <a href="{% url 'applications' %}" class="sidebar-btn">
@@ -86,7 +112,7 @@
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                 <polyline points="14,2 14,8 20,8"/>
             </svg>
-            Applications
+           My Applications
         </a>
 
         <a href="{% url 'archives' %}" class="sidebar-btn">
@@ -95,7 +121,7 @@
                 <path d="M3 7v14h18V7z"/>
                 <line x1="10" y1="11" x2="14" y2="11"/>
             </svg>
-            Archives
+            My Archives
         </a>
 
         <a href="{% url 'saved_scholarships' %}" class="sidebar-btn active">
@@ -109,13 +135,25 @@
     <!-- Saved Scholarships Section -->
     <div class="saved-scholarships-container">
 
-        <h2 class="section-title">
-            <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-            </svg>
-            Archived Scholarships
-        </h2>
-        <p class="section-subtitle">Manage and view your archived scholarship opportunities.</p>
+        <div class="saved-header-row">
+            <div class="saved-header-left">
+                <h2 class="section-title">
+                    <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
+                    </svg>
+                    Archived Scholarships
+                </h2>
+                <p class="saved-subtitle">Manage and view your archived scholarship opportunities.</p>
+
+                <!-- Pill-style filters (replaces select) -->
+                <div class="filter-pills" role="group" aria-label="Archive filters">
+                    <button class="filter-pill active" data-status="all" aria-pressed="true">All (<span class="count" data-type="all">0</span>)</button>
+                    <button class="filter-pill" data-status="active" aria-pressed="false">Active (<span class="count" data-type="active">0</span>)</button>
+                    <button class="filter-pill" data-status="expired" aria-pressed="false">Expired (<span class="count" data-type="expired">0</span>)</button>
+                </div>
+            </div>
+        </div>
+        <!-- no header-level applications button — archives page uses same header as applications page -->
 
         
         <!-- Dynamic scholarship list -->
@@ -125,12 +163,15 @@
                     <div class="scholarship-header">
                         <h3 class="scholarship-title">{{ post.title }}</h3>
                         <div class="detail-icons">
-                            <div class="detail-icon-wrapper" data-tooltip="Saved Scholarship">
-                                <svg class="detail-icon" viewBox="0 0 24 24" fill="blue" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-                                </svg>
+                                {% if post.is_expired %}
+                                    <span class="card-status expired"><i class="fa-solid fa-calendar-xmark" aria-hidden="true" style="margin-right:8px;"></i>Expired</span>
+                                {% else %}
+                                    <span class="card-status active"><i class="fa-solid fa-circle-check" aria-hidden="true" style="margin-right:8px;"></i>Active</span>
+                                    <button class="unarchive-btn" data-id="{{ post.id }}" title="Unarchive" aria-label="Unarchive" style="margin-left:12px;">
+                                        <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+                                    </button>
+                                {% endif %}
                             </div>
-                        </div>
                     </div>
 
                     
@@ -141,7 +182,9 @@
                         <div class="meta-item meta-location">📍 {{ post.location }}</div>
                     </div>
 
-        <a href="{{ post.scholarship_link }}" target="_blank" class="btn-view">View Scholarship Details</a>
+        <div class="scholarship-actions" style="display:flex;justify-content:flex-end;">
+            <a href="/admin-page/view-description/{{ post.id }}/" class="btn-view">View Scholarship Details</a>
+        </div>
                 </div>
             {% empty %}
                 <p>No saved scholarships yet.</p>
@@ -149,8 +192,121 @@
         </div>
     </div>
 
-   <script src="{% static 'archive.js' %}"></script>
-    <script src="{% static 'script2.js' %}"></script>
-    
+        <script src="{% static 'archive.js' %}"></script>
+         <script src="{% static 'appscript.js' %}"></script>
+         <script src="{% static 'script2.js' %}"></script>
+
+        <script>
+        (function(){
+            const toggle = document.getElementById('profileToggle');
+            const dropdown = document.getElementById('profileDropdown');
+            // Toggle dropdown on avatar click, close when clicking outside
+            document.addEventListener('click', function(e){
+                if (!toggle || !dropdown) return;
+                if (toggle.contains(e.target)) {
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                    return;
+                }
+                if (!dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        })();
+        </script>
+
+        <script>
+        (function(){
+            const input = document.querySelector('.search-input');
+            if (!input) return;
+            const cards = Array.from(document.querySelectorAll('.scholarship-card'));
+            function normalize(s){ return (s||'').toLowerCase(); }
+            function filter(){
+                const q = normalize(input.value.trim());
+                function getSelectedStatus(){
+                    const activePill = document.querySelector('.filter-pill.active');
+                    if (activePill) return activePill.dataset.status;
+                    const sel = document.getElementById('filterStatus');
+                    return sel ? sel.value : 'all';
+                }
+                const status = getSelectedStatus();
+                if (!q && status === 'all') {
+                    for (const c of cards) c.style.display = '';
+                    return;
+                }
+                for (const card of cards) {
+                    const title = normalize(card.querySelector('.scholarship-title')?.textContent);
+                    const desc = normalize(card.querySelector('.scholarship-description')?.textContent);
+                    const loc = normalize(card.querySelector('.meta-location')?.textContent);
+                    const isExpired = !!card.querySelector('.card-status.expired');
+                    const matchesQuery = !q || ((title && title.includes(q)) || (desc && desc.includes(q)) || (loc && loc.includes(q)));
+                    const matchesStatus = (status === 'all') || (status === 'expired' && isExpired) || (status === 'active' && !isExpired);
+                    if (matchesQuery && matchesStatus) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            }
+            let t;
+            input.addEventListener('input', function(){
+                clearTimeout(t);
+                t = setTimeout(filter, 150);
+            });
+            // wire up pill clicks and update counts
+            function updateCounts(){
+                const allCount = cards.length;
+                let activeCount = 0, expiredCount = 0;
+                for (const c of cards){ if (c.querySelector('.card-status.expired')) expiredCount++; else activeCount++; }
+                const allSpan = document.querySelector('.count[data-type="all"]'); if (allSpan) allSpan.textContent = allCount;
+                const aSpan = document.querySelector('.count[data-type="active"]'); if (aSpan) aSpan.textContent = activeCount;
+                const eSpan = document.querySelector('.count[data-type="expired"]'); if (eSpan) eSpan.textContent = expiredCount;
+            }
+            updateCounts();
+            const pills = Array.from(document.querySelectorAll('.filter-pill'));
+            for (const p of pills){
+                p.addEventListener('click', function(){
+                    for (const x of pills){ x.classList.remove('active'); x.setAttribute('aria-pressed','false'); }
+                    p.classList.add('active'); p.setAttribute('aria-pressed','true');
+                    filter();
+                });
+            }
+            const filterSelect = document.getElementById('filterStatus');
+            if (filterSelect) filterSelect.addEventListener('change', filter);
+
+            // Unarchive button handler: sends POST to server and removes card on success
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+            function unarchivePost(id, btn){
+                if (!id) return;
+                btn.disabled = true;
+                const csrftoken = getCookie('csrftoken');
+                fetch(`/archives/unarchive/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken || ''
+                    },
+                    body: JSON.stringify({})
+                }).then(r=>{
+                    if (r.ok) {
+                        // remove the card from DOM
+                        const el = document.querySelector(`.unarchive-btn[data-id="${id}"]`);
+                        if (el){ const card = el.closest('.scholarship-card'); if (card) card.remove(); }
+                        updateCounts();
+                    } else {
+                        btn.disabled = false;
+                        alert('Unarchive failed.');
+                    }
+                }).catch(err=>{ btn.disabled = false; alert('Network error'); });
+            }
+            // attach handlers
+            const unBtns = Array.from(document.querySelectorAll('.unarchive-btn'));
+            for (const b of unBtns){ b.addEventListener('click', function(e){ e.preventDefault(); const id = this.dataset.id; unarchivePost(id, this); }); }
+        })();
+        </script>
+
 </body>
 </html>

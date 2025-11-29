@@ -171,6 +171,9 @@ def save_description(request):
 def description_posts_view(request):
     return render(request, "admin_page/descriptionposts.html")
 
+def dashboard_view(request):
+    return render(request, "admin_page/admin-dashboard.html")
+
 
 
 
@@ -263,3 +266,5 @@ def submit_requirements(request, post_id):
     except Exception as e:
         print("SUBMIT ERROR:", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+    
+    

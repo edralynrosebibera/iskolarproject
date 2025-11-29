@@ -1,0 +1,38 @@
+:root{--bg:#eaf6ff;--card:#fff;--muted:#6b7280;--accent:#33c3f0}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:#0b2733}
+.header{background:var(--bg);padding:18px 28px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.header-content{display:flex;align-items:center;gap:18px}
+.logo-icon{height:36px}
+.search-container{flex:1;display:flex;align-items:center;gap:12px;max-width:720px;margin-left:12px}
+.search-input{flex:1;padding:10px 14px;border-radius:12px;border:1px solid rgba(0,0,0,0.06);background:#fff}
+.header-right{margin-left:auto}
+.avatar{width:40px;height:40px;border-radius:50%}
+
+.main{padding:28px}
+.overview{max-width:1200px;margin:0 auto}
+.dashboard-title{font-size:28px;margin:8px 0}
+.dashboard-sub{color:var(--muted);margin:0 0 18px 0}
+
+/* Admin header block */
+.admin-header{background:var(--bg);padding:12px 0 8px;border-radius:6px;margin: -12px -28px 12px -28px}
+.admin-header-inner{max-width:1200px;margin:0 auto;padding:0 18px;display:flex;flex-direction:column;align-items:flex-start}
+.admin-title-row{display:flex;align-items:center;gap:12px;width:100%}
+.shield-icon{flex:0 0 40px}
+.admin-title-text .dashboard-title{font-size:30px;margin:0}
+.admin-title-text .dashboard-sub{margin-top:4px;color:var(--muted)}
+.admin-tabs{margin-top:10px;display:inline-flex;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.5);border-radius:12px}
+.admin-tab{background:transparent;border:1px solid transparent;padding:8px 12px;border-radius:12px;color:#415a6b;cursor:pointer;font-weight:600}
+.admin-tab.active{background:#fff;border-color:#09a0d6;color:#0b67a4;box-shadow:0 6px 18px rgba(10,20,40,0.04)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
+.stat-card{background:var(--card);padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(10,20,40,0.03)}
+.stat-card .label{color:var(--muted);font-size:13px}
+.stat-card .value{font-size:22px;font-weight:700;margin-top:8px}
+
+.panels{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.panel{background:var(--card);padding:18px;border-radius:10px}
+.panel h3{margin:0 0 12px 0}
+.application-item{padding:12px;border-radius:8px;border:1px solid #f2f6f8;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.activity-item{padding:12px;border-radius:8px;border:1px solid #f2f6f8;margin-bottom:10px}
+
+@media (max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.panels{grid-template-columns:1fr}}

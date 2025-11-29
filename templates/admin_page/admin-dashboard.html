@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ISkOLAR — Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'admin_page/admin-dashboard.css' %}">
+</head>
+<body>
+  <!-- header removed to match requested admin layout -->
+
+  <main class="main">
+    <section class="overview">
+      <!-- Admin header (title + subtitle + tabs) -->
+      <div class="admin-header">
+        <div class="admin-header-inner">
+          <div class="admin-title-row">
+            <div class="shield-icon" aria-hidden="true">
+              <!-- simple shield SVG -->
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#0b67a4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 3v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V5l7-3z"/></svg>
+            </div>
+            <div class="admin-title-text">
+              <h1 class="dashboard-title">Admin Dashboard</h1>
+              <p class="dashboard-sub">Manage users, scholarships, and applications</p>
+            </div>
+          </div>
+          <nav class="admin-tabs" role="navigation" aria-label="Admin tabs">
+            <button class="admin-tab active">Overview</button>
+            <button class="admin-tab">Users</button>
+            <button class="admin-tab">Scholarships</button>
+            <button class="admin-tab">Applications</button>
+            <button class="admin-tab">System Logs</button>
+          </nav>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Users</div>
+          <div class="value">{{ total_users|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Applications</div>
+          <div class="value">{{ total_applications|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Pending Review</div>
+          <div class="value">{{ pending_review|default:0 }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Active Scholarships</div>
+          <div class="value">{{ active_scholarships|default:0 }}</div>
+        </div>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <h3>Recent Applications</h3>
+          {% if recent_applications %}
+            {% for app in recent_applications %}
+              <div class="application-item">
+                <div>
+                  <div style="font-weight:700">{{ app.applicant_name }}</div>
+                  <div style="color:var(--muted);font-size:13px">{{ app.scholarship_title }}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="background:#eef7fb;color:#0b67a4;padding:6px 10px;border-radius:12px;font-size:13px">{{ app.status|default:'Pending' }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No recent applications.</p>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <h3>Recent Activity</h3>
+          {% if recent_activity %}
+            {% for act in recent_activity %}
+              <div class="activity-item">
+                <div style="font-weight:600">{{ act.title }}</div>
+                <div style="color:var(--muted);font-size:13px">{{ act.subtitle }}</div>
+                <div style="color:var(--muted);font-size:12px;margin-top:6px">{{ act.date }}</div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No recent activity.</p>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="{% static 'admin_page/admin-dashboard.js' %}"></script>
+  <script src="{% static 'admin_page/admin-dashboard.js' %}"></script>
+</body>
+</html>

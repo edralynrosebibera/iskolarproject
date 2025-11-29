@@ -8,6 +8,18 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
     <link rel="stylesheet" href="{% static 'saved.css' %}?v4">
+    <style>
+    /* Enhanced unsave button style */
+    .unsave-btn.enhanced {
+        display:inline-flex;align-items:center;justify-content:center;
+        width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,0,0,0.06);
+        background:#fff;color:#c0392b;font-size:16px;cursor:pointer;transition:transform .12s,box-shadow .12s;
+        box-shadow:0 1px 3px rgba(0,0,0,0.06);
+    }
+    .unsave-btn.enhanced:hover{transform:scale(1.06);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .scholarship-header .card-status.saved{display:inline-block;background:#edf7f1;color:#2e7d32;padding:4px 8px;border-radius:12px;font-size:13px;margin-right:8px}
+    .saved-subtitle{margin-top:6px;margin-bottom:20px;color:#000}
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -78,7 +90,7 @@
                 <circle cx="12" cy="8" r="7"/>
                 <polyline points="8.21,13.89 7,23 12,20 17,23 15.79,13.88"/>
             </svg>
-            Scholarships
+            Browse Scholarships
         </a>
 
         <a href="{% url 'applications' %}" class="sidebar-btn">
@@ -86,7 +98,7 @@
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                 <polyline points="14,2 14,8 20,8"/>
             </svg>
-            Applications
+            My Applications
         </a>
 
         <a href="{% url 'archives' %}" class="sidebar-btn">
@@ -95,7 +107,7 @@
                 <path d="M3 7v14h18V7z"/>
                 <line x1="10" y1="11" x2="14" y2="11"/>
             </svg>
-            Archives
+            My Archives
         </a>
 
         <a href="{% url 'saved_scholarships' %}" class="sidebar-btn active">
@@ -109,13 +121,18 @@
     <!-- Saved Scholarships Section -->
     <div class="saved-scholarships-container">
 
-        <h2 class="section-title">
-            <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-            </svg>
-            Saved Scholarships
-        </h2>
-        <p class="section-subtitle">Manage and view your saved scholarship opportunities.</p>
+            <div class="saved-header-row">
+                <div class="saved-header-left">
+                    <h2 class="section-title">
+                        <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
+                        </svg>
+                        Saved Scholarships
+                    </h2>
+                    <p class="saved-subtitle">Manage and view your saved scholarship opportunities.</p>
+                    <!-- filter removed per user request -->
+                </div>
+            </div>
 
         
         <!-- Dynamic scholarship list -->
@@ -125,11 +142,14 @@
                     <div class="scholarship-header">
                         <h3 class="scholarship-title">{{ post.title }}</h3>
                         <div class="detail-icons">
-                            <div class="detail-icon-wrapper" data-tooltip="  Scholarship">
-                                <svg class="detail-icon" viewBox="0 0 24 24" fill="blue" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
+                            <span class="card-status saved"><i class="fa-solid fa-bookmark" aria-hidden="true" style="margin-right:8px"></i>Saved</span>
+                            <button class="unsave-btn enhanced" data-id="{{ post.id }}" title="Unsaved" aria-label="Unsaved" style="margin-left:8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M19 21l-7-3-7 3V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    <path d="M15 6l-6 6"></path>
+                                    <path d="M9 6l6 6"></path>
                                 </svg>
-                            </div>
+                            </button>
                         </div>
                     </div>
 
@@ -152,6 +172,118 @@
 
        <script src="{% static 'saved.js' %}"></script>
     <script src="{% static 'script2.js' %}"></script>
-    
+</body>
+<script>
+// Utility: get CSRF token from cookie
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Unsave a post via POST to the server, then remove the card from DOM
+function unsavePost(postId, btn) {
+    const csrftoken = getCookie('csrftoken');
+    btn.disabled = true;
+    fetch(`/saved_scholarships/unsave/${postId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({})
+    }).then(r => r.json())
+      .then(data => {
+          if (data.ok) {
+              // Remove card
+              const card = btn.closest('.scholarship-card');
+              if (card) card.remove();
+          } else {
+              console.error('Unsave failed', data);
+              btn.disabled = false;
+          }
+      }).catch(err => {
+          console.error('Network error', err);
+          btn.disabled = false;
+      });
+}
+
+// Wire up unsave buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const unsaveBtns = document.querySelectorAll('.unsave-btn');
+    for (const btn of unsaveBtns) {
+        btn.addEventListener('click', function(e) {
+            const id = btn.dataset.id;
+            unsavePost(id, btn);
+        });
+    }
+});
+
+// Profile popup toggle (self-contained so it works even if script2.js isn't loaded as module)
+document.addEventListener('DOMContentLoaded', function () {
+    const profileToggle = document.getElementById('profileToggle');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (!profileToggle || !profileDropdown) return;
+
+    function showDropdown() {
+        profileDropdown.style.display = 'block';
+        profileToggle.setAttribute('aria-expanded', 'true');
+    }
+    function hideDropdown() {
+        profileDropdown.style.display = 'none';
+        profileToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    profileToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (profileDropdown.style.display === 'block') hideDropdown(); else showDropdown();
+    });
+
+    // Prevent clicks inside the dropdown from closing it
+    profileDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    // Close when clicking outside
+    document.addEventListener('click', function () { hideDropdown(); });
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideDropdown(); });
+});
+// Small shared debounce helper (moved to outer scope to satisfy linter)
+function debounce(fn, delay = 200) {
+    let t;
+    return function (...args) {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+// Lightweight search for Saved Scholarships (debounced, non-invasive)
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.querySelector('.search-input');
+    if (!searchInput) return;
+
+    const getCards = () => Array.from(document.querySelectorAll('.scholarship-card'));
+
+    function filterCards(query) {
+        const q = (query || '').trim().toLowerCase();
+        const cards = getCards();
+        if (!q) {
+            for (const c of cards) c.style.display = '';
+            return;
+        }
+        for (const c of cards) {
+            const title = (c.querySelector('.scholarship-title')?.textContent || '').toLowerCase();
+            const desc = (c.querySelector('.scholarship-description')?.textContent || '').toLowerCase();
+            const meta = (c.querySelector('.scholarship-meta')?.textContent || '').toLowerCase();
+            const combined = `${title} ${desc} ${meta}`;
+            c.style.display = combined.includes(q) ? '' : 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', debounce(function (e) {
+        filterCards(e.target.value);
+    }, 180));
+});
+</script>
 </body>
 </html>

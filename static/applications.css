@@ -543,6 +543,20 @@ body {
     background-color:rgba(6, 131, 177, 0.882);
 }
 
+/* Align archive card buttons to the right and make them sized like card CTAs */
+.saved-scholarships-grid .scholarship-card .scholarship-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+.saved-scholarships-grid .scholarship-card .scholarship-actions .btn-view {
+    width: auto;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    min-width: 180px;
+}
+
 .saved-date {
     font-size: 12px;
     color: #666;

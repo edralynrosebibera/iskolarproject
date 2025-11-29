@@ -4,6 +4,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from supabase import create_client, Client
+from datetime import datetime, timezone
 from django.conf import settings
 from django.http import JsonResponse
 import json
@@ -86,7 +87,50 @@ def applications_view(request):
 def archives_view(request):
     resp = supabase.table("posts").select("*").eq("is_archived", True).execute()
     posts = resp.data if resp.data else []
+
+    # mark expired flag per post so templates can render an "expired" badge
+    for post in posts:
+        post_deadline = post.get("deadline")
+        is_expired = False
+        if post_deadline:
+            try:
+                # support ISO strings with Z or timezone offset
+                dl = post_deadline.replace('Z', '+00:00') if isinstance(post_deadline, str) else post_deadline
+                dt = datetime.fromisoformat(dl)
+                # compare with UTC if aware, else with naive UTC
+                if dt.tzinfo is not None:
+                    is_expired = dt < datetime.now(timezone.utc)
+                else:
+                    is_expired = dt < datetime.utcnow()
+            except Exception:
+                is_expired = False
+        post["is_expired"] = is_expired
+
     return render(request, "archives.html", {"posts": posts})
+
+
+def unarchive_post(request, post_id):
+    """Handle AJAX POST to unarchive a post by setting is_archived=False in Supabase."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    try:
+        # Update the post in Supabase
+        resp = supabase.table('posts').update({'is_archived': False}).eq('id', post_id).execute()
+        # resp may contain status; assume success if no exception
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def unsave_post(request, post_id):
+    """Handle AJAX POST to remove saved flag (is_saved=False) for a post in Supabase."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    try:
+        resp = supabase.table('posts').update({'is_saved': False}).eq('id', post_id).execute()
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def logout_view(request):
     logout(request)

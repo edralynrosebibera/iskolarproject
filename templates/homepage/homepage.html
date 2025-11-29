@@ -54,7 +54,7 @@
             <li><a href="#" id="darkModeToggle"><span class="icon">🌙</span> Dark Mode</a></li>
           </ul>
           <hr>
-          <a href="{% url 'login' %}" class="logout-link danger"><span class="icon">➡</span> Log Out<br><small>Sign out of your account</small></a>
+          <a href="{% url 'admin_dashboard' %}" class="logout-link danger"><span class="icon">➡</span> Log Out<br><small>Sign out of your account</small></a>
         </div>
       </div>
     </div>
@@ -76,13 +76,13 @@
     </div>
 
           <a href="{% url 'homepage' %}" class="sidebar-btn">
-          <i class="fa-solid fa-graduation-cap"></i> Scholarships
+          <i class="fa-solid fa-graduation-cap"></i> Browse Scholarships
           </a>
           <a href="{% url 'applications' %}" class="sidebar-btn">
-            <i class="fa-solid fa-file-lines"></i> Applications
+            <i class="fa-solid fa-file-lines"></i> My Applications
           </a>
           <a href="{% url 'archives' %}" class="sidebar-btn">
-            <i class="fa-solid fa-box-archive"></i> Archives
+            <i class="fa-solid fa-box-archive"></i> My Archives
           </a>
           <a href="{% url 'saved_scholarships' %}" class="sidebar-btn">
             <i class="fa-solid fa-bookmark"></i> Scholarships Saved
