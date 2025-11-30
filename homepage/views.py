@@ -60,3 +60,57 @@ def homepage_view(request):
         print('⚠️ Error while auto-archiving expired posts:', e)
 
     return render(request, "homepage/homepage.html", {"posts": posts})
+
+
+
+
+    # views.py
+
+def homepage_view(request):
+    # 1. Get current time for filtering active scholarships
+    now = datetime.now().isoformat()
+    
+    # Initialize counters
+    available_count = 0
+    applied_count = 0
+    posts = []
+
+    try:
+        # --- QUERY A: Get "Available" (Active Scholarships) ---
+        # Count posts where deadline is greater than or equal to now
+        active_res = supabase.table("posts").select("id", count="exact").gte("deadline", now).execute()
+        available_count = active_res.count
+
+        # --- QUERY B: Get "Applied" (Specific to User) ---
+        # We need the user's ID from the session (assuming you store it there like in your view_description)
+        user_id = request.session.get("user_id")
+
+        if user_id:
+            # Count applications matching this user_id
+            applied_res = supabase.table("applications").select("id", count="exact").eq("user_id", str(user_id)).execute()
+            applied_count = applied_res.count
+
+        # --- QUERY C: Get the actual Posts for the grid ---
+        # Fetch active posts to display in the "Featured Scholarships" section
+        posts_data = supabase.table("posts").select("*").gte("deadline", now).order("deadline", desc=False).execute()
+        posts = posts_data.data
+
+    except Exception as e:
+        print("Error loading homepage data:", e)
+
+    # Context to pass to HTML
+    context = {
+        'available_count': available_count,
+        'applied_count': applied_count,
+        'posts': posts,
+        # Pass user details if needed for the profile dropdown
+        'user': {
+            'first_name': request.session.get("user_fullname", "Student"),
+            'email': request.session.get("user_email", "")
+        }
+    }
+
+    # Render the homepage with the dynamic data
+    return render(request, "homepage/homepage.html", context) 
+    # Note: Make sure "homepage/homepage.html" matches your actual folder structure. 
+    # If it's in the root of templates, just use "homepage.html"
