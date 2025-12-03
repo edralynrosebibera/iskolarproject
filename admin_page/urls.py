@@ -24,6 +24,15 @@ urlpatterns = [
 
 
     path("analytics/", views.analytics_view, name="analytics"),
+    path("analytics/json/", views.analytics_json, name="analytics_json"),
+    path("applications/json/", views.applications_json, name="applications_json"),
     path("admin-dashboard/", views.dashboard_view, name="admin_dashboard"),
+     path("applications/", views.admin_applications_view, name="admin_applications"),
+    path("applications/<int:app_id>/", views.admin_view_application, name="admin_view_application"),
+    path("applications/<int:app_id>/json/", views.admin_view_application_json, name="admin_view_application_json"),
+    path("applications/<int:app_id>/approve/", views.admin_approve_application, name="admin_approve_application"),
+    path("applications/<int:app_id>/reject/", views.admin_reject_application, name="admin_reject_application"),
+
+
 ]
 

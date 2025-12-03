@@ -19,27 +19,6 @@ supabase: Client = create_client(url, key)
 def admin_view(request):
     return render(request, "admin_page/admin.html")
 
-# Create post view
-# @csrf_exempt
-# def create_post_view(request):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body)
-#             res = supabase.table("posts").insert({
-#                 "title": data.get("title"),
-#                 "description": data.get("description"),
-#                 "location": data.get("location"),
-#                 "qualifications": data.get("qualifications"),
-#                 "posted_date": data.get("postedDate"),
-#                 "deadline": data.get("deadline"),
-#                 "scholarship_link": data.get("scholarshipLink")
-#             }, returning="representation").execute()
-#             return JsonResponse({"success": True, "data": res.data})
-#         except Exception as e:
-#             return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#     return render(request, "admin_page/create-post.html")
-
 @csrf_exempt
 def create_post_view(request):
     if request.method == "POST":
@@ -65,10 +44,7 @@ def create_post_view(request):
 
     if request.method == "GET":
         return render(request, "admin_page/create-post.html")
-        
 
-
-# Get posts view
 @csrf_exempt
 def get_posts_view(request):
     try:
@@ -90,7 +66,6 @@ def get_posts_view(request):
         print("⚠️ Error fetching posts:", e)
         return JsonResponse({"success": False, "error": str(e)})
 
-# Edit post
 @csrf_exempt
 def edit_post_view(request, post_id):
     if request.method == "POST":
@@ -112,7 +87,6 @@ def edit_post_view(request, post_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": False, "error": "Invalid request method"})
 
-# Delete post
 @csrf_exempt
 def delete_post_view(request, post_id):
     if request.method in ["DELETE", "POST"]:
@@ -125,7 +99,6 @@ def delete_post_view(request, post_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": False, "error": "Invalid method"})
 
-# Posts page
 def posts_view(request):
     return render(request, "admin_page/posts.html")
 
@@ -136,9 +109,6 @@ def logout_view(request):
 def create_description(request):
     return render(request, "admin_page/index.html")
 
-# def view_description(request, post_id):
-#     return render(request, "admin_page/view.html", {"post_id": post_id})
-
 def view_description(request, post_id):
     return render(request, "admin_page/view.html", {
         "django_user_id": request.session.get("user_id"),
@@ -146,14 +116,10 @@ def view_description(request, post_id):
         "django_user_name": request.session.get("user_fullname"),
     })
 
-
-
-# Example: get all submissions for a post
 def get_submissions(request, post_id):
     data = supabase.table("submissions").select("*").eq("post_id", post_id).execute()
     return JsonResponse(data.data, safe=False)
 
-# Example: save a description (if using Django instead of JS)
 @csrf_exempt
 def save_description(request):
     if request.method == "POST":
@@ -165,40 +131,27 @@ def save_description(request):
             "content": content
         }).execute()
         return JsonResponse({"success": True})
-    
-    
-    
+
 def description_posts_view(request):
     return render(request, "admin_page/descriptionposts.html")
 
 def dashboard_view(request):
     return render(request, "admin_page/admin-dashboard.html")
 
-
-
-
-
 def analytics_view(request):
     try:
-        # 1. Total Posts (Count all rows in 'posts')
         total_res = supabase.table("posts").select("id", count="exact").execute()
         total_count = total_res.count
 
-        # 2. Active Posts (Count where deadline is greater than today)
-        # We get the current time in ISO format for Supabase comparison
         now = datetime.now().isoformat()
         active_res = supabase.table("posts").select("id", count="exact").gte("deadline", now).execute()
         active_count = active_res.count
 
-        # 3. Total Users (Assuming you want to count a 'users' table)
-        # Note: If your users are only in Supabase Auth and not a public table, 
-        # this might fail without a Service Role key. 
-        # For now, let's try counting a 'users' table if you have one, otherwise set to 0.
         try:
             user_res = supabase.table("users").select("id", count="exact").execute()
             user_count = user_res.count
         except:
-            user_count = 0 # Fallback if 'users' table doesn't exist
+            user_count = 0
 
         context = {
             'active_count': active_count,
@@ -207,16 +160,51 @@ def analytics_view(request):
         }
         
         return render(request, "admin_page/analytics.html", context)
-      
 
     except Exception as e:
         print("Error fetching analytics:", e)
-        # Return 0s so the page still loads even if Supabase fails
         return render(request, "admin_page/analytics.html", {
             'active_count': 0, 'total_count': 0, 'user_count': 0
         })
 
 
+def analytics_json(request):
+    """Return key analytics numbers as JSON for AJAX consumption."""
+    try:
+        total_res = supabase.table("posts").select("id", count="exact").execute()
+        total_count = total_res.count or 0
+
+        now = datetime.now().isoformat()
+        active_res = supabase.table("posts").select("id", count="exact").gte("deadline", now).execute()
+        active_count = active_res.count or 0
+
+        try:
+            user_res = supabase.table("users").select("id", count="exact").execute()
+            user_count = user_res.count or 0
+        except:
+            user_count = 0
+
+        # Pending applications
+        try:
+            pending_res = supabase.table("applications").select("id", count="exact").eq("status", "Pending").execute()
+            pending_count = pending_res.count or 0
+        except:
+            pending_count = 0
+
+        return JsonResponse({
+            "success": True,
+            "total_count": total_count,
+            "active_count": active_count,
+            "user_count": user_count,
+            "pending_count": pending_count,
+        })
+    except Exception as e:
+        print("ERROR analytics_json:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+# NOTE: applications_trends_json previously provided a time-series for charts.
+# It was removed per request to no longer show trends/charts in the admin UI.
 
 @csrf_exempt
 def submit_requirements(request, post_id):
@@ -224,35 +212,54 @@ def submit_requirements(request, post_id):
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
     try:
-        body = request.body.decode("utf-8")
-        data = json.loads(body)
-
-        user_id = data.get("user_id")
-        reqs = data.get("requirements", [])
+        # ⭐ Always use Supabase UUID stored in session
+        user_id = request.session.get("supabase_user_id")
 
         if not user_id:
-            return JsonResponse({"success": False, "error": "Missing user ID"}, status=400)
+            return JsonResponse({"success": False, "error": "User not logged in"}, status=400)
 
-        # 1. FIND OR CREATE APPLICATION
-        existing = supabase.table("applications") \
-            .select("id") \
-            .eq("user_id", str(user_id)) \
-            .eq("post_id", str(post_id)) \
-            .limit(1) \
+        body = json.loads(request.body.decode("utf-8"))
+        reqs = body.get("requirements", [])
+
+        # 🔥 1) Validate post exists (post_id is already UUID)
+        post_check = (
+            supabase.table("posts")
+            .select("id")
+            .eq("id", post_id)
+            .single()
             .execute()
+        )
+
+        if not post_check.data:
+            return JsonResponse({"success": False, "error": "Post not found"}, status=404)
+
+        # 🔥 2) Check if application already exists for this user + post
+        existing = (
+            supabase.table("applications")
+            .select("id")
+            .eq("user_id", user_id)  # UUID
+            .eq("post_id", post_id)  # UUID
+            .limit(1)
+            .execute()
+        )
 
         if existing.data:
-            application_id = existing.data[0]["id"]
+            application_id = existing.data[0]["id"]  # BIGINT
         else:
-            new_app = supabase.table("applications").insert({
-                "user_id": str(user_id),
-                "post_id": str(post_id),
-                "status": "Pending"
-            }).execute()
+            # 🔥 3) Create new application
+            new_app = (
+                supabase.table("applications")
+                .insert({
+                    "user_id": user_id,      # UUID
+                    "post_id": post_id,      # UUID
+                    "status": "Pending",
+                })
+                .execute()
+            )
 
-            application_id = new_app.data[0]["id"]
+            application_id = new_app.data[0]["id"]  # BIGINT
 
-        # 2. SAVE EACH FILE
+        # 🔥 4) Save requirement files
         for req in reqs:
             supabase.table("application_files").insert({
                 "application_id": application_id,
@@ -260,11 +267,262 @@ def submit_requirements(request, post_id):
                 "file_url": req["file_url"],
             }).execute()
 
-        # 3. 🔥 Return redirect so fetch() detects it
         return redirect("/applications/")
 
     except Exception as e:
         print("SUBMIT ERROR:", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
-    
-    
+
+
+
+# ------------------------------
+# ADMIN: APPLICATIONS
+# ------------------------------
+
+def admin_applications_view(request):
+    try:
+        apps = (
+            supabase.table("applications")
+            .select("*")
+            .order("id", desc=True)
+            .execute()
+            .data or []
+        )
+
+        formatted = []
+
+        for app in apps:
+
+            # 🛑 Skip records with invalid post_id (must be UUID)
+            if not app["post_id"] or len(str(app["post_id"])) != 36:
+                print("Skipping invalid application:", app)
+                continue
+
+            user_uuid = app["user_id"]  # UUID string
+
+            # Fetch Supabase user
+            user = (
+                supabase.table("users")
+                .select("*")
+                .eq("id", user_uuid)
+                .maybe_single()
+                .execute()
+                .data
+            )
+
+            if not user:
+                print("User not found for:", user_uuid)
+                continue
+
+            # Build full name
+            user["full_name"] = f"{user.get('first_name','')} {user.get('last_name','')}".strip()
+
+            # Fetch the post
+            post = (
+                supabase.table("posts")
+                .select("*")
+                .eq("id", app["post_id"])
+                .maybe_single()
+                .execute()
+                .data
+            )
+
+            formatted.append({
+                "id": app["id"],
+                "status": app.get("status", "Pending"),
+                "created_at": app.get("created_at"),
+                "user": user,
+                "post": post,
+            })
+
+        return render(request, "admin_page/applications.html", {"applications": formatted})
+
+    except Exception as e:
+        print("ADMIN APPLICATIONS ERROR:", e)
+        return render(request, "admin_page/applications.html", {"applications": []})
+
+
+def applications_json(request):
+    """Return a JSON list of applications with user and post metadata for the admin UI."""
+    try:
+        apps = (
+            supabase.table("applications")
+            .select("*")
+            .order("id", desc=True)
+            .execute()
+            .data or []
+        )
+
+        formatted = []
+
+        for app in apps:
+            # validate post_id
+            if not app.get("post_id") or len(str(app.get("post_id"))) != 36:
+                continue
+
+            user = (
+                supabase.table("users")
+                .select("*")
+                .eq("id", app.get("user_id"))
+                .maybe_single()
+                .execute()
+                .data or {}
+            )
+
+            post = (
+                supabase.table("posts")
+                .select("*")
+                .eq("id", app.get("post_id"))
+                .maybe_single()
+                .execute()
+                .data or {}
+            )
+
+            full_name = ""
+            if user:
+                full_name = f"{user.get('first_name','')} {user.get('last_name','')}".strip()
+
+            formatted.append({
+                "id": app.get("id"),
+                "status": app.get("status", "Pending"),
+                "created_at": app.get("created_at"),
+                "user": {"id": user.get("id"), "full_name": full_name, "email": user.get("email")},
+                "post": {"id": post.get("id"), "title": post.get("title")},
+            })
+
+        return JsonResponse({"success": True, "data": formatted})
+    except Exception as e:
+        print("ERROR applications_json:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+
+
+def admin_view_application(request, app_id):
+
+    app = (
+        supabase.table("applications")
+        .select("*")
+        .eq("id", app_id)
+        .single()
+        .execute()
+        .data
+    )
+
+    if not app:
+        messages.error(request, "Application not found.")
+        return redirect("admin_applications")
+
+    user = (
+        supabase.table("users")
+        .select("*")
+        .eq("id", app["user_id"])
+        .single()
+        .execute()
+        .data
+    )
+
+    # ⭐ ADD FULL NAME HERE ALSO
+    full_name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+    user["full_name"] = full_name
+
+    post = (
+        supabase.table("posts")
+        .select("*")
+        .eq("id", app["post_id"])
+        .single()
+        .execute()
+        .data
+    )
+
+    files = (
+        supabase.table("application_files")
+        .select("*")
+        .eq("application_id", app_id)
+        .execute()
+        .data
+        or []
+    )
+
+    return render(request, "admin_page/application_view.html", {
+        "app": app,
+        "user": user,
+        "post": post,
+        "files": files,
+    })
+
+
+def admin_view_application_json(request, app_id):
+    """Return application details as JSON for in-page viewing (AJAX)."""
+    try:
+        app = (
+            supabase.table("applications")
+            .select("*")
+            .eq("id", app_id)
+            .single()
+            .execute()
+            .data
+        )
+
+        if not app:
+            return JsonResponse({"success": False, "error": "Application not found."}, status=404)
+
+        user = (
+            supabase.table("users")
+            .select("*")
+            .eq("id", app["user_id"])
+            .single()
+            .execute()
+            .data
+        ) or {}
+
+        user_full_name = f"{user.get('first_name','')} {user.get('last_name','')}".strip()
+        user["full_name"] = user_full_name
+
+        post = (
+            supabase.table("posts")
+            .select("*")
+            .eq("id", app["post_id"])
+            .single()
+            .execute()
+            .data
+        ) or {}
+
+        files = (
+            supabase.table("application_files")
+            .select("*")
+            .eq("application_id", app_id)
+            .execute()
+            .data
+        ) or []
+
+        return JsonResponse({
+            "success": True,
+            "app": {
+                "id": app.get("id"),
+                "status": app.get("status"),
+                "created_at": app.get("created_at"),
+            },
+            "user": user,
+            "post": post,
+            "files": files,
+        })
+
+    except Exception as e:
+        print("ERROR admin_view_application_json:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+
+def admin_approve_application(request, app_id):
+    if request.method == "POST":
+        supabase.table("applications").update({"status": "Approved"}).eq("id", app_id).execute()
+        messages.success(request, "Application approved.")
+        return redirect("admin_applications")
+
+
+def admin_reject_application(request, app_id):
+    if request.method == "POST":
+        supabase.table("applications").update({"status": "Rejected"}).eq("id", app_id).execute()
+        messages.success(request, "Application rejected.")
+        return redirect("admin_applications")

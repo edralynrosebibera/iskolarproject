@@ -213,6 +213,38 @@ if (searchInput) {
   });
 }
 
+// show Archive Expired button only when Scholarships tab is active
+function updateArchiveBtnVisibility(){
+  try{
+    const activeTab = document.querySelector('.tabs .tab.active');
+    if(!archiveBtn) return;
+    if(activeTab && activeTab.dataset && activeTab.dataset.target === '#pane-scholarships'){
+      archiveBtn.style.display = '';
+    }else{
+      archiveBtn.style.display = 'none';
+      // also reset archive filter if navigating away
+      if(archiveFilterActive){
+        archiveFilterActive = false;
+        archiveBtn.textContent = 'Archive Expired';
+        archiveBtn.classList.remove('active');
+        const all = window._adminPosts || [];
+        renderTableRows(all);
+      }
+    }
+  }catch(e){ console.error('updateArchiveBtnVisibility', e); }
+}
+
+// Attach listeners to tabs so visibility updates when user switches panes
+document.querySelectorAll('.tabs .tab').forEach(t => {
+  t.addEventListener('click', function(){
+    // small timeout to allow other tab handlers to run
+    setTimeout(updateArchiveBtnVisibility, 10);
+  });
+});
+
+// Call once to set initial visibility
+updateArchiveBtnVisibility();
+
 // archive expired (client-side toggle or endpoint call if exists)
 if (archiveBtn) {
   // Toggle client-side filter: show only archived/expired posts when active

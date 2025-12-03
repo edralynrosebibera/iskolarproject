@@ -10,66 +10,75 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from django.contrib.auth import logout
 
 url: str = settings.SUPABASE_URL
 key: str = settings.SUPABASE_KEY
 supabase: Client = create_client(url, key)
 
+
 def iSKOLARapp_view(request):
     return render(request, "dashboard/iskolar.html")
 
 
-    #Icon functionalities saved, archive, appplied.
-
+# ---------------------------------------------------------
+# SAVED SCHOLARSHIPS
+# ---------------------------------------------------------
 def saved_scholarships_view(request):
     try:
-        # Fetch posts that are marked as saved (from Supabase)
         resp = supabase.table("posts").select("*").eq("is_saved", True).execute()
-        posts = resp.data if resp.data else []
+        posts = resp.data or []
     except Exception as e:
         print("⚠️ Error fetching saved scholarships:", e)
         posts = []
-    
-    # ✅ Make sure this matches your file name: saved_scholarships.html
+
     return render(request, "saved_scholarships.html", {"posts": posts})
 
 
+# ---------------------------------------------------------
+# STUDENT APPLICATIONS
+# ---------------------------------------------------------
 def applications_view(request):
-    user_id = request.session.get("user_id")
 
-    if not user_id:
+    # 🔥 FIX — USE SUPABASE UUID
+    supabase_user_id = request.session.get("supabase_user_id")
+
+    if not supabase_user_id:
         return redirect("login")
 
-    # 1. Get all applications for this user
-    res_app = supabase.table("applications") \
-        .select("*") \
-        .eq("user_id", str(user_id)) \
+    # 1. Fetch all applications using SUPABASE UUID
+    res_app = (
+        supabase.table("applications")
+        .select("*")
+        .eq("user_id", supabase_user_id)  # UUID
         .execute()
+    )
 
     applications = res_app.data or []
     posts = []
 
-    # 2. Join each application with its scholarship post
+    # 2. Join each application with its post
     for app in applications:
         post_id = app.get("post_id")
 
-        res_post = supabase.table("posts") \
-            .select("*") \
-            .eq("id", post_id) \
-            .maybe_single() \
+        if not post_id or len(str(post_id)) != 36:
+            continue
+
+        res_post = (
+            supabase.table("posts")
+            .select("*")
+            .eq("id", str(post_id))
+            .maybe_single()
             .execute()
+        )
 
         post = res_post.data
         if not post:
             continue
 
-        # Attach application status (Pending, Accepted, Rejected)
         post["status"] = app.get("status", "Pending")
-
         posts.append(post)
 
-    # 3. Status counts for tabs
+    # 3. Count totals per status
     pending_count = sum(1 for p in posts if p["status"].lower() == "pending")
     review_count = sum(1 for p in posts if p["status"].lower() == "review")
     accepted_count = sum(1 for p in posts if p["status"].lower() == "accepted")
@@ -84,6 +93,9 @@ def applications_view(request):
     })
 
 
+# ---------------------------------------------------------
+# ARCHIVES
+# ---------------------------------------------------------
 def archives_view(request):
     resp = supabase.table("posts").select("*").eq("is_archived", True).execute()
     posts = resp.data if resp.data else []
@@ -109,29 +121,32 @@ def archives_view(request):
     return render(request, "archives.html", {"posts": posts})
 
 
+
+# ---------------------------------------------------------
+# UNSAVE / UNARCHIVE
+# ---------------------------------------------------------
 def unarchive_post(request, post_id):
-    """Handle AJAX POST to unarchive a post by setting is_archived=False in Supabase."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+
     try:
-        # Update the post in Supabase
-        resp = supabase.table('posts').update({'is_archived': False}).eq('id', post_id).execute()
-        # resp may contain status; assume success if no exception
+        supabase.table('posts').update({'is_archived': False}).eq('id', post_id).execute()
         return JsonResponse({'ok': True})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
 def unsave_post(request, post_id):
-    """Handle AJAX POST to remove saved flag (is_saved=False) for a post in Supabase."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+
     try:
-        resp = supabase.table('posts').update({'is_saved': False}).eq('id', post_id).execute()
+        supabase.table('posts').update({'is_saved': False}).eq('id', post_id).execute()
         return JsonResponse({'ok': True})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
 def logout_view(request):
     logout(request)
-    return redirect('/login/')
+    return redirect("/login/")

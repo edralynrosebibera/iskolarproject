@@ -6,47 +6,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scholarship Posts</title>
   <link rel="stylesheet" href="{% static 'admin_page/posts.css' %}?v=10">
+  <link rel="stylesheet" href="{% static 'admin_page/posts-dashboard.css' %}?v=1">
 </head>
 <body>
   <header class="hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <h1>Manage Scholarships</h1>
-        <p class="subtitle">Create, edit, and manage scholarship listings</p>
+        <h1>Admin Dashboard</h1>
+        <!-- export button moved to hero-right -->
+        <p class="subtitle">Manage scholarships, applications, and users</p>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-target="#pane-scholarships" role="tab" aria-selected="true">Scholarships</button>
+          <button class="tab" data-target="#pane-applications" role="tab" aria-selected="false">Applications</button>
+          <button class="tab" data-target="#pane-users" role="tab" aria-selected="false">Users</button>
+          <button class="tab" data-target="#pane-analytics" role="tab" aria-selected="false">Analytics</button>
+        </div>
 
         <div class="controls">
           <div class="search-wrap">
             <input id="searchInput" type="search" placeholder="Search scholarships...">
           </div>
           <button id="archiveExpired" class="archive-btn">Archive Expired</button>
+          <button class="create-btn" onclick="goToCreatePost()">➕ Add Scholarship</button>
         </div>
       </div>
 
-      <div class="hero-right">
+      <div class="hero-right" style="display:flex;align-items:center;gap:12px">
+        <button id="exportAppsBtn" class="export-btn" title="Export dashboard as CSV" style="display:inline-flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Export</span>
+        </button>
         <a href="{% url 'analytics' %}" class="analytics-btn" style="margin-right:12px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">📊 Analytics</a>
-        <button class="create-btn" onclick="goToCreatePost()">➕ Add Scholarship</button>
       </div>
     </div>
   </header>
 
-  <main class="content">
-    <div class="table-wrap">
-      <table id="postsTable" class="posts-table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Deadline</th>
-            <th>Applicants</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="postsContainer">
-          <!-- rows injected by posts2.js -->
-        </tbody>
-      </table>
-    </div>
-  </main>
+    <main class="content">
+      <!-- Scholarships pane (default) -->
+      <section id="pane-scholarships" class="pane">
+        <div class="table-wrap">
+          <table id="postsTable" class="posts-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Deadline</th>
+                <th>Applicants</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="postsContainer">
+              <!-- rows injected by posts2.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Applications pane -->
+      <section id="pane-applications" class="pane hidden">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <label for="applicationsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
+          <select id="applicationsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
+            <option value="all">All</option>
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+            <option value="Rejected">Rejected</option>
+            <option value="In Progress">In Progress</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="posts-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Scholarship</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsContainer">
+              <tr><td colspan="5" style="padding:18px;color:#6b8796">Loading applications...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Users pane -->
+      <section id="pane-users" class="pane hidden">
+        <div class="table-wrap">
+          <table class="posts-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="padding:18px;color:#6b8796">No users loaded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Analytics pane -->
+      <section id="pane-analytics" class="pane hidden">
+        <div class="analytics-grid">
+          <div class="analytics-card" aria-live="polite">
+            <div class="label">Total Users</div>
+            <div class="analytics-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <div class="value"><span id="analytics-user-count">0</span></div>
+            <div class="note" id="analytics-user-delta">&nbsp;</div>
+          </div>
+
+          <div class="analytics-card" aria-live="polite">
+            <div class="label">Total Applications</div>
+            <div class="analytics-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <div class="value"><span id="analytics-total-apps">0</span></div>
+            <div class="note" id="analytics-apps-delta">&nbsp;</div>
+          </div>
+
+          <div class="analytics-card" aria-live="polite">
+            <div class="label">Pending Review</div>
+            <div class="analytics-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v5l4 2 .75-1.23L13 12.5V8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+            </div>
+            <div class="value"><span id="analytics-pending">0</span></div>
+            <div class="note" id="analytics-pending-note">&nbsp;</div>
+          </div>
+
+          <div class="analytics-card" aria-live="polite">
+            <div class="label">Active Scholarships</div>
+            <div class="analytics-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L1 7l11 5 9-4.09V17h2V7L12 2z"/></svg>
+            </div>
+            <div class="value"><span id="analytics-active">0</span></div>
+            <div class="note" id="analytics-active-note">&nbsp;</div>
+          </div>
+        </div>
+
+        <!-- Charts removed per request -->
+      </section>
+
+    </main>
 
   <div id="confirmDialog" class="dialog hidden">
     <div class="dialog-box">
@@ -60,5 +171,283 @@
   </div>
 
   <script src="{% static 'admin_page/posts2.js' %}?v=10"></script>
+  <script>
+    // Tab switching and light analytics update (charts removed)
+    (function(){
+      const analyticsUrl = "{% url 'analytics_json' %}";
+      const applicationsJsonUrl = "{% url 'applications_json' %}";
+      const adminApplicationsBase = "{% url 'admin_applications' %}"; // base path to append app id
+
+      async function fetchAnalytics(){
+        try{
+          const resp = await fetch(analyticsUrl, { credentials: 'same-origin' });
+          const data = await resp.json();
+          if(!data.success) return;
+          document.getElementById('analytics-user-count').textContent = data.user_count ?? '0';
+          document.getElementById('analytics-total-apps').textContent = data.total_count ?? '0';
+          document.getElementById('analytics-pending').textContent = data.pending_count ?? '0';
+          document.getElementById('analytics-active').textContent = data.active_count ?? '0';
+          document.getElementById('analytics-user-delta').textContent = '';
+          document.getElementById('analytics-apps-delta').textContent = '';
+          document.getElementById('analytics-pending-note').textContent = data.pending_count > 0 ? 'Requires attention' : '';
+          document.getElementById('analytics-active-note').textContent = '';
+        }catch(err){ console.error('fetchAnalytics error', err); }
+      }
+
+      function qs(sel, root){ return (root||document).querySelector(sel); }
+      function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+
+      const tabs = qsa('.tabs .tab');
+      const panes = qsa('.pane');
+
+      function showPane(targetSel){
+        panes.forEach(p => p.classList.add('hidden'));
+        const target = qs(targetSel);
+        if(target) target.classList.remove('hidden');
+      }
+
+      tabs.forEach(t => {
+        t.addEventListener('click', function(){
+          tabs.forEach(x=>{ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+          this.classList.add('active');
+          this.setAttribute('aria-selected','true');
+          const target = this.dataset.target;
+          if(target) showPane(target);
+          if(target === '#pane-analytics'){
+            fetchAnalytics();
+          }
+          if(target === '#pane-applications'){
+            fetchApplications();
+          }
+        });
+      });
+
+      // ensure default pane visible
+      const active = document.querySelector('.tabs .tab.active');
+      if(active && active.dataset.target){
+        showPane(active.dataset.target);
+        if(active.dataset.target === '#pane-analytics') fetchAnalytics();
+        if(active.dataset.target === '#pane-applications') fetchApplications();
+      }
+      
+      // Fetch and render applications into the Applications pane
+      let lastApplications = [];
+      async function fetchApplications(){
+        try{
+          const resp = await fetch(applicationsJsonUrl, { credentials: 'same-origin' });
+          const json = await resp.json();
+          const container = document.getElementById('applicationsContainer');
+          if(!container) return;
+          container.innerHTML = '';
+          if(!json.success){
+            container.innerHTML = '<tr><td colspan="5" style="padding:18px;color:#6b8796">Could not load applications.</td></tr>';
+            return;
+          }
+          const list = json.data || [];
+          lastApplications = list;
+          renderApplications(list);
+
+        }catch(err){
+          console.error('fetchApplications error', err);
+          const container = document.getElementById('applicationsContainer');
+          if(container) container.innerHTML = '<tr><td colspan="5" style="padding:18px;color:#6b8796">Error loading applications.</td></tr>';
+        }
+      }
+
+      function renderApplications(list){
+        const container = document.getElementById('applicationsContainer');
+        if(!container) return;
+        container.innerHTML = '';
+        if(!list || list.length === 0){
+          container.innerHTML = '<tr><td colspan="5" style="padding:18px;color:#6b8796">No applications found.</td></tr>';
+          return;
+        }
+
+        // get current filter
+        const filterEl = document.getElementById('applicationsFilter');
+        const filter = filterEl ? filterEl.value : 'all';
+
+        const filtered = list.filter(app => {
+          if(!filter || filter === 'all') return true;
+          return String(app.status || '').toLowerCase() === filter.toLowerCase();
+        });
+
+        if(filtered.length === 0){
+          container.innerHTML = '<tr><td colspan="5" style="padding:18px;color:#6b8796">No applications match the filter.</td></tr>';
+          return;
+        }
+
+        filtered.forEach(app => {
+          const tr = document.createElement('tr');
+          const student = (app.user && (app.user.full_name || app.user.email)) || 'Unknown';
+          const scholarship = (app.post && app.post.title) || '-';
+          const applied = app.created_at ? new Date(app.created_at).toLocaleString() : '';
+
+          function statusClassFor(s){
+            if(!s) return 'status-pending';
+            const key = String(s).toLowerCase();
+            if(key.includes('approve')) return 'status-approved';
+            if(key.includes('reject')) return 'status-rejected';
+            if(key.includes('in progress')) return 'status-pending';
+            if(key.includes('pending')) return 'status-pending';
+            return 'status-pending';
+          }
+
+          const statusClass = statusClassFor(app.status);
+          const statusHtml = `<span class="status-pill ${statusClass}">${escapeHtml(app.status || 'Pending')}</span>`;
+
+          const viewUrl = adminApplicationsBase.endsWith('/') ? adminApplicationsBase + app.id + '/' : adminApplicationsBase + '/' + app.id + '/';
+
+          const actionsHtml = `
+            <div class="actions-cell">
+              <a class="action-btn btn-view" href="${viewUrl}">
+                <span class="action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+                <span>View</span>
+              </a>
+              <button class="action-btn btn-approve" data-app-id="${app.id}" title="Approve">
+                <span class="action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </span>
+              </button>
+              <button class="action-btn btn-reject" data-app-id="${app.id}" title="Reject">
+                <span class="action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </button>
+            </div>
+          `;
+
+          tr.innerHTML = `
+            <td>
+              <div class="post-title">${escapeHtml(student)}
+                <div class="post-sub">${escapeHtml((app.user && app.user.email) || '')}</div>
+              </div>
+            </td>
+            <td>${escapeHtml(scholarship)}</td>
+            <td>${escapeHtml(applied)}</td>
+            <td>${statusHtml}</td>
+            <td>${actionsHtml}</td>
+          `;
+
+          container.appendChild(tr);
+
+          // attach approve/reject handlers
+          const approveBtn = tr.querySelector('.btn-approve');
+          const rejectBtn = tr.querySelector('.btn-reject');
+          const statusEl = tr.querySelector('.status-pill');
+
+          function getCsrfToken(){
+            const match = document.cookie.match(new RegExp('(^| )csrftoken=([^;]+)'));
+            return match ? match[2] : '';
+          }
+
+          async function postAction(url){
+            try{
+              const resp = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-CSRFToken': getCsrfToken(), 'Accept': 'application/json' }
+              });
+              const ct = resp.headers.get('content-type') || '';
+              if(ct.includes('application/json')){
+                const j = await resp.json();
+                return j;
+              }
+              return { success: resp.ok };
+            }catch(e){ console.error('postAction error', e); return { success: false, error: String(e) }; }
+          }
+
+          if(approveBtn){
+            approveBtn.addEventListener('click', async function(e){
+              e.preventDefault();
+              approveBtn.disabled = true;
+              const url = (adminApplicationsBase.endsWith('/') ? adminApplicationsBase + app.id + '/approve/' : adminApplicationsBase + '/' + app.id + '/approve/');
+              const res = await postAction(url);
+              approveBtn.disabled = false;
+              if(res && res.success){
+                statusEl.textContent = 'Approved';
+                statusEl.className = 'status-pill status-approved';
+                // update cached list
+                const found = lastApplications.find(x=>x.id === app.id);
+                if(found) found.status = 'Approved';
+              }else{
+                alert('Approve failed: ' + (res && res.error ? res.error : 'Unknown'));
+              }
+            });
+          }
+
+          if(rejectBtn){
+            rejectBtn.addEventListener('click', async function(e){
+              e.preventDefault();
+              if(!confirm('Reject this application?')) return;
+              rejectBtn.disabled = true;
+              const url = (adminApplicationsBase.endsWith('/') ? adminApplicationsBase + app.id + '/reject/' : adminApplicationsBase + '/' + app.id + '/reject/');
+              const res = await postAction(url);
+              rejectBtn.disabled = false;
+              if(res && res.success){
+                statusEl.textContent = 'Rejected';
+                statusEl.className = 'status-pill status-rejected';
+                const found = lastApplications.find(x=>x.id === app.id);
+                if(found) found.status = 'Rejected';
+              }else{
+                alert('Reject failed: ' + (res && res.error ? res.error : 'Unknown'));
+              }
+            });
+          }
+        });
+      }
+
+      // small helper to escape HTML inserted into rows
+      function escapeHtml(str){
+        if(!str) return '';
+        return String(str).replace(/[&<>\"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+      }
+
+      // Export applications as CSV
+      async function exportApplicationsCSV(){
+        try{
+          const resp = await fetch(applicationsJsonUrl, { credentials: 'same-origin' });
+          const json = await resp.json();
+          if(!json.success){ alert('Could not fetch applications for export.'); return; }
+          const rows = json.data || [];
+          if(rows.length === 0){ alert('No applications to export.'); return; }
+
+          const header = ['Application ID','Student Name','Email','Scholarship Title','Applied At','Status'];
+          const csv = [header.join(',')];
+          rows.forEach(r=>{
+            const cols = [
+              '"'+(r.id||'')+'"',
+              '"'+((r.user&&r.user.full_name)||'')+'"',
+              '"'+((r.user&&r.user.email)||'')+'"',
+              '"'+((r.post&&r.post.title)||'')+'"',
+              '"'+((r.created_at)||'')+'"',
+              '"'+((r.status)||'')+'"'
+            ];
+            csv.push(cols.join(','));
+          });
+
+          const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'applications_export.csv';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        }catch(e){ console.error('exportApplicationsCSV', e); alert('Export failed.'); }
+      }
+
+      // wire export button
+      const exportBtn = document.getElementById('exportAppsBtn');
+      if(exportBtn){ exportBtn.addEventListener('click', function(){ exportBtn.disabled = true; exportBtn.textContent = 'Exporting...'; exportApplicationsCSV().finally(()=>{ exportBtn.disabled = false; exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Export CSV</span>'; }); }); }
+
+      // re-render applications when filter changes
+      const applicationsFilter = document.getElementById('applicationsFilter');
+      if(applicationsFilter){ applicationsFilter.addEventListener('change', function(){ renderApplications(lastApplications || []); }); }
+    })();
+  </script>
 </body>
 </html>

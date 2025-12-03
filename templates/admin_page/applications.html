@@ -1,0 +1,356 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Applications — Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'admin_page/admin-dashboard.css' %}">
+    <style>
+        .table-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 14px 10px;
+            color: #6b7280;
+            font-size: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td {
+            padding: 16px 10px;
+            font-size: 15px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+        .pending { background:#dbeafe; color:#1e40af; }
+        .review { background:#cffafe; color:#0369a1; }
+        .approved { background:#bbf7d0; color:#166534; }
+        .rejected { background:#fecaca; color:#991b1b; }
+
+        .action-btn {
+            padding: 6px 14px;
+            border-radius: 10px;
+            background: #eef7fb;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .approve-btn { background:#d1fae5; color:#065f46; }
+        .reject-btn { background:#fee2e2; color:#991b1b; }
+    </style>
+</head>
+
+<body>
+<main class="main">
+<section class="overview">
+
+    <div class="admin-header">
+        <div class="admin-header-inner">
+            <div class="admin-title-row">
+                <div class="shield-icon">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#0b67a4" stroke-width="1.6">
+                        <path d="M12 2l7 3v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V5l7-3z"/>
+                    </svg>
+                </div>
+                <div class="admin-title-text">
+                    <h1 class="dashboard-title">Applications</h1>
+                    <p class="dashboard-sub">Review and manage submitted applications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search + Filter + Export -->
+    <div style="display:flex; gap:10px; margin-top:20px;">
+        <input type="text" placeholder="Search applications..." 
+               style="flex:1; padding:12px 14px; border-radius:10px; border:1px solid #e5e7eb;">
+        
+        <select style="padding:12px 14px; border-radius:10px; border:1px solid #e5e7eb;">
+            <option>All Applications</option>
+            <option>Pending</option>
+            <option>Review</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+        </select>
+
+        <button class="action-btn">
+            <i class="fa-solid fa-download"></i> Export
+        </button>
+    </div>
+
+    <!-- Table + Detail Panel (side-by-side in dashboard) -->
+    <div class="table-panel-wrap" style="display:flex; gap:20px; margin-top:20px; align-items:flex-start;">
+        <div class="table-card" style="flex:1;">
+        <div id="applications-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Scholarship</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% if applications %}
+                {% for app in applications %}
+                <tr data-app-id="{{ app.id }}">
+                    <td>
+                        <div style="font-weight:700;">{{ app.user.full_name }}</div>
+                        <div style="color:#6b7280; font-size:13px;">{{ app.user.email }}</div>
+                    </td>
+
+                    <td>{{ app.post.title }}</td>
+
+                    <td>{{ app.created_at|date:"Y-m-d" }}</td>
+
+                    <td>
+                        <span class="status-badge
+                            {% if app.status == 'Approved' %}approved
+                            {% elif app.status == 'Rejected' %}rejected
+                            {% elif app.status == 'Review' %}review
+                            {% else %}pending
+                            {% endif %}
+                        ">
+                            {{ app.status }}
+                        </span>
+                    </td>
+
+                    <td style="text-align:right; display:flex; justify-content:flex-end; gap:8px;">
+                        <button type="button" class="action-btn view-btn" data-json-url="{% url 'admin_view_application_json' app.id %}">
+                            <i class="fa-solid fa-eye"></i> View
+                        </button>
+
+                        <form action="{% url 'admin_approve_application' app.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="action-btn approve-btn"><i class="fa-solid fa-check"></i></button>
+                        </form>
+
+                        <form action="{% url 'admin_reject_application' app.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="action-btn reject-btn"><i class="fa-solid fa-xmark"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="5">No applications found.</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+            </div>
+        </div>
+
+        <!-- side panel removed (details render inside list area) -->
+    </div>
+
+    <style>
+        /* responsive tweaks */
+        .app-file-link{ display:block; padding:6px 8px; background:#f8fafc; border-radius:8px; margin-bottom:6px; text-decoration:none; color:#0b67a4; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            const listContainer = document.getElementById('applications-list');
+            let originalHTML = listContainer.innerHTML;
+            let selectedAppId = null;
+            
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+            const csrftoken = getCookie('csrftoken') || (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || '';
+            const csrfElGlobal = document.querySelector('input[name=csrfmiddlewaretoken]');
+
+            function formatDate(iso){
+                if(!iso) return '';
+                try{ return new Date(iso).toISOString().split('T')[0]; }catch(e){ return iso; }
+            }
+
+            function renderDetailsToTable(app, user, post, files){
+                // Render details inside a card to preserve layout (header/search remain)
+                let html = '';
+                html += `<div style="background:#fff; padding:18px; border-radius:12px; box-shadow:0 2px 10px rgba(13,30,50,0.04);">`;
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><h3 style="margin:0; font-size:18px;">Application Details</h3><button id="back-to-list" class="action-btn">Back</button></div>`;
+
+                html += `<div style="padding-top:8px; border-top:1px solid #f3f4f6;">`;
+                html += `<div style="margin-bottom:12px;"><div style="font-weight:700;">${user.full_name||''}</div><div style="color:#6b7280; font-size:13px;">${user.email||''}</div></div>`;
+
+                html += `<div style="margin-bottom:12px;"><div style="font-weight:700;">${post.title||''}</div><div style="color:#6b7280; font-size:13px; margin-top:6px;">${post.location||''}</div></div>`;
+
+                if(post.description){ html += `<div style="margin-bottom:12px; color:#374151;">${post.description}</div>`; }
+
+                html += `<div style="display:flex; gap:18px; margin-top:6px; margin-bottom:12px;"><div><strong>Applied</strong><div style="margin-top:6px;">${formatDate(app.created_at)||''}</div></div><div><strong>Status</strong><div style="margin-top:6px;">${app.status||''}</div></div></div>`;
+
+                if(files.length){
+                    html += `<div style="margin-top:6px; margin-bottom:12px;"><strong>Files</strong>`;
+                    files.forEach(f=>{
+                        const name = f.requirement_name || f.file_url || 'File';
+                        const url = f.file_url || '#';
+                        html += `<div><a class="app-file-link" href="${url}" target="_blank" rel="noopener">${name}</a></div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // actions: approve/reject forms
+                html += `<div style="margin-top:12px; display:flex; gap:8px;">`;
+                html += `<form method="post" action="/applications/${app.id}/approve/">`;
+                if(csrfElGlobal){ html += `<input type="hidden" name="csrfmiddlewaretoken" value="${csrfElGlobal.value}">`; }
+                html += `<button class="action-btn approve-btn" type="submit">Approve</button></form>`;
+                html += `<form method="post" action="/applications/${app.id}/reject/">`;
+                if(csrfElGlobal){ html += `<input type="hidden" name="csrfmiddlewaretoken" value="${csrfElGlobal.value}">`; }
+                html += `<button class="action-btn reject-btn" type="submit">Reject</button></form>`;
+
+                html += `</div></div></div>`;
+
+                listContainer.innerHTML = html;
+
+                // wire back button
+                const backBtn = document.getElementById('back-to-list');
+                if(backBtn) backBtn.addEventListener('click', function(){
+                    listContainer.innerHTML = originalHTML;
+                    initViewButtons();
+                });
+            }
+
+            async function loadAndShowDetails(url, appId){
+                try{
+                    const resp = await fetch(url, { credentials: 'same-origin' });
+                    const data = await resp.json();
+                    if(!data.success){
+                            listContainer.innerHTML = '<div style="color:#b91c1c; padding:18px;">Unable to load application.</div>';
+                        return;
+                    }
+
+                    const app = data.app || {};
+                    const user = data.user || {};
+                    const post = data.post || {};
+                    const files = data.files || [];
+
+                    selectedAppId = appId || null;
+                    renderDetailsToTable(app, user, post, files);
+                    // attach AJAX handlers for approve/reject in the details card
+                    attachAjaxActions(app.id);
+                }catch(err){
+                    console.error(err);
+                    listContainer.innerHTML = '<div style="color:#b91c1c; padding:18px;">Error loading application.</div>';
+                }
+            }
+
+            function initViewButtons(){
+                document.querySelectorAll('.view-btn').forEach(btn=>{
+                    btn.addEventListener('click', function(e){
+                        const url = this.dataset.jsonUrl;
+                        if(!url) return;
+                        // extract app id from the row data attribute if available
+                        const tr = this.closest('tr');
+                        const appId = tr ? tr.dataset.appId : null;
+                        loadAndShowDetails(url, appId);
+                    });
+                });
+            }
+
+            function updateOriginalHTMLStatus(appId, newStatus){
+                try{
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = originalHTML;
+                    const row = tmp.querySelector(`[data-app-id="${appId}"]`);
+                    if(row){
+                        const badge = row.querySelector('.status-badge');
+                        if(badge){
+                            badge.textContent = newStatus;
+                            // update classes
+                            badge.classList.remove('pending','review','approved','rejected');
+                            if(newStatus === 'Approved') badge.classList.add('approved');
+                            else if(newStatus === 'Rejected') badge.classList.add('rejected');
+                            else if(newStatus === 'Review') badge.classList.add('review');
+                            else badge.classList.add('pending');
+                        }
+                        originalHTML = tmp.innerHTML;
+                    }
+                }catch(e){ console.error('updateOriginalHTMLStatus error', e); }
+            }
+
+            async function ajaxPostAction(url, successStatus){
+                try{
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if(resp.ok){
+                        // Update details UI and cached list HTML
+                        // successStatus should be 'Approved' or 'Rejected'
+                        // update details card status text
+                        const statusEl = document.querySelector('#applications-list .details-status');
+                        if(statusEl) statusEl.textContent = successStatus;
+                        // update cached original HTML so when back pressed the list shows updated status
+                        if(selectedAppId) updateOriginalHTMLStatus(selectedAppId, successStatus);
+                        return true;
+                    }
+                }catch(err){ console.error(err); }
+                return false;
+            }
+
+            function attachAjaxActions(appId){
+                // approve
+                const approveForm = listContainer.querySelector(`form[action="/applications/${appId}/approve/"]`);
+                if(approveForm){
+                    approveForm.addEventListener('submit', async function(ev){
+                        ev.preventDefault();
+                        const ok = await ajaxPostAction(`/applications/${appId}/approve/`, 'Approved');
+                        if(ok){
+                            // update details card status display
+                            const st = listContainer.querySelector('.details-status');
+                            if(st) st.textContent = 'Approved';
+                        }
+                    });
+                }
+                // reject
+                const rejectForm = listContainer.querySelector(`form[action="/applications/${appId}/reject/"]`);
+                if(rejectForm){
+                    rejectForm.addEventListener('submit', async function(ev){
+                        ev.preventDefault();
+                        const ok = await ajaxPostAction(`/applications/${appId}/reject/`, 'Rejected');
+                        if(ok){
+                            const st = listContainer.querySelector('.details-status');
+                            if(st) st.textContent = 'Rejected';
+                        }
+                    });
+                }
+            }
+
+            // initialize
+            initViewButtons();
+        });
+    </script>
+
+</section>
+</main>
+</body>
+</html>

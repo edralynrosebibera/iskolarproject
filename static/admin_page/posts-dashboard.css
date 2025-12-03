@@ -1,0 +1,88 @@
+/* posts-dashboard.css
+   Extracted from templates/admin_page/posts.html inline styles
+*/
+/* Quick layout styles to match admin dashboard screenshot */
+.body-font { font-family: Inter, system-ui, Arial, sans-serif; }
+body{font-family:Inter, system-ui, Arial, sans-serif;background:#f7fbfe;color:#07283d;margin:0;font-weight:400}
+.hero{background:#f3f7fb;padding:28px 20px;border-bottom: none}
+.hero-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 8px}
+.hero-left h1{font-size:32px;margin:0;color:#07283d;font-weight:600}
+.subtitle{color:#6b8796;margin-top:6px}
+.tabs{display:flex;gap:10px;background:transparent;margin-top:18px}
+.tab{padding:8px 12px;border-radius:6px;background:transparent;color:#0b3747;border:1px solid transparent;font-size:14px}
+.tab.active{background:transparent;border-color:rgba(11,103,164,0.08);box-shadow:none}
+.controls{display:flex;align-items:center;gap:12px;margin-top:14px}
+.search-wrap{flex:1 1 90%;max-width:1400px}
+.search-wrap input{width:100%;padding:8px 14px;border-radius:6px;border:1px solid rgba(11,103,164,0.08);background:#fff;color:#07283d;font-size:14px;line-height:1.2}
+.search-wrap input::placeholder{color:#9aaab6;opacity:1}
+.search-wrap input{height:48px;border-radius:28px;padding-left:22px;padding-right:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 2px rgba(11,103,164,0.02)}
+
+/* make the header-right controls compact and aligned like the attachment */
+.hero-right{display:flex;align-items:center;gap:12px}
+.hero-right .export-btn{border-radius:12px;padding:8px 12px;background:#fff;box-shadow:0 1px 2px rgba(11,103,164,0.04);border:1px solid rgba(11,103,164,0.06)}
+.hero-right .export-btn span{font-weight:600}
+.hero-right .analytics-btn{border-radius:12px;padding:10px 14px;background:#fff;border:1px solid rgba(11,103,164,0.04);box-shadow:0 1px 2px rgba(11,103,164,0.02);color:#0b67a4}
+
+/* If a small select is placed in the header (like the attachment), style it compactly */
+.hero-right .header-select, select.header-select{height:44px;border-radius:12px;padding:8px 12px;border:1px solid rgba(11,103,164,0.06);background:#fff;color:#07283d}
+.archive-btn{background:transparent;color:#0b67a4;border:1px solid rgba(11,103,164,0.08);padding:8px 12px;border-radius:6px}
+.create-btn{background:#0b67a4;color:white;border:none;padding:8px 12px;border-radius:6px}
+.analytics-btn{background:transparent;padding:6px 10px;border-radius:6px;color:#0b67a4}
+
+.content{max-width:1400px;margin:22px auto;padding:0 8px}
+.table-wrap{background:white;border-radius:8px;padding:14px 16px}
+.posts-table{width:100%;border-collapse:collapse}
+.posts-table thead th{color:#6b8796;padding:12px 10px;border-bottom:1px solid #eef2f5;font-weight:600;font-size:13px}
+.posts-table tbody td{padding:12px 10px;border-bottom:1px solid #f3f6f8;background:transparent}
+.posts-table tbody td{vertical-align: middle}
+.post-title{font-weight:600;color:#07283d}
+.post-sub{color:#95a6b0;font-size:13px;margin-top:4px}
+.deadline{color:#059669;font-weight:700}
+.status-pill{background:#dff6fb;color:#0b67a4;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.actions-cell{display:flex;justify-content:flex-end;gap:10px}
+.icon-btn{background:transparent;border:none;color:#0b67a4;cursor:pointer;font-size:18px}
+.delete-icon{color:#ef4444}
+/* Analytics readability */
+.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.analytics-card{background:white;border-radius:8px;padding:16px 14px;display:flex;flex-direction:column;gap:6px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
+.analytics-card .label{font-size:13px;color:#6b8796}
+.analytics-card .value{font-size:24px;line-height:1;font-weight:600;color:#07283d;margin-top:6px}
+.analytics-card .note{font-size:12px;color:#6b8796;margin-top:6px}
+.analytics-icon{position:absolute;top:12px;right:12px;opacity:0.9;color:#9aaab6}
+.analytics-icon svg{width:18px;height:18px;display:block;fill:currentColor}
+
+/* Analytics card refinements: larger number + icon position */
+.analytics-card { position: relative; padding: 14px; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.analytics-card .label { font-size: 13px; color: #666; margin-bottom: 6px; }
+.analytics-card .value { font-size: 22px; font-weight: 600; color: #111; }
+.analytics-card .note { color: #888; font-size: 12px; margin-top: 6px; }
+.analytics-card .analytics-icon { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 6px; }
+.analytics-card .analytics-icon svg { width: 16px; height: 16px; fill: #555; }
+
+/* small helpers used inline in template — left as inline attributes but selectors available */
+.flex-col { display:flex; flex-direction:column; }
+.center { display:flex; align-items:center; justify-content:center; }
+
+/* Action buttons in Applications table */
+.actions-cell { display:flex; gap:8px; align-items:center; justify-content:flex-end }
+.action-btn { border: 1px solid transparent; padding:6px 10px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-weight:500; text-decoration:none; background:transparent }
+.btn-view { background:transparent; color:#071b2b; border-color:rgba(6,30,60,0.04) }
+.btn-approve { background: transparent; color:#166534; border-color:rgba(22,101,52,0.06) }
+.btn-reject { background: transparent; color:#991b1b; border-color:rgba(153,27,27,0.04) }
+.action-icon { width:18px; height:18px; display:inline-block }
+
+/* Status pill variants */
+.status-pill { padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px; display:inline-block }
+.status-pill { display:inline-flex; align-items:center; justify-content:center }
+
+/* Remove underline on anchor-style action buttons */
+.action-btn, .action-btn:link, .action-btn:visited { text-decoration: none; }
+
+/* Export button */
+.export-btn { background: #ffffff; color: #0b67a4; border: 1px solid rgba(11,103,164,0.08); padding:8px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-weight:600 }
+.export-btn svg{ width:16px; height:16px; }
+.export-btn:hover{ box-shadow: 0 4px 10px rgba(11,103,164,0.04); transform: translateY(0); }
+.hero-right .analytics-btn{ text-decoration:none }
+.status-pending { background:#eef6ff; color:#0b67a4 }
+.status-approved { background:#f0fff4; color:#166534 }
+.status-rejected { background:#fff5f5; color:#991b1b }
