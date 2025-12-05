@@ -80,7 +80,7 @@ def login_view(request):
                 return redirect("login")
 
             # Check email verification status
-            if not response.user.email_confirmed:
+            if not response.user.confirmed_at:
                 messages.error(request, "Please verify your email before logging in.")
                 return redirect("login")
 
