@@ -212,16 +212,20 @@ def submit_requirements(request, post_id):
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
     try:
-        # ⭐ Always use Supabase UUID stored in session
-        user_id = request.session.get("supabase_user_id")
+        # Convert post_id (UUID object) → string
+        post_id = str(post_id)
 
+        # Get user UUID from session and convert to string
+        user_id = request.session.get("supabase_user_id")
         if not user_id:
             return JsonResponse({"success": False, "error": "User not logged in"}, status=400)
+
+        user_id = str(user_id)
 
         body = json.loads(request.body.decode("utf-8"))
         reqs = body.get("requirements", [])
 
-        # 🔥 1) Validate post exists (post_id is already UUID)
+        # Validate post exists
         post_check = (
             supabase.table("posts")
             .select("id")
@@ -233,33 +237,32 @@ def submit_requirements(request, post_id):
         if not post_check.data:
             return JsonResponse({"success": False, "error": "Post not found"}, status=404)
 
-        # 🔥 2) Check if application already exists for this user + post
+        # Check if application exists
         existing = (
             supabase.table("applications")
             .select("id")
-            .eq("user_id", user_id)  # UUID
-            .eq("post_id", post_id)  # UUID
+            .eq("user_id", user_id)
+            .eq("post_id", post_id)
             .limit(1)
             .execute()
         )
 
         if existing.data:
-            application_id = existing.data[0]["id"]  # BIGINT
+            application_id = existing.data[0]["id"]
         else:
-            # 🔥 3) Create new application
+            # Create new application
             new_app = (
                 supabase.table("applications")
                 .insert({
-                    "user_id": user_id,      # UUID
-                    "post_id": post_id,      # UUID
+                    "user_id": user_id,
+                    "post_id": post_id,
                     "status": "Pending",
                 })
                 .execute()
             )
+            application_id = new_app.data[0]["id"]
 
-            application_id = new_app.data[0]["id"]  # BIGINT
-
-        # 🔥 4) Save requirement files
+        # Insert requirement files
         for req in reqs:
             supabase.table("application_files").insert({
                 "application_id": application_id,
@@ -272,6 +275,7 @@ def submit_requirements(request, post_id):
     except Exception as e:
         print("SUBMIT ERROR:", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 
 
