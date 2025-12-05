@@ -106,34 +106,52 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     // 3. Profile Completeness Functions
-    const updateMissingInfoList = (profileData) => {
-        const missingItems = [];
-        // Define key fields and the criteria to check for their completeness
-        const checks = {
-            'Upload Profile Photo': (data) => data.avatar && data.avatar.includes('url('),
-            'Address': (data) => data.address && data.address.trim() !== '',
-            'Birthdate': (data) => data.birthdate && data.birthdate.trim() !== '',
-            'GPA/GWA': (data) => data.gwa && data.gwa.trim() !== '',
-            'Complete Bio': (data) => data.bio && data.bio.trim().length >= 20, // Require 20+ chars
-            'Year Level': (data) => data.yearLevel && data.yearLevel.trim() !== '',
-        };
+    // Replace your existing updateMissingInfoList function with this:
 
-        // Only require 'Course' if education level is 'COLLEGE'
-        if (profileData.educationLevel === "COLLEGE") {
-            checks['College Course'] = (data) => data.course && data.course.trim() !== '';
-        }
-
-        for (const [name, isComplete] of Object.entries(checks)) {
-            if (!isComplete(profileData)) {
-                missingItems.push(name);
-            }
-        }
-
-        const missingInfoUl = document.querySelector('.missing-info ul');
-        if (missingInfoUl) {
-            missingInfoUl.innerHTML = missingItems.map(item => `<li>${item}</li>`).join('');
-        }
+const updateMissingInfoList = (profileData) => {
+    const missingItems = [];
+    
+    // Define checks
+    const checks = {
+        'Upload Profile Photo': (data) => data.avatar && data.avatar.includes('url('),
+        'Address': (data) => data.address && data.address.trim() !== '',
+        'Birthdate': (data) => data.birthdate && data.birthdate.trim() !== '',
+        'GPA/GWA': (data) => data.gwa && data.gwa.trim() !== '',
+        'Complete Bio': (data) => data.bio && data.bio.trim().length >= 20, 
+        'Year Level': (data) => data.yearLevel && data.yearLevel.trim() !== '',
     };
+
+    if (profileData.educationLevel === "COLLEGE") {
+        checks['College Course'] = (data) => data.course && data.course.trim() !== '';
+    }
+
+    for (const [name, isComplete] of Object.entries(checks)) {
+        if (!isComplete(profileData)) {
+            missingItems.push(name);
+        }
+    }
+
+    // --- THE FIX ---
+    const missingInfoContainer = document.querySelector('.missing-info');
+
+    if (missingInfoContainer) {
+        if (missingItems.length === 0) {
+            // 1. Clear the inner HTML so the text "Missing Information" is physically gone
+            missingInfoContainer.innerHTML = ''; 
+            // 2. Hide the box
+            missingInfoContainer.style.display = 'none';
+        } else {
+            // Restore the box if items are missing
+            missingInfoContainer.style.display = 'block';
+            missingInfoContainer.innerHTML = `
+                <p><strong>Missing Information:</strong></p>
+                <ul>
+                    ${missingItems.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+        }
+    }
+};
     
     const updateProfileCompleteness = (profileData) => {
         let totalPoints = 11; // Base points
