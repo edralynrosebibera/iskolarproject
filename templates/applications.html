@@ -7,9 +7,49 @@
     <title>Scholarship Portal - Saved Scholarships</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
-    <link rel="stylesheet" href="{% static 'applications.css' %}?v4">
+    <link rel="stylesheet" href="{% static 'applications.css' %}?v=12">
     <link rel="stylesheet" href="{% static 'applications_cards.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+    /* 1. BRING THE HEADER TO THE FRONT */
+    /* This is the most important part. The parent container must be above the page content */
+    .header {
+        z-index: 9999 !important; 
+        position: fixed !important; /* Ensure it stays fixed at top */
+    }
+
+    /* 2. Profile Dropdown Styles */
+    .profile-dropdown {
+        width: 320px !important;
+        border-radius: 16px !important;
+        border: 1px solid #eee !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        top: 64px !important; /* Adjusted to match header height exactly */
+        right: 10px !important;
+        padding: 0 !important;
+        background: #fff !important;
+        z-index: 10000 !important; /* One level higher than the header */
+    }
+
+    /* Fix Header Padding */
+    .profile-header {
+        padding: 20px 24px 16px 24px !important;
+        background: #f7fafd !important;
+        border-bottom: 1px solid #eee !important;
+        display: flex !important;
+        gap: 16px !important;
+        align-items: center !important;
+    }
+    
+    /* Fix Link Spacing */
+    .profile-menu li a, 
+    .logout-link {
+        padding: 14px 24px !important;
+        font-size: 16px !important;
+        display: block !important;
+        text-decoration: none !important; /* Removes underline blue link style */
+    }
+</style>
 </head>
 <body>
     <!-- Header -->
@@ -50,8 +90,8 @@
                     </div>
                     <ul class="profile-menu">
                         <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
-                        <li><a href="{% url 'profile' %}">Edit Profile<br><small>Update your information</small></a></li>
-                        <li><a href="#">Settings<br><small>Manage your preferences</small></a></li>
+                        
+                        
                     </ul>
                     <hr>
                     <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
@@ -198,6 +238,29 @@
    <script src="{% static 'appscript.js' %}"></script>
     <script src="{% static 'script2.js' %}"></script>
         <script>
+            (function(){
+        const toggle = document.getElementById('profileToggle');
+        const dropdown = document.getElementById('profileDropdown');
+
+        if(toggle && dropdown) {
+            // 1. Toggle the dropdown when clicking the profile picture
+            toggle.addEventListener('click', function(e){
+                e.stopPropagation(); // Prevents the click from closing it immediately
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                } else {
+                    dropdown.style.display = 'block';
+                }
+            });
+
+            // 2. Close the dropdown if clicking anywhere else on the screen
+            document.addEventListener('click', function(e){
+                if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+    })();
         // Countdown "Due in ..." update for each card
         (function(){
             function pad(n){return n<10?('0'+n):n}

@@ -6,10 +6,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scholarship Portal - Dashboard</title>
   <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <link rel="stylesheet" href="{% static 'homepage/homepage.css' %}?v=10">
+ <link rel="stylesheet" href="{% static 'homepage/homepage.css' %}?v=12">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
+<style>
+    /* 1. BRING THE HEADER TO THE FRONT */
+    /* This forces the header bar to sit above all page content (cards, banners) */
+    .header {
+        z-index: 9999 !important;
+        position: fixed !important;
+    }
+
+    /* 2. Profile Dropdown Styles */
+    .profile-dropdown {
+        width: 320px !important;
+        border-radius: 16px !important;
+        border: 1px solid #eee !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        padding: 0 !important;
+        top: 64px !important; /* Matches header height */
+        right: 10px !important;
+        z-index: 10000 !important; /* Higher than the header itself */
+        background: #fff !important;
+    }
+
+    /* Header Section (Avatar + Name) */
+    .profile-header {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 20px 24px 16px 24px !important;
+        background: #f7fafd !important;
+        border-bottom: 1px solid #eee !important;
+    }
+
+    /* Name and Email Text */
+    .profile-name {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #222 !important;
+    }
+    
+    .profile-email {
+        font-size: 14px !important;
+        color: #666 !important;
+    }
+
+    /* Menu Links */
+    .profile-menu li a {
+        display: block !important; /* Ensures clickable area spans full width */
+        padding: 14px 24px !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        color: #222 !important;
+        text-decoration: none !important;
+    }
+
+    .profile-menu li a:hover, 
+    .logout-link:hover {
+        background: #f7fafd !important;
+    }
+
+    /* Logout Link */
+    .logout-link {
+        display: block !important;
+        padding: 14px 24px 14px 24px !important;
+        color: #000 !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        border-top: 1px solid #f0f0f0 !important;
+        text-decoration: none !important;
+    }
+    
+    .logout-link.danger {
+        color: #000 !important; 
+    }
+  </style>
 <body>
   <!-- Header -->
   <header class="header">
@@ -36,26 +109,24 @@
       </div>
 
       <div class="header-right">
-        <button class="profile-btn" id="profileToggle">
-          <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:32px;height:32px;border-radius:50%;border:3px solid #33c3f0;">
-        </button>
-        <div class="profile-dropdown" id="profileDropdown" style="display: none;">
-          <div class="profile-header">
-            <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:52px;height:52px;">
-            <div>
-              <div class="profile-name">{{ user.first_name }}</div>
-              <div class="profile-email">{{ user.email }}</div>
-            </div>
-          </div>
-          <ul class="profile-menu">
-            <li><a href="{% url 'view_profile' %}"><span class="icon">👤</span> View Profile<br><small>See your profile information</small></a></li>
-            <li><a href="{% url 'profile' %}"><span class="icon">👤</span> Edit Profile<br><small>Update your information</small></a></li>
-            <li><a href="#"><span class="icon">⚙️</span> Settings<br><small>Manage your preferences</small></a></li>
-            <li><a href="#" id="darkModeToggle"><span class="icon">🌙</span> Dark Mode</a></li>
-          </ul>
-          <hr>
-          <a href="{% url 'admin_dashboard' %}" class="logout-link danger"><span class="icon">➡</span> Log Out<br><small>Sign out of your account</small></a>
-        </div>
+                <button class="profile-btn" id="profileToggle">
+                    <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:32px;height:32px;border-radius:50%;">
+                </button>
+                <div class="profile-dropdown" id="profileDropdown" style="display: none;">
+                    <div class="profile-header">
+                        <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:56px;height:56px;">
+                        <div>
+                            <div class="profile-name">{{ user.first_name }}</div>
+                            <div class="profile-email">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <ul class="profile-menu">
+                        <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
+              
+                    </ul>
+                    <hr>
+                    <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
+                </div>
       </div>
     </div>
   </header>
