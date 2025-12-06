@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarship Portal - Saved Scholarships</title>
+    <title>Scholarship Portal - My Applications</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
     <meta name="description" content="View your saved scholarships in the academic portal.">
     <link rel="stylesheet" href="{% static 'applications.css' %}?v=12">
@@ -12,11 +12,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
     /* 1. BRING THE HEADER TO THE FRONT */
-    /* This is the most important part. The parent container must be above the page content */
     .header {
         z-index: 9999 !important; 
         position: fixed !important; /* Ensure it stays fixed at top */
     }
+
+    /* --- SIDEBAR FIX ADDED HERE --- */
+    /* This ensures the sidebar is clickable by placing it ABOVE the header */
+    .sidebar {
+        z-index: 10000 !important; 
+    }
+    .sidebar-overlay {
+        z-index: 9998 !important;
+    }
+    /* ------------------------------ */
 
     /* 2. Profile Dropdown Styles */
     .profile-dropdown {
@@ -52,7 +61,6 @@
 </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="header-left">
@@ -90,8 +98,6 @@
                     </div>
                     <ul class="profile-menu">
                         <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
-                        
-                        
                     </ul>
                     <hr>
                     <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
@@ -100,10 +106,8 @@
         </div>
     </header>
 
-    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2 class="sidebar-title">Menu</h2>
@@ -123,7 +127,7 @@
             Browse Scholarships
         </a>
 
-        <a href="{% url 'applications' %}" class="sidebar-btn">
+        <a href="{% url 'applications' %}" class="sidebar-btn active">
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                 <polyline points="14,2 14,8 20,8"/>
@@ -140,7 +144,7 @@
             My Archives
         </a>
 
-        <a href="{% url 'saved_scholarships' %}" class="sidebar-btn active">
+        <a href="{% url 'saved_scholarships' %}" class="sidebar-btn">
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
             </svg>
@@ -148,7 +152,6 @@
         </a>
     </nav>
 
-    <!-- Applications (card layout) -->
     <main class="cards-container">
         <section class="cards-hero">
             <div class="cards-hero-left">
