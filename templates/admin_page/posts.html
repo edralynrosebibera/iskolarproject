@@ -27,17 +27,15 @@
           <div class="search-wrap">
             <input id="searchInput" type="search" placeholder="Search scholarships...">
           </div>
-          <button id="archiveExpired" class="archive-btn">Archive Expired</button>
           <button class="create-btn" onclick="goToCreatePost()">➕ Add Scholarship</button>
         </div>
       </div>
 
       <div class="hero-right" style="display:flex;align-items:center;gap:12px">
-        <button id="exportAppsBtn" class="export-btn" title="Export dashboard as CSV" style="display:inline-flex;align-items:center;gap:8px">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Export</span>
-        </button>
-        <a href="{% url 'analytics' %}" class="analytics-btn" style="margin-right:12px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">📊 Analytics</a>
+        <form method="post" action="{% url 'logout' %}" style="margin:0">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn" title="Log out" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(11,103,164,0.06);background:#fff;cursor:pointer">Logout</button>
+        </form>
       </div>
     </div>
   </header>
@@ -45,6 +43,14 @@
     <main class="content">
       <!-- Scholarships pane (default) -->
       <section id="pane-scholarships" class="pane">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <label for="postsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
+          <select id="postsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
         <div class="table-wrap">
           <table id="postsTable" class="posts-table">
             <thead>
@@ -65,7 +71,7 @@
 
       <!-- Applications pane -->
       <section id="pane-applications" class="pane hidden">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:12px">
           <label for="applicationsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
           <select id="applicationsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
             <option value="all">All</option>
@@ -74,6 +80,7 @@
             <option value="Rejected">Rejected</option>
             <option value="In Progress">In Progress</option>
           </select>
+          <!-- Applications export button removed -->
         </div>
         <div class="table-wrap">
           <table class="posts-table">
@@ -443,6 +450,19 @@
       // wire export button
       const exportBtn = document.getElementById('exportAppsBtn');
       if(exportBtn){ exportBtn.addEventListener('click', function(){ exportBtn.disabled = true; exportBtn.textContent = 'Exporting...'; exportApplicationsCSV().finally(()=>{ exportBtn.disabled = false; exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Export CSV</span>'; }); }); }
+
+      // also wire the Applications-pane export button (if present)
+      const exportBtnApp = document.getElementById('exportAppsBtnApp');
+      if(exportBtnApp){
+        exportBtnApp.addEventListener('click', function(){
+          exportBtnApp.disabled = true;
+          exportBtnApp.textContent = 'Exporting...';
+          exportApplicationsCSV().finally(()=>{
+            exportBtnApp.disabled = false;
+            exportBtnApp.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Export</span>';
+          });
+        });
+      }
 
       // re-render applications when filter changes
       const applicationsFilter = document.getElementById('applicationsFilter');

@@ -19,6 +19,33 @@ supabase: Client = create_client(url, key)
 def admin_view(request):
     return render(request, "admin_page/admin.html")
 
+# ------------------------------
+# SESSION GUARDS
+# ------------------------------
+
+def student_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        # If user is admin → force logout → redirect to login
+        if request.session.get("is_admin") is True:
+            logout(request)
+            return redirect("/login/")
+        
+        # If missing student UUID → force logout
+        if not request.session.get("supabase_user_id"):
+            logout(request)
+            return redirect("/login/")
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if request.session.get("is_admin") is not True:
+            return redirect("/login/")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 @csrf_exempt
 def create_post_view(request):
     if request.method == "POST":
@@ -109,6 +136,7 @@ def logout_view(request):
 def create_description(request):
     return render(request, "admin_page/index.html")
 
+@student_required
 def view_description(request, post_id):
     return render(request, "admin_page/view.html", {
         "django_user_id": request.session.get("user_id"),
@@ -207,6 +235,7 @@ def analytics_json(request):
 # It was removed per request to no longer show trends/charts in the admin UI.
 
 @csrf_exempt
+@student_required
 def submit_requirements(request, post_id):
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)

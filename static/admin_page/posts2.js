@@ -57,34 +57,43 @@ function renderTableRows(posts) {
     const status = post.status || (deadlineDate && deadlineDate < new Date() ? 'expired' : 'active');
 
     const tr = document.createElement('tr');
-    tr.setAttribute('data-id', '${post.id}');
+    tr.setAttribute('data-id', String(post.id));
+
     tr.innerHTML = `
-      <td class="td-title">
-        <div class="title-line">
-          <div class="title-text">${post.title}</div>
-          <div class="title-sub">${(post.location || '')}</div>
+      <td>
+        <div class="post-title">
+          <div class="title-text">${escapeHtml(post.title || '')}</div>
+          <div class="post-sub">${escapeHtml(post.location || '')}</div>
         </div>
       </td>
       <td class="td-deadline" id="${countdownId}">${post.deadline || 'N/A'}</td>
-      <td class="td-applicants">${applicants}</td>
-      <td class="td-status"><span id="status-${post.id}" class="status-pill ${status === 'active' ? 'active' : status === 'expired' ? 'expired' : 'neutral'}">${status}</span></td>
-      <td class="td-actions">
-        <button class="icon-btn edit" title="Edit" data-tooltip="Edit" onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')" aria-label="Edit">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="2.5" y="3.5" width="15" height="15" rx="3" stroke="currentColor" stroke-width="1.6" fill="none" />
-            <path d="M8.5 13.5l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M14.5 6.5l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button class="icon-btn delete" title="Delete" data-tooltip="Delete" onclick="confirmDelete('${post.id}')" aria-label="Delete">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M10 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+      <td>${escapeHtml(String(applicants))}</td>
+      <td>
+        <span id="status-${post.id}" class="status-pill ${(
+          (String(status||'').toLowerCase().includes('arch')) ? 'archived' :
+          (String(status||'').toLowerCase() === 'expired') ? 'expired' :
+          (String(status||'').toLowerCase() === 'active') ? 'active' : 'neutral'
+        )}">${escapeHtml(status)}</span>
+      </td>
+      <td>
+        <div class="actions-cell">
+          <button class="icon-btn edit" title="Edit" data-tooltip="Edit" onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')" aria-label="Edit">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2.5" y="3.5" width="15" height="15" rx="3" stroke="currentColor" stroke-width="1.6" fill="none" />
+              <path d="M8.5 13.5l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M14.5 6.5l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn delete" title="Delete" data-tooltip="Delete" onclick="confirmDelete('${post.id}')" aria-label="Delete">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
       </td>
     `;
 
@@ -145,6 +154,12 @@ function escapeQuotes(text) {
   return text ? text.replace(/'/g, "\\'").replace(/"/g, '\\"') : "";
 }
 
+// small helper to escape HTML inserted into rows
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>\"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+}
+
 function confirmDelete(id) {
   deleteId = id;
   dialog.classList.remove("hidden");
@@ -197,6 +212,25 @@ async function editPost(id, title, description, location, qualifications, deadli
 }
 
 document.addEventListener("DOMContentLoaded", fetchPosts);
+
+// wire posts filter (scholarships) to apply client-side filtering similar to applications
+const postsFilter = document.getElementById('postsFilter');
+if(postsFilter){
+  postsFilter.addEventListener('change', function(){
+    const val = (this.value || 'all').toLowerCase();
+    const all = window._adminPosts || [];
+    if(!val || val === 'all') return renderTableRows(all);
+    const filtered = all.filter(p => {
+      const s = String((p.status||'')).toLowerCase();
+      const deadlineDate = p.deadline ? new Date(p.deadline) : null;
+      const isExpired = deadlineDate && deadlineDate < new Date();
+      if(val === 'expired') return isExpired || s === 'expired';
+      if(val === 'active') return s === 'active' || (!s && !isExpired);
+      return true;
+    });
+    renderTableRows(filtered);
+  });
+}
 
 // client-side search
 if (searchInput) {
