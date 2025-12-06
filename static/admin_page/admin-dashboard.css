@@ -14,12 +14,13 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;backgr
 .dashboard-sub{color:var(--muted);margin:0 0 18px 0}
 
 /* Admin header block */
-.admin-header{background:var(--bg);padding:12px 0 8px;border-radius:6px;margin: -12px -28px 12px -28px}
+.admin-header{background:var(--bg);padding:18px 0 12px;border-radius:8px;margin: -18px -28px 16px -28px}
 .admin-header-inner{max-width:1200px;margin:0 auto;padding:0 18px;display:flex;flex-direction:column;align-items:flex-start}
-.admin-title-row{display:flex;align-items:center;gap:12px;width:100%}
-.shield-icon{flex:0 0 40px}
-.admin-title-text .dashboard-title{font-size:30px;margin:0}
-.admin-title-text .dashboard-sub{margin-top:4px;color:var(--muted)}
+.admin-title-row{display:flex;align-items:center;gap:14px;width:100%}
+.shield-icon{flex:0 0 48px}
+.shield-icon svg{width:48px;height:48px}
+.admin-title-text .dashboard-title{font-size:36px;margin:0;font-weight:800;color:#07283d}
+.admin-title-text .dashboard-sub{margin-top:6px;color:#6b8796;font-size:16px}
 .admin-tabs{margin-top:10px;display:inline-flex;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.5);border-radius:12px}
 .admin-tab{background:transparent;border:1px solid transparent;padding:8px 12px;border-radius:12px;color:#415a6b;cursor:pointer;font-weight:600}
 .admin-tab.active{background:#fff;border-color:#09a0d6;color:#0b67a4;box-shadow:0 6px 18px rgba(10,20,40,0.04)}

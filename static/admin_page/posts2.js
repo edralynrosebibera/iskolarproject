@@ -225,6 +225,64 @@ async function editPost(id, title, description, location, qualifications, deadli
 
 document.addEventListener("DOMContentLoaded", fetchPosts);
 
+// debounce helper
+function debounce(fn, wait){
+  let t = null;
+  return function(...args){
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+// wire additional search inputs: postsSearch (scholarships), applicationSearch, userSearch
+document.addEventListener('DOMContentLoaded', function(){
+  // Scholarships pane search (filters _adminPosts)
+  const postsSearch = document.getElementById('postsSearch');
+  if(postsSearch){
+    postsSearch.addEventListener('input', debounce(function(e){
+      const q = String(e.target.value || '').trim().toLowerCase();
+      const all = window._adminPosts || [];
+      if(!q) return renderTableRows(all);
+      const filtered = all.filter(p => {
+        return (p.title && p.title.toLowerCase().includes(q)) ||
+               (p.description && p.description.toLowerCase().includes(q)) ||
+               (p.location && p.location.toLowerCase().includes(q));
+      });
+      renderTableRows(filtered);
+    }, 220));
+  }
+
+  // Applications pane: filter visible DOM rows
+  const applicationSearch = document.getElementById('applicationSearch');
+  if(applicationSearch){
+    applicationSearch.addEventListener('input', debounce(function(e){
+      const q = String(e.target.value || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('#applicationsContainer tr');
+      rows.forEach(r => {
+        const txt = (r.textContent || '').toLowerCase();
+        if(!q) r.style.display = '';
+        else r.style.display = txt.includes(q) ? '' : 'none';
+      });
+    }, 160));
+  }
+
+  // Users pane: filter visible DOM rows
+  const userSearch = document.getElementById('userSearch');
+  if(userSearch){
+    userSearch.addEventListener('input', debounce(function(e){
+      const q = String(e.target.value || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('#usersContainer tr');
+      rows.forEach(r => {
+        // skip empty/fallback rows
+        if(r.querySelector('td[colspan]')){ r.style.display = ''; return; }
+        const txt = (r.textContent || '').toLowerCase();
+        if(!q) r.style.display = '';
+        else r.style.display = txt.includes(q) ? '' : 'none';
+      });
+    }, 160));
+  }
+});
+
 // wire posts filter (scholarships) to apply client-side filtering similar to applications
 const postsFilter = document.getElementById('postsFilter');
 if(postsFilter){

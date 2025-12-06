@@ -53,18 +53,26 @@ button.ghost {
   background: #ffffff;
   border: 2px solid rgba(15,23,36,0.06);
   box-shadow: none;
+  box-sizing: border-box; /* ensure padding is included in width */
+  width: 100%;
+  overflow: hidden; /* prevent inner fields from bleeding past rounded corners */
+  position: relative;
 }
 
 /* Section title/desc */
 .section-item input,
 .section-item textarea {
+  box-sizing: border-box; /* include padding/border in width to avoid overflow */
   width:100%;
   padding:8px;
   margin-top:8px;
   margin-bottom:8px;
   border-radius:6px;
   border:1px solid rgba(15,23,36,0.06);
+  max-width:100%;
 }
+
+.section-item textarea { resize: vertical; min-height: 64px; }
 
 /* Color palette inside a section */
 .color-palette {
@@ -144,6 +152,29 @@ button.ghost {
   border:none;
   cursor:pointer;
 }
+
+/* Primary button used in Content Block UI (Add Section / Add Requirement / Post) */
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* control space between icon and text */
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.primary-btn .btn-icon { font-size: 16px; line-height: 1 }
+.primary-btn .btn-text { font-size: 15px }
+.primary-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(79,70,229,0.16); }
+
+/* spacing between adjacent primary buttons within cards */
+.card .primary-btn + .primary-btn { margin-left: 12px; }
 
 /* small helpers */
 .text-muted { color:#64748b; font-size:13px; }

@@ -23,12 +23,7 @@
           <button class="tab" data-target="#pane-analytics" role="tab" aria-selected="false">Analytics</button>
         </div>
 
-        <div class="controls">
-          <div class="search-wrap">
-            <input id="searchInput" type="search" placeholder="Search scholarships...">
-          </div>
-          <button class="create-btn" onclick="goToCreatePost()">➕ Add Scholarship</button>
-        </div>
+        
       </div>
 
       <div class="hero-right" style="display:flex;align-items:center;gap:12px">
@@ -36,6 +31,7 @@
           {% csrf_token %}
           <button type="submit" class="logout-btn" title="Log out" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(11,103,164,0.06);background:#fff;cursor:pointer">Logout</button>
         </form>
+        
       </div>
     </div>
   </header>
@@ -43,13 +39,27 @@
     <main class="content">
       <!-- Scholarships pane (default) -->
       <section id="pane-scholarships" class="pane">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-          <label for="postsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
-          <select id="postsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-          </select>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <div class="search-wrap" style="flex:1">
+            <span class="search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input id="postsSearch" type="search" placeholder="Search scholarships..." aria-label="Search scholarships">
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <label for="postsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
+            <select id="postsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+            </select>
+            <button class="create-btn" onclick="goToCreatePost()" aria-label="Add Scholarship" style="margin-left:6px">
+              <span class="create-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.59 13.41a3 3 0 0 0 4.24 0l3-3a3 3 0 0 0-4.24-4.24l-1.06 1.06"/><path d="M13.41 10.59a3 3 0 0 0-4.24 0l-3 3a3 3 0 0 0 4.24 4.24l1.06-1.06"/></svg>
+              </span>
+              <span class="create-text">Add Scholarship</span>
+            </button>
+          </div>
         </div>
         <div class="table-wrap">
           <table id="postsTable" class="posts-table">
@@ -71,15 +81,28 @@
 
       <!-- Applications pane -->
       <section id="pane-applications" class="pane hidden">
-        <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:12px">
-          <label for="applicationsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
-          <select id="applicationsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
-            <option value="all">All</option>
-            <option value="Approved">Approved</option>
-            <option value="Pending">Pending</option>
-            <option value="Rejected">Rejected</option>
-            <option value="In Progress">In Progress</option>
-          </select>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <div class="search-wrap" style="flex:1">
+            <span class="search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input id="applicationSearch" type="search" placeholder="Search applications..." aria-label="Search applications">
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <label for="applicationsFilter" style="margin-right:8px;color:#6b8796;align-self:center">Filter:</label>
+            <select id="applicationsFilter" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(11,103,164,0.06)">
+              <option value="all">All</option>
+              <option value="Approved">Approved</option>
+              <option value="Pending">Pending</option>
+              <option value="Rejected">Rejected</option>
+              <option value="In Progress">In Progress</option>
+            </select>
+            <!-- In-pane export button (matches header layout) -->
+            <button id="exportAppsBtnApp" type="button" class="export-btn" aria-label="Export CSV" title="Export applications as CSV" style="margin-left:8px">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Export</span>
+            </button>
+          </div>
           <!-- Applications export button removed -->
         </div>
         <div class="table-wrap">
@@ -102,6 +125,18 @@
 
       <!-- Users pane -->
       <section id="pane-users" class="pane hidden">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <div class="search-wrap" style="flex:1">
+            <span class="search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input id="userSearch" type="search" placeholder="Search users..." aria-label="Search users">
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <button id="userFilterBtn" class="header-select" style="height:44px;border-radius:12px;padding:8px 12px;border:1px solid rgba(11,103,164,0.06);background:#fff;cursor:pointer">All Users ▾</button>
+          </div>
+        </div>
+
         <div class="table-wrap">
           <table class="posts-table">
             <thead>
@@ -111,11 +146,42 @@
                 <th>Role</th>
                 <th>Status</th>
                 <th>Joined</th>
+                <th>Applications</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td colspan="6" style="padding:18px;color:#6b8796">No users loaded.</td></tr>
+            <tbody id="usersContainer">
+              {% if users %}
+                {% for u in users %}
+                  <tr>
+                    <td>
+                      <div class="post-title">{{ u.get_full_name|default:u.username }}
+                        <div class="post-sub">{{ u.email }}</div>
+                      </div>
+                    </td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                      <span class="role-pill">{{ u.role|default:"student" }}</span>
+                    </td>
+                    <td>
+                      {% if u.is_active %}
+                        <span class="status-pill status-approved">Active</span>
+                      {% else %}
+                        <span class="status-pill status-rejected">Suspended</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ u.date_joined|date:"Y-m-d" }}</td>
+                    <td>{{ u.applications_count|default:"0" }}</td>
+                    <td>
+                      <div class="actions-cell">
+                        <button class="action-dots" aria-label="More">&middot;&middot;&middot;</button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="7" style="padding:18px;color:#6b8796">No users found.</td></tr>
+              {% endif %}
             </tbody>
           </table>
         </div>

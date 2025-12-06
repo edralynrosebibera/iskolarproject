@@ -115,14 +115,14 @@ function createContentBlock(editData = null) {
 
   const addSectionBtn = document.createElement("button");
   addSectionBtn.className = "primary-btn";
-  addSectionBtn.textContent = "+ Add Section";
+  addSectionBtn.innerHTML = '<span class="btn-icon">+</span><span class="btn-text">Add Section</span>';
   addSectionBtn.onclick = () => {
     sectionsContainer.appendChild(createContentSection(`s-${Date.now()}`, "", "", "blue"));
   };
 
   const addFileBtn = document.createElement("button");
   addFileBtn.className = "primary-btn";
-  addFileBtn.textContent = "+ Add Requirement";
+  addFileBtn.innerHTML = '<span class="btn-icon">+</span><span class="btn-text">Add Requirement</span>';
   addFileBtn.onclick = () => {
     filesContainer.appendChild(createFileRequirement(`r-${Date.now()}`));
   };
@@ -136,7 +136,7 @@ function createContentBlock(editData = null) {
 
   const postBtn = document.createElement("button");
   postBtn.className = "primary-btn";
-  postBtn.textContent = "🚀 Post Description";
+  postBtn.innerHTML = '<span class="btn-icon">🚀</span><span class="btn-text">Post Description</span>';
   postBtn.onclick = () => {
     saveDescription(sectionsContainer, filesContainer);
   };

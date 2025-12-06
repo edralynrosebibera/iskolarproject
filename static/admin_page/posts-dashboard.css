@@ -3,19 +3,22 @@
 */
 /* Quick layout styles to match admin dashboard screenshot */
 .body-font { font-family: Inter, system-ui, Arial, sans-serif; }
-body{font-family:Inter, system-ui, Arial, sans-serif;background:#f7fbfe;color:#07283d;margin:0;font-weight:400}
-.hero{background:#f3f7fb;padding:28px 20px;border-bottom: none}
+.body-font { font-family: Inter, system-ui, Arial, sans-serif; }
+body{font-family:Inter, system-ui, Arial, sans-serif;background:#eaf6fb;color:#07283d;margin:0;font-weight:400}
+.hero{background:#e9f5fb;padding:28px 20px;border-bottom: none}
 .hero-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 8px}
-.hero-left h1{font-size:32px;margin:0;color:#07283d;font-weight:600}
-.subtitle{color:#6b8796;margin-top:6px}
-.tabs{display:flex;gap:10px;background:transparent;margin-top:18px}
-.tab{padding:8px 12px;border-radius:6px;background:transparent;color:#0b3747;border:1px solid transparent;font-size:14px}
-.tab.active{background:transparent;border-color:rgba(11,103,164,0.08);box-shadow:none}
+.hero-left h1{font-size:40px;margin:0;color:#07283d;font-weight:700;letter-spacing:-0.2px}
+.subtitle{color:#6b8796;margin-top:8px;font-size:15px;line-height:1.4}
+.tabs{display:flex;gap:12px;background:rgba(11,103,164,0.03);margin-top:18px;padding:8px;border-radius:14px}
+.tab{padding:10px 18px;border-radius:12px;background:transparent;color:#33525e;border:1px solid transparent;font-size:15px;cursor:pointer;transition:background .12s ease,color .12s ease,box-shadow .12s ease,transform .08s ease}
+.tab:hover{background:#ffffff;color:#07283d;box-shadow:0 4px 10px rgba(11,103,164,0.04);transform:translateY(-1px)}
+.tab.active{background:#ffffff;border-color:rgba(11,103,164,0.08);box-shadow:0 8px 22px rgba(11,103,164,0.06);color:#07283d}
 .controls{display:flex;align-items:center;gap:12px;margin-top:14px}
-.search-wrap{flex:1 1 90%;max-width:1400px}
+.search-wrap{flex:1 1 90%;max-width:1400px;position:relative}
+.search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9aaab6;pointer-events:none;display:inline-flex;align-items:center;justify-content:center}
 .search-wrap input{width:100%;padding:8px 14px;border-radius:6px;border:1px solid rgba(11,103,164,0.08);background:#fff;color:#07283d;font-size:14px;line-height:1.2}
 .search-wrap input::placeholder{color:#9aaab6;opacity:1}
-.search-wrap input{height:48px;border-radius:28px;padding-left:22px;padding-right:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 2px rgba(11,103,164,0.02)}
+.search-wrap input{height:48px;border-radius:28px;padding-left:44px;padding-right:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 2px rgba(11,103,164,0.02)}
 
 /* make the header-right controls compact and aligned like the attachment */
 .hero-right{display:flex;align-items:center;gap:12px}
@@ -25,8 +28,37 @@ body{font-family:Inter, system-ui, Arial, sans-serif;background:#f7fbfe;color:#0
 
 /* If a small select is placed in the header (like the attachment), style it compactly */
 .hero-right .header-select, select.header-select{height:44px;border-radius:12px;padding:8px 12px;border:1px solid rgba(11,103,164,0.06);background:#fff;color:#07283d}
+
+/* Small filter button in header */
+.filter-btn{background:#fff;border:1px solid rgba(11,103,164,0.06);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#0b67a4}
 .archive-btn{background:transparent;color:#0b67a4;border:1px solid rgba(11,103,164,0.08);padding:8px 12px;border-radius:6px}
-.create-btn{background:#0b67a4;color:white;border:none;padding:8px 12px;border-radius:6px}
+.create-btn{
+   display:inline-flex;
+   align-items:center;
+   gap:10px;
+   padding:15px 25px;
+   border-radius:10px;
+   border: none;
+   cursor: pointer;
+   color: #ffffff;
+   font-weight:600;
+   white-space:nowrap;
+   flex-wrap:nowrap;
+   background: linear-gradient(90deg,#4f46e5 0%,#06b6d4 100%);
+   box-shadow: 0 6px 18px rgba(6, 95, 140, 0.15);
+   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+.create-btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(6,95,140,0.18); }
+.create-btn:active{ transform: translateY(0); opacity:0.95 }
+.create-btn .create-icon{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px }
+.create-btn .create-icon svg{ width:18px; height:18px; color:rgba(255,255,255,0.95); stroke:currentColor }
+.create-btn .create-text{ color:#ffffff; font-size:15px; line-height:1 }
+/* ensure the button label stays on one line */
+.create-btn .create-text{ white-space:nowrap }
+.create-small{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;color:#ffffff;font-weight:600;background:linear-gradient(90deg,#06b6d4 0%,#0ea5bf 100%);box-shadow:0 6px 14px rgba(6,95,140,0.12)}
+.create-small .create-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px}
+.create-small .create-icon svg{width:14px;height:14px;color:rgba(255,255,255,0.95);stroke:currentColor}
+.create-small .create-text{color:#fff;font-size:14px}
 .analytics-btn{background:transparent;padding:6px 10px;border-radius:6px;color:#0b67a4}
 
 .content{max-width:1400px;margin:22px auto;padding:0 8px}
