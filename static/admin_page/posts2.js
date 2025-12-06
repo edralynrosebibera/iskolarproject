@@ -77,14 +77,14 @@ function renderTableRows(posts) {
       </td>
       <td>
         <div class="actions-cell">
-          <button class="icon-btn edit" title="Edit" data-tooltip="Edit" onclick="editPost('${post.id}', '${escapeQuotes(post.title)}', '${escapeQuotes(post.description)}', '${escapeQuotes(post.location)}', '${escapeQuotes(post.qualifications)}', '${post.deadline}', '${post.link}')" aria-label="Edit">
+          <button class="icon-btn edit" title="Edit" data-tooltip="Edit" data-id="${post.id}" aria-label="Edit">
             <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <rect x="2.5" y="3.5" width="15" height="15" rx="3" stroke="currentColor" stroke-width="1.6" fill="none" />
               <path d="M8.5 13.5l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
               <path d="M14.5 6.5l2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
-          <button class="icon-btn delete" title="Delete" data-tooltip="Delete" onclick="confirmDelete('${post.id}')" aria-label="Delete">
+          <button class="icon-btn delete" title="Delete" data-tooltip="Delete" data-id="${post.id}" aria-label="Delete">
             <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -98,6 +98,18 @@ function renderTableRows(posts) {
     `;
 
     postsContainer.appendChild(tr);
+    // attach event listeners instead of using inline onclick (avoids quoting/escaping issues)
+    const editBtn = tr.querySelector('button.icon-btn.edit');
+    if (editBtn) {
+      editBtn.addEventListener('click', () => {
+        editPost(post.id, post.title || '', post.description || '', post.location || '', post.qualifications || '', post.deadline || '', post.link || '');
+      });
+    }
+    const delBtn = tr.querySelector('button.icon-btn.delete');
+    if (delBtn) {
+      delBtn.addEventListener('click', () => confirmDelete(post.id));
+    }
+
     startTimers(postedAgoId, countdownId, postedDate, deadlineDate, post.id);
   });
 }
