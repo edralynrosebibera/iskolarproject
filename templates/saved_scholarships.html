@@ -6,31 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scholarship Portal - Saved Scholarships</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-    <meta name="description" content="View your saved scholarships in the academic portal.">
-    <link rel="stylesheet" href="{% static 'saved.css' %}?v4">
+    
+    <link rel="stylesheet" href="{% static 'applications.css' %}?v=12">
+    <link rel="stylesheet" href="{% static 'applications_cards.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
-    /* Enhanced unsave button style */
-    .unsave-btn.enhanced {
-        display:inline-flex;align-items:center;justify-content:center;
-        width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,0,0,0.06);
-        background:#fff;color:#c0392b;font-size:16px;cursor:pointer;transition:transform .12s,box-shadow .12s;
-        box-shadow:0 1px 3px rgba(0,0,0,0.06);
-    }
-    .unsave-btn.enhanced:hover{transform:scale(1.06);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    .scholarship-header .card-status.saved{display:inline-block;background:#edf7f1;color:#2e7d32;padding:4px 8px;border-radius:12px;font-size:13px;margin-right:8px}
-    .saved-subtitle{margin-top:6px;margin-bottom:20px;color:#000}
+        /* 1. Header Fixes */
+        .header { z-index: 9999 !important; position: fixed !important; }
+        .profile-dropdown { width: 320px !important; top: 64px !important; z-index: 10000 !important; }
+
+        /* 2. SIDEBAR FIX */
+        .sidebar {
+            z-index: 10000 !important;
+        }
+        .sidebar-overlay {
+            z-index: 9998 !important;
+        }
+
+        /* 3. Unsave Button Styles */
+        .unsave-btn {
+            background: #fff;
+            border: 1px solid #fee2e2;
+            color: #ef4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+        .unsave-btn:hover {
+            background: #fee2e2;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
+
     <header class="header">
         <div class="header-content">
             <div class="header-left">
                 <button class="menu-toggle" id="menuToggleBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="4" x2="20" y1="6" y2="6"/>
-                        <line x1="4" x2="20" y1="12" y2="12"/>
-                        <line x1="4" x2="20" y1="18" y2="18"/>
+                        <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
                     </svg>
                 </button>
                 <img src="{% static 'images/logo2.png' %}" alt="Logo" class="logo-icon">
@@ -39,10 +61,9 @@
             <div class="header-center">
                 <div class="search-container">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.35-4.35"/>
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                     </svg>
-                    <input type="search" placeholder="Search scholarships..." class="search-input">
+                    <input type="search" placeholder="Search saved scholarships..." class="search-input">
                 </div>
             </div>
 
@@ -60,8 +81,6 @@
                     </div>
                     <ul class="profile-menu">
                         <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
-                        
-                        
                     </ul>
                     <hr>
                     <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
@@ -70,42 +89,35 @@
         </div>
     </header>
 
-    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2 class="sidebar-title">Menu</h2>
             <button class="close-btn" id="closeSidebarBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="m18 6-12 12"/>
-                    <path d="m6 6 12 12"/>
+                    <path d="m18 6-12 12"/><path d="m6 6 12 12"/>
                 </svg>
             </button>
         </div>
 
         <a href="{% url 'homepage' %}" class="sidebar-btn">
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="8" r="7"/>
-                <polyline points="8.21,13.89 7,23 12,20 17,23 15.79,13.88"/>
+                <circle cx="12" cy="8" r="7"/><polyline points="8.21,13.89 7,23 12,20 17,23 15.79,13.88"/>
             </svg>
             Browse Scholarships
         </a>
 
         <a href="{% url 'applications' %}" class="sidebar-btn">
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14,2 14,8 20,8"/>
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/>
             </svg>
             My Applications
         </a>
 
         <a href="{% url 'archives' %}" class="sidebar-btn">
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 3h18v4H3z"/>
-                <path d="M3 7v14h18V7z"/>
-                <line x1="10" y1="11" x2="14" y2="11"/>
+                <path d="M3 3h18v4H3z"/><path d="M3 7v14h18V7z"/><line x1="10" y1="11" x2="14" y2="11"/>
             </svg>
             My Archives
         </a>
@@ -118,172 +130,172 @@
         </a>
     </nav>
 
-    <!-- Saved Scholarships Section -->
-    <div class="saved-scholarships-container">
-
-            <div class="saved-header-row">
-                <div class="saved-header-left">
-                    <h2 class="section-title">
-                        <svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 3h14a2 2 0 0 1 2 2v16l-9-4-9 4V5a2 2 0 0 1 2-2z"/>
-                        </svg>
-                        Saved Scholarships
-                    </h2>
-                    <p class="saved-subtitle">Manage and view your saved scholarship opportunities.</p>
-                    <!-- filter removed per user request -->
+    <main class="cards-container">
+        
+        <section class="cards-hero">
+            <div class="cards-hero-left">
+                <svg class="hero-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <div>
+                    <h1>Saved Scholarships</h1>
+                    <p class="hero-sub">Manage and view your saved scholarship opportunities.</p>
                 </div>
             </div>
+        </section>
 
-        
-        <!-- Dynamic scholarship list -->
-        <div class="saved-scholarships-grid">
+        <section class="cards-grid">
             {% for post in posts %}
-                <div class="scholarship-card">
-                    <div class="scholarship-header">
-                        <h3 class="scholarship-title">{{ post.title }}</h3>
-                        <div class="detail-icons">
-                            <span class="card-status saved"><i class="fa-solid fa-bookmark" aria-hidden="true" style="margin-right:8px"></i>Saved</span>
-                            <button class="unsave-btn enhanced" data-id="{{ post.id }}" title="Unsaved" aria-label="Unsaved" style="margin-left:8px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M19 21l-7-3-7 3V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                                    <path d="M15 6l-6 6"></path>
-                                    <path d="M9 6l6 6"></path>
-                                </svg>
-                            </button>
-                        </div>
+            <article class="cards-card">
+                <div class="card-head">
+                    <h2 class="card-title">{{ post.title }}</h2>
+                    <div class="card-right">
+                        <span class="card-status active" style="background:#f0fdf4; color:#15803d;">
+                            <i class="fa-solid fa-bookmark" style="margin-right:6px;"></i> Saved
+                        </span>
+                        <button class="unsave-btn" data-id="{{ post.id }}" title="Unsave Scholarship">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
-
-                    
-                    <p class="scholarship-description">{{ post.description }}</p>
-
-                    <div class="scholarship-meta">
-                        <div class="meta-item meta-amount">💰 {{ post.amount }}</div>
-                        <div class="meta-item meta-deadline">🕒 {{ post.deadline }}</div>
-                        <div class="meta-item meta-location">📍 {{ post.location }}</div>
-                    </div>
-
-        <a href="{{ post.scholarship_link }}" target="_blank" class="btn-view">View Scholarship Details</a>
                 </div>
+
+                <div class="card-tags">
+                     <span class="chip">Scholarship</span>
+                </div>
+
+                <p class="card-desc">{{ post.description|truncatewords:20 }}</p>
+
+                <ul class="card-meta">
+                    <li class="meta-location">
+                        <span class="meta-icon location-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+                        </span>
+                        <span class="meta-location-text">Location: {{ post.location|default:'Philippines' }}</span>
+                    </li>
+
+                    <li class="meta-due" data-deadline="{{ post.deadline|date:'c' }}">
+                        <span class="meta-icon due-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V9h14v9z"/></svg>
+                        </span>
+                        <span class="meta-due-text">Due {{ post.deadline }}</span>
+                    </li>
+                    
+                    </ul>
+
+                <a class="card-cta" href="{{ post.scholarship_link }}">View Scholarship Details</a>
+            </article>
             {% empty %}
-                <p>No saved scholarships yet.</p>
+                <p class="no-cards" style="grid-column: 1/-1; text-align:center;">You have no saved scholarships.</p>
             {% endfor %}
-        </div>
-    </div>
+        </section>
+    </main>
 
-       <script src="{% static 'saved.js' %}"></script>
+    <script src="{% static 'appscript.js' %}"></script>
     <script src="{% static 'script2.js' %}"></script>
-</body>
-<script>
-// Utility: get CSRF token from cookie
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
 
-// Unsave a post via POST to the server, then remove the card from DOM
-function unsavePost(postId, btn) {
-    const csrftoken = getCookie('csrftoken');
-    btn.disabled = true;
-    fetch(`/saved_scholarships/unsave/${postId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({})
-    }).then(r => r.json())
-      .then(data => {
-          if (data.ok) {
-              // Remove card
-              const card = btn.closest('.scholarship-card');
-              if (card) card.remove();
-          } else {
-              console.error('Unsave failed', data);
-              btn.disabled = false;
-          }
-      }).catch(err => {
-          console.error('Network error', err);
-          btn.disabled = false;
-      });
-}
+    <script>
+        (function(){
+            const toggle = document.getElementById('profileToggle');
+            const dropdown = document.getElementById('profileDropdown');
+            if(toggle && dropdown) {
+                toggle.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+                });
+                document.addEventListener('click', function(e){
+                    if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
+        })();
+    </script>
 
-// Wire up unsave buttons
-document.addEventListener('DOMContentLoaded', function() {
-    const unsaveBtns = document.querySelectorAll('.unsave-btn');
-    for (const btn of unsaveBtns) {
-        btn.addEventListener('click', function(e) {
-            const id = btn.dataset.id;
-            unsavePost(id, btn);
+    <script>
+        // Debounce helper
+        function debounce(fn, delay = 200) {
+            let t;
+            return function (...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.querySelector('.search-input');
+            if (!searchInput) return;
+
+            const getCards = () => Array.from(document.querySelectorAll('.cards-card'));
+
+            function filterCards(query) {
+                const q = (query || '').trim().toLowerCase();
+                const cards = getCards();
+                if (!q) {
+                    for (const c of cards) c.style.display = '';
+                    return;
+                }
+                for (const c of cards) {
+                    const title = (c.querySelector('.card-title')?.textContent || '').toLowerCase();
+                    const desc = (c.querySelector('.card-desc')?.textContent || '').toLowerCase();
+                    const meta = (c.querySelector('.card-meta')?.textContent || '').toLowerCase();
+                    const combined = `${title} ${desc} ${meta}`;
+                    c.style.display = combined.includes(q) ? '' : 'none';
+                }
+            }
+
+            searchInput.addEventListener('input', debounce(function (e) {
+                filterCards(e.target.value);
+            }, 180));
         });
-    }
-});
+    </script>
 
-// Profile popup toggle (self-contained so it works even if script2.js isn't loaded as module)
-document.addEventListener('DOMContentLoaded', function () {
-    const profileToggle = document.getElementById('profileToggle');
-    const profileDropdown = document.getElementById('profileDropdown');
-    if (!profileToggle || !profileDropdown) return;
-
-    function showDropdown() {
-        profileDropdown.style.display = 'block';
-        profileToggle.setAttribute('aria-expanded', 'true');
-    }
-    function hideDropdown() {
-        profileDropdown.style.display = 'none';
-        profileToggle.setAttribute('aria-expanded', 'false');
-    }
-
-    profileToggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (profileDropdown.style.display === 'block') hideDropdown(); else showDropdown();
-    });
-
-    // Prevent clicks inside the dropdown from closing it
-    profileDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    // Close when clicking outside
-    document.addEventListener('click', function () { hideDropdown(); });
-
-    // Close on Escape
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideDropdown(); });
-});
-// Small shared debounce helper (moved to outer scope to satisfy linter)
-function debounce(fn, delay = 200) {
-    let t;
-    return function (...args) {
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
-
-// Lightweight search for Saved Scholarships (debounced, non-invasive)
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.querySelector('.search-input');
-    if (!searchInput) return;
-
-    const getCards = () => Array.from(document.querySelectorAll('.scholarship-card'));
-
-    function filterCards(query) {
-        const q = (query || '').trim().toLowerCase();
-        const cards = getCards();
-        if (!q) {
-            for (const c of cards) c.style.display = '';
-            return;
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
-        for (const c of cards) {
-            const title = (c.querySelector('.scholarship-title')?.textContent || '').toLowerCase();
-            const desc = (c.querySelector('.scholarship-description')?.textContent || '').toLowerCase();
-            const meta = (c.querySelector('.scholarship-meta')?.textContent || '').toLowerCase();
-            const combined = `${title} ${desc} ${meta}`;
-            c.style.display = combined.includes(q) ? '' : 'none';
-        }
-    }
 
-    searchInput.addEventListener('input', debounce(function (e) {
-        filterCards(e.target.value);
-    }, 180));
-});
-</script>
+        function unsavePost(postId, btn) {
+            const csrftoken = getCookie('csrftoken');
+            btn.disabled = true;
+            // Note: Ensure your URL pattern matches exactly
+            fetch(`/saved_scholarships/unsave/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({})
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.ok) {
+                      const card = btn.closest('.cards-card');
+                      if (card) {
+                          card.style.opacity = '0';
+                          setTimeout(() => card.remove(), 300);
+                      }
+                  } else {
+                      console.error('Unsave failed', data);
+                      btn.disabled = false;
+                  }
+              }).catch(err => {
+                  console.error('Network error', err);
+                  btn.disabled = false;
+              });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const unsaveBtns = document.querySelectorAll('.unsave-btn');
+            unsaveBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const id = btn.dataset.id;
+                    if(confirm("Remove this scholarship from your saved list?")) {
+                        unsavePost(id, btn);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
