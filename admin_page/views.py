@@ -25,10 +25,9 @@ def admin_view(request):
 
 def student_required(view_func):
     def wrapper(request, *args, **kwargs):
-        # If user is admin → force logout → redirect to login
+        # If admin tries to access a student-only page → redirect to admin dashboard
         if request.session.get("is_admin") is True:
-            logout(request)
-            return redirect("/login/")
+            return redirect("/admin-page/posts/")
         
         # If missing student UUID → force logout
         if not request.session.get("supabase_user_id"):
@@ -39,9 +38,13 @@ def student_required(view_func):
     return wrapper
 
 
+
 def admin_required(view_func):
     def wrapper(request, *args, **kwargs):
-        if request.session.get("is_admin") is not True:
+        is_admin = request.session.get("is_admin")
+        print("DEBUG is_admin =", is_admin)  # debug
+
+        if is_admin != True:  # Must be boolean True
             return redirect("/login/")
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -94,6 +97,8 @@ def get_posts_view(request):
         return JsonResponse({"success": False, "error": str(e)})
 
 @csrf_exempt
+@admin_required
+
 def edit_post_view(request, post_id):
     if request.method == "POST":
         try:
@@ -389,44 +394,67 @@ def applications_json(request):
         formatted = []
 
         for app in apps:
-            # validate post_id
+            # Validate post_id
             if not app.get("post_id") or len(str(app.get("post_id"))) != 36:
                 continue
 
-            user = (
+            # -----------------------------
+            # SAFE USER FETCH
+            # -----------------------------
+            user_res = (
                 supabase.table("users")
                 .select("*")
                 .eq("id", app.get("user_id"))
                 .maybe_single()
                 .execute()
-                .data or {}
             )
 
-            post = (
+            if not user_res or not user_res.data:
+                # Skip if user not found
+                continue
+
+            user = user_res.data
+
+            full_name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+
+            # -----------------------------
+            # SAFE POST FETCH
+            # -----------------------------
+            post_res = (
                 supabase.table("posts")
                 .select("*")
                 .eq("id", app.get("post_id"))
                 .maybe_single()
                 .execute()
-                .data or {}
             )
 
-            full_name = ""
-            if user:
-                full_name = f"{user.get('first_name','')} {user.get('last_name','')}".strip()
+            if not post_res or not post_res.data:
+                # Skip if post not found
+                continue
+
+            post = post_res.data
 
             formatted.append({
                 "id": app.get("id"),
                 "status": app.get("status", "Pending"),
                 "created_at": app.get("created_at"),
-                "user": {"id": user.get("id"), "full_name": full_name, "email": user.get("email")},
-                "post": {"id": post.get("id"), "title": post.get("title")},
+                "user": {
+                    "id": user.get("id"),
+                    "full_name": full_name,
+                    "email": user.get("email")
+                },
+                "post": {
+                    "id": post.get("id"),
+                    "title": post.get("title")
+                },
             })
 
         return JsonResponse({"success": True, "data": formatted})
+
     except Exception as e:
         print("ERROR applications_json:", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 
 

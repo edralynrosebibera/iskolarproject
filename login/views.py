@@ -12,11 +12,11 @@ supabase: Client = create_client(url, key)
 
 def login_view(request):
     if request.method == "POST":
+        request.session.flush()
         username = request.POST.get("username")
         password = request.POST.get("password")
 
         # Always start with fresh session
-        request.session.flush()
 
         # ---------------------------------------------------------
         # A) ADMIN LOGIN
