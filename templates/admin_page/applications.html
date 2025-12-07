@@ -56,10 +56,40 @@
         }
         .approve-btn { background:#d1fae5; color:#065f46; }
         .reject-btn { background:#fee2e2; color:#991b1b; }
+
+        .back-icon-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #374151;
+            font-size: 16px;
+            z-index: 99;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.25s ease;
+        }
+
+        .back-icon-btn:hover {
+            background: #f1f5f9;
+            transform: translateX(-3px);
+        }
+
     </style>
 </head>
 
-<body>
+<a href="{% url 'posts' %}" class="back-icon-btn">
+    <i class="fas fa-arrow-left"></i>
+</a>
+
+
 <main class="main">
 <section class="overview">
 
