@@ -166,8 +166,7 @@
             <div class="cards-tabs" role="tablist" aria-label="Application status tabs">
                 <button class="cards-tab active" data-status="all" role="tab" aria-selected="true">All ({{ posts|length }})</button>
                 <button class="cards-tab" data-status="pending" role="tab">Pending ({{ pending_count|default:0 }})</button>
-                <button class="cards-tab" data-status="review" role="tab">Review ({{ review_count|default:0 }})</button>
-                <button class="cards-tab" data-status="accepted" role="tab">Accepted ({{ accepted_count|default:0 }})</button>
+                <button class="cards-tab" data-status="accepted" role="tab">Approved ({{ accepted_count|default:0 }})</button>
                 <button class="cards-tab" data-status="rejected" role="tab">Rejected ({{ rejected_count|default:0 }})</button>
             </div>
         </section>
@@ -238,8 +237,8 @@
         </section>
     </main>
 
-   <script src="{% static 'appscript.js' %}"></script>
-    <script type="module" src="{% static 'script2.js' %}"></script>
+    <script src="{% static 'appscript.js' %}"></script>
+     <script type="module" src="{% static 'script2.js' %}?v=13"></script>
         <script>
             (function(){
         const toggle = document.getElementById('profileToggle');

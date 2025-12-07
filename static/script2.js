@@ -44,6 +44,37 @@ document.addEventListener('DOMContentLoaded', function () {
   const profileToggle = document.getElementById('profileToggle');
   const profileDropdown = document.getElementById('profileDropdown');
 
+  // --- Apply stored avatar (if any) to header avatars on page load ---
+  function applyStoredAvatarToHeaders() {
+    try {
+      const saved = localStorage.getItem('userProfile');
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      const avatarBg = data.avatar || '';
+      // avatarBg expected like: url("data:...") or url(data:...)
+      const m = avatarBg.match(/url\((?:\"|')?(.*?)(?:\"|')?\)/i);
+      const src = m ? m[1] : null;
+      if (!src) return;
+
+      // update all avatars in header/profile areas
+      const headerAvatars = Array.from(document.querySelectorAll('.header .avatar, .profile-btn .avatar, .profile-dropdown .avatar'));
+      headerAvatars.forEach(el => {
+        if (!el) return;
+        if (el.tagName && el.tagName.toLowerCase() === 'img') {
+          el.src = src;
+        } else {
+          el.style.backgroundImage = `url(${src})`;
+          el.innerHTML = '';
+        }
+      });
+    } catch (err) {
+      console.debug('applyStoredAvatarToHeaders error', err);
+    }
+  }
+
+  // run on load
+  applyStoredAvatarToHeaders();
+
   const scholarshipsContainer =
     document.querySelector('.saved-scholarships-grid') ||
     document.querySelector('.scholarships-grid');
@@ -74,12 +105,57 @@ document.addEventListener('DOMContentLoaded', function () {
   profileToggle?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!profileDropdown) return;
+    try {
+      const r = profileToggle.getBoundingClientRect();
+      const midX = r.left + r.width / 2;
+      const midY = r.top + r.height / 2;
+      const elAt = document.elementFromPoint(midX, midY);
+      console.debug('[debug] profileToggle click — top element at center:', elAt);
+    } catch (err) {
+      console.debug('[debug] profileToggle elementFromPoint error', err);
+    }
     profileDropdown.style.display =
       profileDropdown.style.display === 'block' ? 'none' : 'block';
   });
   document.addEventListener('click', () => {
     if (profileDropdown) profileDropdown.style.display = 'none';
   });
+
+  // Debug helper: when clicking near the top area, log which element is top-most at the pointer
+  document.addEventListener('click', (e) => {
+    try {
+      if (e.clientY <= 120) { // header area
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        console.info('[debug] click at top area - elementFromPoint:', el);
+        if (el) {
+          console.info('[debug] element classes/id:', el.id, el.className);
+        }
+      }
+    } catch (err) {
+      console.debug('[debug] elementFromPoint error', err);
+    }
+  }, true);
+
+  // Capture-phase handler: if any stacked element at the click point is the profile toggle
+  // (or contains it), toggle the dropdown. This bypasses overlays that are above the header.
+  document.addEventListener('click', function(e) {
+    try {
+      if (!profileToggle || !profileDropdown) return;
+      // only consider clicks near the header area to avoid interfering with other clicks
+      if (e.clientY > 140) return;
+      const stacked = document.elementsFromPoint(e.clientX, e.clientY) || [];
+      const found = stacked.find(el => el && (el.id === 'profileToggle' || el.closest && el.closest('#profileToggle')));
+      if (found) {
+        e.stopPropagation();
+        e.preventDefault();
+        console.info('[debug] capture: toggling profileDropdown due to stacked element match', found);
+        profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        return;
+      }
+    } catch (err) {
+      console.debug('[debug] capture handler error', err);
+    }
+  }, true);
 
   // ------------------------------
   // fade-in animation
@@ -368,7 +444,48 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', debounce(positionSuggestions, 150));
     window.addEventListener('scroll', debounce(positionSuggestions, 150), true);
 
-    searchInput.addEventListener('input', debounce((e) => performSearch(e.target.value), 180));
+    // unified input handler: run appropriate search for the current page
+    function filterCardsGrid(query) {
+      const q = (query || '').trim().toLowerCase();
+      const cards = Array.from(document.querySelectorAll('.cards-card'));
+      if (!cards || cards.length === 0) return;
+      let anyVisible = false;
+      cards.forEach(card => {
+        const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+        const desc = (card.querySelector('.card-desc')?.textContent || '').toLowerCase();
+        const meta = (card.querySelector('.card-meta')?.textContent || '').toLowerCase();
+        const isMatch = q === '' || title.includes(q) || desc.includes(q) || meta.includes(q);
+        card.style.display = isMatch ? '' : 'none';
+        if (isMatch) anyVisible = true;
+        if (isMatch) {
+          card.classList.add('highlighted-search-result');
+          setTimeout(() => card.classList.remove('highlighted-search-result'), 1000);
+        }
+      });
+      const noMsg = document.querySelector('.no-cards');
+      if (!anyVisible) {
+        if (!noMsg && document.querySelector('.cards-grid')) {
+          const msg = document.createElement('p');
+          msg.className = 'no-cards';
+          msg.textContent = 'No results found.';
+          document.querySelector('.cards-grid').appendChild(msg);
+        }
+      } else {
+        if (noMsg) noMsg.remove();
+      }
+    }
+
+    searchInput.addEventListener('input', debounce((e) => {
+      const val = e.target.value;
+      // homepage/dynamic scholarships
+      if (document.querySelectorAll('.scholarship-card').length > 0) {
+        performSearch(val);
+      }
+      // cards pages (applications, saved, archives)
+      if (document.querySelectorAll('.cards-card').length > 0) {
+        filterCardsGrid(val);
+      }
+    }, 180));
 
     // keyboard navigation for suggestions
     searchInput.addEventListener('keydown', (e) => {
@@ -404,6 +521,11 @@ document.addEventListener('DOMContentLoaded', function () {
   // sidebar closes when clicking a link
   document.addEventListener('click', function (e) {
     if (e.target.matches('.sidebar-btn')) closeSidebar();
+  });
+
+  // listen for profile updates in other tabs/windows (storage event)
+  window.addEventListener('storage', (ev) => {
+    if (ev.key === 'userProfile') applyStoredAvatarToHeaders();
   });
 });
 

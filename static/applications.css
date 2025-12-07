@@ -286,6 +286,14 @@ body {
     visibility: visible;
 }
 
+/* Allow clicks to pass through the overlay when it's not active. */
+.sidebar-overlay {
+    pointer-events: none;
+}
+.sidebar-overlay.active {
+    pointer-events: auto;
+}
+
 .sidebar {
     position: fixed;
     left: 0;
@@ -300,6 +308,20 @@ body {
 
 .sidebar.active {
     transform: translateX(0);
+}
+
+/* Ensure header and profile dropdown sit above overlays and remain clickable */
+.header {
+    z-index: 10050 !important;
+    position: fixed !important;
+}
+.profile-btn {
+    position: relative !important;
+    z-index: 10060 !important;
+}
+.profile-dropdown {
+    z-index: 10070 !important;
+    pointer-events: auto !important;
 }
 
 .sidebar-header {

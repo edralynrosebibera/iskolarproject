@@ -18,6 +18,15 @@
         position: fixed !important;
     }
 
+  /* Ensure sidebar is clickable by placing it above the header when opened */
+  .sidebar {
+    z-index: 10000 !important;
+  }
+
+  .sidebar-overlay {
+    z-index: 9998 !important;
+  }
+
     /* 2. Profile Dropdown Styles */
     .profile-dropdown {
         width: 320px !important;
@@ -187,8 +196,7 @@
 </div>
 
       <div class="scholarships-section">
-        <h2 class="section-title">Featured Scholarships</h2>
-        <button class="details">View All</button>
+        <h2 class="section-title">Browse Scholarships</h2>
       </div>
 
       <!-- Scholarship Cards (Django preloaded) -->

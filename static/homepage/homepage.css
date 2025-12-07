@@ -430,8 +430,18 @@ body {
     text-align: left;
     text-decoration: none;
 }
-.sidebar-btn i {
-  margin-right: 8px;
+.sidebar-btn i,
+.sidebar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* match applications.css svg sizing so FA icons align with svgs */
+    width: 30px;
+    height: 20px;
+    margin-right: 12px;
+    font-size: 18px;
+    color: #06b6d4;
+    flex: 0 0 30px;
 }
 
 .sidebar-btn:hover {
