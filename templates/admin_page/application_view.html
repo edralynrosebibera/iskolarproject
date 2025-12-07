@@ -9,47 +9,164 @@
     <link rel="stylesheet" href="{% static 'admin_page/admin-dashboard.css' %}">
 
     <style>
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            display: inline-block;
+        body {
+            background: #eef7fb;
         }
-        .approved { background:#d1fae5; color:#065f46; }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.04);
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeUp 0.4s ease;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .application-item {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .approved { background:#dcfce7; color:#166534; }
         .rejected { background:#fee2e2; color:#991b1b; }
-        .pending  { background:#eef7fb; color:#0b67a4; }
+        .pending  { background:#e0f2fe; color:#0369a1; }
 
         .file-item {
-            padding: 10px 0;
+            padding: 14px 0;
             display:flex;
             justify-content:space-between;
             align-items:center;
             border-bottom:1px solid #f1f5f9;
         }
+
         .file-link {
-            background:#eef7fb;
-            padding:6px 12px;
-            border-radius:8px;
+            background:#e0f2fe;
+            padding:8px 16px;
+            border-radius:999px;
             text-decoration:none;
-            font-size:14px;
-            color:#0b67a4;
+            font-size:13px;
+            font-weight:500;
+            color:#0369a1;
+            transition: 0.2s ease;
         }
+
+        .file-link:hover {
+            background:#bae6fd;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 24px 0;
+        }
+
         .btn {
-            padding:10px 18px;
-            border-radius:10px;
+            padding:12px 24px;
+            border-radius:14px;
             border:none;
             cursor:pointer;
             font-size:14px;
             font-weight:600;
+            min-width:120px;
+            transition: all 0.2s ease;
         }
-        .btn-approve { background:#065f46; color:white; }
-        .btn-reject  { background:#b91c1c; color:white; }
-        .btn-back    { background:#e5e7eb; color:#374151; text-decoration:none; display:inline-block; }
+
+        .btn-approve {
+            background: #00A3D6;
+            color: white;
+            box-shadow: 0 10px 22px rgba(0, 163, 214, 0.35);
+        }
+
+        .btn-approve:hover {
+            background: #008ec0;
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background:#dc2626;
+            color:white;
+            box-shadow: 0 10px 22px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-reject:hover {
+            background:#b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .back-icon-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #374151;
+            font-size: 16px;
+            z-index: 99;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.25s ease;
+        }
+
+        .back-icon-btn:hover {
+            background: #f1f5f9;
+            transform: translateX(-3px);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .breadcrumb a {
+            text-decoration: none;
+            color: #0284c7;
+            font-weight: 500;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 
 <body>
+
+<!-- Sticky Back Icon -->
+<a href="{% url 'admin_applications' %}" class="back-icon-btn">
+    <i class="fas fa-arrow-left"></i>
+</a>
+
 <main class="main">
 <section class="overview">
 
@@ -73,34 +190,39 @@
     <!-- Content Panel -->
     <div class="panel" style="margin-top:20px;">
 
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{% url 'admin_applications' %}">Applications</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Details</span>
+        </div>
+
         <!-- Applicant Info -->
         <h3>Applicant Information</h3>
 
-        <div class="application-item" style="justify-content:space-between;">
+        <div class="application-item">
             <div>
                 <div style="font-weight:700">{{ user.full_name }}</div>
                 <div style="color:var(--muted);font-size:13px">{{ user.email }}</div>
             </div>
 
-            <div>
-                <span class="status-badge 
-                    {% if app.status == 'Approved' %}approved
-                    {% elif app.status == 'Rejected' %}rejected
-                    {% else %}pending
-                    {% endif %}
-                ">
-                    {{ app.status }}
-                </span>
-            </div>
+            <span class="status-badge 
+                {% if app.status == 'Approved' %}approved
+                {% elif app.status == 'Rejected' %}rejected
+                {% else %}pending{% endif %}">
+                {{ app.status }}
+            </span>
         </div>
 
-        <hr style="margin:20px 0;">
+        <hr>
 
         <!-- Scholarship -->
         <h3>Scholarship</h3>
         <p style="font-weight:600">{{ post.title }}</p>
 
-        <hr style="margin:20px 0;">
+        <hr>
 
         <!-- Requirements -->
         <h3>Submitted Requirements</h3>
@@ -115,32 +237,22 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>No files submitted.</p>
+            <p style="color:#64748b;font-size:14px;">No files submitted.</p>
         {% endif %}
 
-        <hr style="margin:20px 0;">
+        <hr>
 
         <!-- Buttons -->
-        <div style="display:flex;gap:12px;">
-
+        <div style="display:flex;gap:16px;margin-top:8px;">
             <form method="POST" action="{% url 'admin_approve_application' app.id %}">
                 {% csrf_token %}
-                <button class="btn btn-approve" type="submit">
-                    Approve
-                </button>
+                <button class="btn btn-approve" type="submit">Approve</button>
             </form>
 
             <form method="POST" action="{% url 'admin_reject_application' app.id %}">
                 {% csrf_token %}
-                <button class="btn btn-reject" type="submit">
-                    Reject
-                </button>
+                <button class="btn btn-reject" type="submit">Reject</button>
             </form>
-
-            <a href="{% url 'admin_applications' %}" class="btn btn-back">
-                Back
-            </a>
-
         </div>
 
     </div>
