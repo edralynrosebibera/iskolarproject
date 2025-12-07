@@ -179,13 +179,39 @@ async function saveDescription(sectionsContainer, filesContainer) {
     .insert([{ post_id: postId, content }]);
 
   if (error) {
-    console.error("❌ Save error:", error);
-    alert("Failed to save description.");
+      console.error("❌ Save error:", error);
+      showToast("❌ Failed to save description.", "error");
   } else {
-    alert("✅ Description saved successfully to Supabase!");
-    window.location.href = "/admin-page/description-posts/";
+      showToast("✅ Description saved successfully!", "success");
+      setTimeout(() => {
+          window.location.href = "/admin-page/description-posts/";
+      }, 800);
   }
+
 }
+
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+      <span>${message}</span>
+      <button class="close-btn">&times;</button>
+  `;
+
+  // Add to DOM
+  container.appendChild(toast);
+
+  // Close on click
+  toast.querySelector(".close-btn").onclick = () => toast.remove();
+
+  // Auto-remove
+  setTimeout(() => toast.remove(), duration);
+}
+
+
+
 
 async function updateDescription(postId) {
   const sectionsContainer = document.querySelector(".sections-container");
@@ -216,7 +242,9 @@ async function updateDescription(postId) {
     return;
   }
 
-  alert("✅ Description updated!");
-  window.location.href = "/admin-page/description-posts/";
+  showToast("Description updated!", "success");
+  setTimeout(() => {
+    window.location.href = "/admin-page/description-posts/";
+}, 800);
 }
 

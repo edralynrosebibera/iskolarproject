@@ -69,6 +69,28 @@ function updatePreview() {
   }
 }
 
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("confirmModal");
+    const text = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    text.textContent = message;
+    modal.style.display = "flex";
+
+    yesBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    noBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+  });
+}
+
 function updateTimers() {
   const now = new Date();
 }
@@ -109,31 +131,55 @@ saveBtn.addEventListener("click", async e => {
 
     const data = await res.json();
     console.log("FRONTEND RECEIVED:", data);
+
     if (data.success) {
-      alert(successMessage);
+        showToast(successMessage);
 
-      const newPostId = data.data && data.data.length > 0 ? data.data[0].id : null;
+        const newPostId = data.data && data.data.length > 0 ? data.data[0].id : null;
 
+        if (!newPostId) {
+            showToast("⚠️ Post saved but no post ID was returned.");
+            return;
+        }
 
-      if (!newPostId) {
-        alert("⚠️ Post saved but no post ID was returned.");
-        return;
-      }
+        // 🔥 <-- INSERT SMART LOGIC HERE
+        let descriptionPrompt = "";
 
-      // ✅ Ask if user wants to create a description page now
-      const goToDescription = confirm("Do you want to create a Description Page for this post?");
-      if (goToDescription) {
-        // Auto redirect and pass the post ID
-        window.location.href = `/admin-page/create-description/?id=${newPostId}`;
-      } else {
-        window.location.href = "/admin-page/posts/";
-      }
+        if (editId) {
+            let hasDescription = false;
+
+            try {
+                const check = await fetch("/admin-page/get-posts/");
+                const response = await check.json();
+
+                if (response.success && response.data) {
+                    const match = response.data.find(p => p.id === editId);
+                    hasDescription = match?.has_description === true;
+                }
+            } catch (e) {
+                console.error("Description check failed:", e);
+            }
+
+            descriptionPrompt = hasDescription
+                ? "This post already has a Description Page. Do you want to EDIT it now?"
+                : "This post has NO Description Page yet. Do you want to CREATE one now?";
+        } else {
+            descriptionPrompt = "Do you want to create a Description Page for this post?";
+        }
+
+        const goToDescription = await showConfirm(descriptionPrompt);
+
+        if (goToDescription) {
+            window.location.href = `/admin-page/create-description/?id=${newPostId}`;
+        } else {
+            window.location.href = "/admin-page/posts/";
+        }
     } else {
-      alert("❌ Failed: " + (data.error || "Unknown error"));
+      showToast("❌ Failed: " + (data.error || "Unknown error"));
     }
   } catch (err) {
     console.error(err);
-    alert("⚠️ Error saving post.");
+    showToast("⚠️ Error saving post.");
   }
 });
 
@@ -155,7 +201,22 @@ if (createDescBtn) {
       // If editing an existing post, link it directly to the description builder
       window.open(`/admin-page/create-description/?id=${editId}`, "_blank");
     } else {
-      alert("⚠️ Please save the scholarship post first before creating a description page.");
+      showToast("⚠️ Please save the scholarship post first before creating a description page.");
     }
   });
 }
+
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+
+  toast.className = `toast ${type}`;
+  toast.innerHTML = message;
+
+  container.appendChild(toast);
+
+  setTimeout(() => toast.remove(), duration);
+}
+
+
+
