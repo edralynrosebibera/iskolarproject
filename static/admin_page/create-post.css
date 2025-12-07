@@ -2,11 +2,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family:Inter,system-ui,Segoe UI,Arial;
 }
 
 body {
-  background: #f8f9fc;
+  background: #eaf6ff;
   color: #333;
 }
 
@@ -14,22 +14,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: white;
+  background: #eaf6ff;
   padding: 15px 25px;
-  border-bottom: 1px solid #e0e0e0;
 }
 
-.logo {
-  background: linear-gradient(135deg, #4f46e5, #06b6d4);
-  color: white;
-  font-size: 1.4rem;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+h1 {
+    text-align: center;
+    margin-left: 60px;
+    font-size: 40px;
+    margin-top: 15px;
 }
+
+.header-text p {
+    margin-left: 60px; 
+}
+
 
 .view-btn {
   background: linear-gradient(to right, #4f46e5, #06b6d4);
