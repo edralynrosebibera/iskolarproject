@@ -151,38 +151,9 @@
               </tr>
             </thead>
             <tbody id="usersContainer">
-              {% if users %}
-                {% for u in users %}
-                  <tr>
-                    <td>
-                      <div class="post-title">{{ u.get_full_name|default:u.username }}
-                        <div class="post-sub">{{ u.email }}</div>
-                      </div>
-                    </td>
-                    <td>{{ u.email }}</td>
-                    <td>
-                      <span class="role-pill">{{ u.role|default:"student" }}</span>
-                    </td>
-                    <td>
-                      {% if u.is_active %}
-                        <span class="status-pill status-approved">Active</span>
-                      {% else %}
-                        <span class="status-pill status-rejected">Suspended</span>
-                      {% endif %}
-                    </td>
-                    <td>{{ u.date_joined|date:"Y-m-d" }}</td>
-                    <td>{{ u.applications_count|default:"0" }}</td>
-                    <td>
-                      <div class="actions-cell">
-                        <button type="button" class="action-dots" aria-label="More">&middot;&middot;&middot;</button>
-                      </div>
-                    </td>
-                  </tr>
-                {% endfor %}
-              {% else %}
-                <tr><td colspan="7" style="padding:18px;color:#6b8796">No users found.</td></tr>
-              {% endif %}
-            </tbody>
+  <tr><td colspan="7" style="padding:18px;color:#6b8796">Loading users...</td></tr>
+</tbody>
+
           </table>
         </div>
       </section>
@@ -291,6 +262,9 @@
           }
           if(target === '#pane-applications'){
             fetchApplications();
+          }
+          if(target === '#pane-users'){
+              fetchUsers();
           }
         });
       });
@@ -533,6 +507,163 @@
       // re-render applications when filter changes
       const applicationsFilter = document.getElementById('applicationsFilter');
       if(applicationsFilter){ applicationsFilter.addEventListener('change', function(){ renderApplications(lastApplications || []); }); }
+    
+    async function fetchUsers() {
+    try {
+        const res = await fetch("{% url 'users_json' %}");
+        const data = await res.json();
+        const container = document.getElementById("usersContainer");
+
+        if (!data.success) {
+            container.innerHTML = `<tr><td colspan="7">Error loading users.</td></tr>`;
+            return;
+        }
+
+        const users = data.data;
+        container.innerHTML = "";
+
+        if (!users.length) {
+            container.innerHTML = `<tr><td colspan="7">No users found.</td></tr>`;
+            return;
+        }
+
+        users.forEach(user => {
+          const fullName = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email || 'Unnamed';
+          const joined = user.created_at ? user.created_at.split("T")[0] : "-";
+          const role = user.user_role || 'student';
+          const apps = user.applications_count ?? 0;
+          const active = user.is_active !== false; // assume true if undefined
+          const avatarUrl = user.avatar_url || ''; // backend may provide
+          const initials = fullName.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+
+          container.innerHTML += `
+            <tr class="user-row" data-user-id="${user.id}">
+              <td>
+                <div class="avatar-wrap">
+                  ${avatarUrl ? `<img class="user-avatar" src="${avatarUrl}" alt="${escapeHtml(fullName)}">` : `<div class="user-avatar" aria-hidden="true">${escapeHtml(initials)}</div>`}
+                  <div>
+                    <div class="post-title">${escapeHtml(fullName)}</div>
+                  </div>
+                </div>
+              </td>
+              <td>${escapeHtml(user.email || '')}</td>
+              <td><span class="role-pill">${escapeHtml(role)}</span></td>
+              <td><span class="status-badge ${active ? 'status-active' : 'status-suspended'}">${active ? 'Active' : 'Suspended'}</span></td>
+              <td>${escapeHtml(joined)}</td>
+              <td>${apps}</td>
+              <td>
+                <div class="user-actions">
+                  <button class="action-dots" aria-haspopup="true" aria-expanded="false">⋯</button>
+                  <div class="user-actions-menu" role="menu">
+                  ${active
+                      ? `<button class="menu-item suspend">Suspend User</button>`
+                      : `<button class="menu-item unsuspend">Unsuspend User</button>`
+                    }
+                    <div class="divider"></div>
+                    <button class="menu-item delete">Delete User</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        // wire up actions menu toggles and menu buttons via event delegation
+        container.querySelectorAll('.user-row').forEach(row => {
+          const btn = row.querySelector('.action-dots');
+          const menu = row.querySelector('.user-actions-menu');
+          const suspendBtn = row.querySelector('.menu-item.suspend');
+          const deleteBtn = row.querySelector('.menu-item.delete');
+          const userId = row.dataset.userId;
+          const unsuspendBtn = row.querySelector('.menu-item.unsuspend');
+
+
+          if(btn && menu){
+            btn.addEventListener('click', (ev) => {
+              ev.stopPropagation();
+              // close other menus
+              document.querySelectorAll('.user-actions-menu.show').forEach(m => { if(m !== menu) m.classList.remove('show'); });
+              menu.classList.toggle('show');
+              btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+            });
+          }
+
+          if(suspendBtn){
+            suspendBtn.addEventListener('click', async (ev) => {
+              ev.preventDefault();
+              if(!confirm('Suspend this user?')) return;
+              // call backend suspend endpoint (placeholder)
+              try{
+                const resp = await fetch(`/admin-page/users/${userId}/suspend/`, { method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''} });
+                if(resp.ok){
+                  row.querySelector('.status-badge').textContent = 'Suspended';
+                  row.querySelector('.status-badge').className = 'status-badge status-suspended';
+                  menu.classList.remove('show');
+                } else { alert('Failed to suspend user'); }
+              }catch(e){ console.error(e); alert('Network error'); }
+            });
+          }
+
+          if (unsuspendBtn) {
+    unsuspendBtn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        if (!confirm('Unsuspend this user?')) return;
+
+        try {
+            const resp = await fetch(`/admin-page/users/${userId}/unsuspend/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''
+                }
+            });
+
+            if (resp.ok) {
+                // Update UI
+                const badge = row.querySelector('.status-badge');
+                badge.textContent = 'Active';
+                badge.className = 'status-badge status-active';
+
+                // Replace menu options
+                menu.innerHTML = `
+                    <button class="menu-item suspend">Suspend User</button>
+                    <div class="divider"></div>
+                    <button class="menu-item delete">Delete User</button>
+                `;
+
+                menu.classList.remove('show');
+            } else {
+                alert('Failed to unsuspend user.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error.');
+        }
+    });
+}
+
+          if(deleteBtn){
+            deleteBtn.addEventListener('click', async (ev) => {
+              ev.preventDefault();
+              if(!confirm('Permanently delete this user? This cannot be undone.')) return;
+              try{
+                const resp = await fetch(`/admin-page/users/${userId}/delete/`, { method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''} });
+                if(resp.ok){ row.remove(); } else { alert('Failed to delete user'); }
+              }catch(e){ console.error(e); alert('Network error'); }
+            });
+          }
+        });
+
+    } catch (err) {
+        console.error("fetchUsers error:", err);
+    }
+}
+
+    // close any open user action menus when clicking elsewhere
+    document.addEventListener('click', function(){
+        document.querySelectorAll('.user-actions-menu.show').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.action-dots[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded','false'));
+    });
     })();
   </script>
 </body>

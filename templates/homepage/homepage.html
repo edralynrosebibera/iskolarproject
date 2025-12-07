@@ -222,8 +222,12 @@
     </div>
     
   </main>
-
-  <script type="module" src="{% static 'script2.js' %}?v=12"></script>
+<div id="serverUser"
+     data-name="{{ request.user.first_name }} {{ request.user.last_name }}"
+     data-email="{{ request.user.email }}"
+     data-avatar="">
+</div>
+  <script type="module" src="{% static 'script2.js' %}?v=13"></script>
 
   <script>
     // Toggle profile dropdown and close on outside click

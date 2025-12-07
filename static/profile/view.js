@@ -187,6 +187,16 @@ const updateMissingInfoList = (profileData) => {
         
         updateMissingInfoList(profileData);
 
+            // Hide the completeness card entirely when profile is 100% complete
+            const completenessCard = document.querySelector('.completeness-card');
+            if (completenessCard) {
+                if (completeness >= 100) {
+                    completenessCard.style.display = 'none';
+                } else {
+                    completenessCard.style.display = '';
+                }
+            }
+
         console.log(`📊 Profile completeness calculated: ${completeness}% (${earnedPoints}/${totalPoints} fields).`);
     };
 
@@ -385,6 +395,12 @@ const updateMissingInfoList = (profileData) => {
         updateDisplayElements(); 
         const profileData = saveProfileToLocalStorage();
         updateProfileCompleteness(profileData);
+        // Notify other scripts in the same tab to update header avatars immediately
+        try {
+            window.dispatchEvent(new Event('userProfileChanged'));
+        } catch (e) {
+            console.debug('dispatch userProfileChanged failed', e);
+        }
         toggleFormState(false);
     });
 

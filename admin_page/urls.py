@@ -33,6 +33,11 @@ urlpatterns = [
     path("applications/<int:app_id>/approve/", views.admin_approve_application, name="admin_approve_application"),
     path("applications/<int:app_id>/reject/", views.admin_reject_application, name="admin_reject_application"),
 
+    path("users/json/", views.users_json, name="users_json"),
+    path("users/<uuid:user_id>/suspend/", views.suspend_user, name="suspend_user"),
+    path("users/<uuid:user_id>/delete/", views.delete_user, name="delete_user"),
+    path("users/<uuid:user_id>/unsuspend/", views.unsuspend_user, name="unsuspend_user"),
+
 
 ]
 

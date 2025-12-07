@@ -118,3 +118,18 @@ body{font-family:Inter, system-ui, Arial, sans-serif;background:#eaf6fb;color:#0
 .status-pending { background:#eef6ff; color:#0b67a4 }
 .status-approved { background:#f0fff4; color:#166534 }
 .status-rejected { background:#fff5f5; color:#991b1b }
+
+/* Users table styles */
+.user-row .avatar-wrap{display:flex;align-items:center;gap:12px}
+.user-avatar{width:40px;height:40px;border-radius:50%;background:#dfeff6;color:#0b67a4;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.role-pill{background:#f1f6f9;color:#0b67a4;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.status-badge{padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+.status-active{background:#dff8e8;color:#06763b}
+.status-suspended{background:#ffe6e6;color:#b91c1c}
+.user-actions{position:relative}
+.action-dots{background:transparent;border:none;font-size:20px;cursor:pointer;padding:6px 8px;border-radius:8px}
+.user-actions-menu{position:absolute;right:0;top:36px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(10,20,40,0.08);min-width:160px;padding:8px 0;display:none;z-index:50}
+.user-actions-menu.show{display:block}
+.user-actions-menu a, .user-actions-menu button{display:block;width:100%;padding:10px 14px;text-align:left;border:none;background:transparent;color:#07283d;cursor:pointer;font-size:14px}
+.user-actions-menu button.delete{color:#ef4444}
+.user-actions-menu .divider{height:1px;background:#f0f3f5;margin:6px 0}

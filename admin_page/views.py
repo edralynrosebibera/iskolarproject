@@ -631,3 +631,85 @@ def admin_reject_application(request, app_id):
         supabase.table("applications").update({"status": "Rejected"}).eq("id", app_id).execute()
         messages.success(request, "Application rejected.")
         return redirect("admin_applications")
+
+def users_json(request):
+    try:
+        # Fetch all users from Supabase
+        users = (
+            supabase.table("users")
+            .select("*")
+            .order("created_at", desc=True)
+            .execute()
+            .data or []
+        )
+
+        formatted = []
+
+        for u in users:
+            user_id = u.get("id")
+
+            # Count this user's applications
+            apps = (
+                supabase.table("applications")
+                .select("id", count="exact")
+                .eq("user_id", user_id)
+                .execute()
+            )
+
+            applications_count = apps.count or 0
+
+            formatted.append({
+                "id": user_id,
+                "first_name": u.get("first_name", ""),
+                "last_name": u.get("last_name", ""),
+                "email": u.get("email", ""),
+                "user_role": u.get("user_role", "student"),
+                "created_at": u.get("created_at", ""),
+                "applications_count": applications_count,
+            })
+
+        return JsonResponse({"success": True, "data": formatted})
+
+    except Exception as e:
+        print("USERS_JSON ERROR:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+@csrf_exempt
+def suspend_user(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+    try:
+        # Mark user as suspended
+        supabase.table("users").update({"is_active": False}).eq("id", user_id).execute()
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        print("SUSPEND USER ERROR:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+@csrf_exempt
+def unsuspend_user(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+    try:
+        supabase.table("users").update({"is_active": True}).eq("id", str(user_id)).execute()
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        print("UNSUSPEND USER ERROR:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+@csrf_exempt
+def delete_user(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+
+    try:
+        supabase.table("users").delete().eq("id", user_id).execute()
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        print("DELETE USER ERROR:", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
