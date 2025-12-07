@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views 
+from .views import auth_callback_view, auth_store_view
 
 
 urlpatterns = [
@@ -17,4 +18,7 @@ urlpatterns = [
     path("reset/done/", 
          auth_views.PasswordResetCompleteView.as_view(template_name="login/password_reset_complete.html"), 
          name="password_reset_complete"),
+     path("auth/callback/", auth_callback_view, name="auth_callback"),
+     path("auth/store/", auth_store_view, name="auth_store"),
+
 ]

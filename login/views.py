@@ -16,11 +16,9 @@ def login_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # Always start with fresh session
-
-        # ---------------------------------------------------------
+        # -------------------------
         # A) ADMIN LOGIN
-        # ---------------------------------------------------------
+        # -------------------------
         if username == "iskolarAdmin@gmail.com" and password == "IskolarAdmin123456":
 
             admin_user, created = User.objects.get_or_create(
@@ -44,26 +42,28 @@ def login_view(request):
 
             return redirect("posts")
 
-        # ---------------------------------------------------------
-        # B) SUPABASE AUTH LOGIN (Correct)
-        # ---------------------------------------------------------
+        # -------------------------
+        # B) SUPABASE LOGIN
+        # -------------------------
         try:
             response = supabase.auth.sign_in_with_password({
                 "email": username,
                 "password": password
             })
 
+            # Invalid Supabase credentials
             if not response.user:
                 messages.error(request, "Invalid credentials.")
                 return redirect("login")
 
+            # User not verified yet
             if not response.user.confirmed_at:
                 messages.error(request, "Please verify your email before logging in.")
                 return redirect("login")
 
             sb_uuid = str(response.user.id)
 
-            # Fetch profile from Supabase 'users'
+            # Fetch profile from Supabase 'users' table
             sb_user = (
                 supabase.table("users")
                 .select("*")
@@ -73,7 +73,7 @@ def login_view(request):
                 .data
             )
 
-            # If this is the FIRST verified login → insert into 'users' table
+            # First login? Insert user in Supabase table
             if not sb_user:
                 sb_user = supabase.table("users").insert({
                     "id": sb_uuid,
@@ -83,21 +83,22 @@ def login_view(request):
                     "user_role": "student"
                 }).execute().data[0]
 
-            # Mirror Django User
+            # Mirror user in Django
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={"email": username}
             )
 
-            if created:
-                user.set_password(password)
-                user.first_name = sb_user.get("first_name", "")
-                user.last_name = sb_user.get("last_name", "")
-                user.save()
+            # IMPORTANT: Always update password
+            user.set_password(password)
+            user.first_name = sb_user.get("first_name", "")
+            user.last_name = sb_user.get("last_name", "")
+            user.save()
 
+            # Log them in Django
             login(request, user)
 
-            # STORE CLEAN USER SESSION
+            # Store session variables
             request.session["is_admin"] = False
             request.session["django_user_id"] = user.id
             request.session["supabase_user_id"] = sb_uuid
@@ -115,6 +116,41 @@ def login_view(request):
 
 
 
+
 def forgot_view(request):
     return render(request, "login/forgot.html")
 
+# -------------------------
+# SUPABASE EMAIL CALLBACK (NEW)
+# -------------------------
+def auth_callback_view(request):
+    return HttpResponse("""
+        <script>
+        // Get the part after the # from the URL
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+
+        const access = params.get("access_token");
+        const refresh = params.get("refresh_token");
+
+        if (access && refresh) {
+            // Send to Django where Django can read it
+            window.location.href = "/auth/store/?access_token=" + access + "&refresh_token=" + refresh;
+        } else {
+            window.location.href = "/login/";
+        }
+        </script>
+    """)
+
+def auth_store_view(request):
+    access = request.GET.get("access_token")
+    refresh = request.GET.get("refresh_token")
+
+    # Set Supabase session (safe)
+    if access and refresh:
+        try:
+            supabase.auth.set_session(access, refresh)
+        except Exception as e:
+            print("SUPABASE SESSION ERROR:", e)
+
+    return redirect("login")
