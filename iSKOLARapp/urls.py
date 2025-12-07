@@ -11,4 +11,5 @@ urlpatterns = [
     path("saved_scholarships/unsave/<str:post_id>/", views.unsave_post, name="unsave_post"),
     path("applications/", views.applications_view, name="applications"),
     
+    
 ]
