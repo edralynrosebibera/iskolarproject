@@ -5,44 +5,130 @@ from django.contrib import messages
 from django.conf import settings
 from supabase import create_client, Client
 
-
 url: str = settings.SUPABASE_URL
 key: str = settings.SUPABASE_KEY
 supabase: Client = create_client(url, key)
+
 
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # Special case: Admin login (local hardcoded credentials)
+        # ---------------------------------------------------------
+        # A) ADMIN LOGIN
+        # ---------------------------------------------------------
         if username == "iskolarAdmin@gmail.com" and password == "IskolarAdmin123456":
-            # Log in or create admin user in Django
-            admin_user, created = User.objects.get_or_create(username=username, email=username, is_staff=True, is_superuser=True)
+
+            admin_user, created = User.objects.get_or_create(
+                username=username,
+                email=username,
+                is_staff=True,
+                is_superuser=True
+            )
+
             if created:
                 admin_user.set_password(password)
                 admin_user.save()
-            login(request, admin_user)
-            return redirect("admin_page")  
 
+            login(request, admin_user)
+
+            request.session["django_user_id"] = admin_user.id
+            request.session["supabase_user_id"] = None
+            request.session["user_email"] = admin_user.email
+            request.session["user_fullname"] = "Iskolar Admin"
+
+            return redirect("admin_page")
+
+        # ---------------------------------------------------------
+        # B) DJANGO AUTH LOGIN
+        # ---------------------------------------------------------
         user = authenticate(request, username=username, password=password)
-        if user is None:
-            try:
-                response = supabase.auth.sign_in_with_password({"email": username, "password": password})
-                if response.user:
-                    user = User.objects.create_user(username=username, email=username, password=password)
-                    login(request, user)
-                    return redirect("homepage")
-                else:
-                    messages.error(request, "Invalid credentials or email not verified.")
-                    return redirect("login")
-            except Exception:
+
+        if user is not None:
+            login(request, user)
+
+            # Try fetch Supabase user profile (safe)
+            sb_query = supabase.table("users").select("*").eq("email", username).maybe_single().execute()
+            sb_user = sb_query.data if sb_query else None
+
+            request.session["django_user_id"] = user.id
+            request.session["supabase_user_id"] = str(sb_user["id"]) if sb_user else None
+            request.session["user_email"] = username
+            request.session["user_fullname"] = user.get_full_name() or username
+
+            return redirect("homepage")
+
+        # ---------------------------------------------------------
+        # C) SUPABASE LOGIN
+        # ---------------------------------------------------------
+        try:
+            response = supabase.auth.sign_in_with_password({
+                "email": username,
+                "password": password
+            })
+
+            if not response.user:
                 messages.error(request, "Invalid credentials or email not verified.")
                 return redirect("login")
-        else:
+
+            if not response.user.email_confirmed:
+                messages.error(request, "Please verify your email before logging in.")
+                return redirect("login")
+
+            sb_uuid = str(response.user.id)
+
+            sb_row = supabase.table("users").select("*").eq("id", sb_uuid).single().execute()
+            sb_user = sb_row.data
+
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={"email": username}
+            )
+
+            if created:
+                user.set_password(password)
+                user.first_name = sb_user.get("first_name", "")
+                user.last_name = sb_user.get("last_name", "")
+                user.save()
+
             login(request, user)
+
+            request.session["django_user_id"] = user.id
+            request.session["supabase_user_id"] = sb_uuid
+            request.session["user_email"] = username
+            request.session["user_fullname"] = (
+                f"{sb_user.get('first_name', '')} {sb_user.get('last_name', '')}"
+            ).strip()
+
             return redirect("homepage")
+
+        except Exception as e:
+            print("SUPABASE LOGIN ERROR:", e)
+            messages.error(request, "Invalid credentials or email not verified.")
+            return redirect("login")
+
     return render(request, "login/login.html")
 
-def forgot_view(request):
-    return render(request, "login/forgot.html")
+def auth_callback_view(request):
+    try:
+        code = request.GET.get("code")
+
+        if not code:
+            messages.error(request, "Missing verification code.")
+            return redirect("login")
+
+        # Exchange code for a Supabase session
+        session = supabase.auth.exchange_code_for_session({"auth_code": code})
+
+        if not session.user:
+            messages.error(request, "Verification failed.")
+            return redirect("login")
+
+        messages.success(request, "Email verified! You can now log in.")
+        return redirect("login")
+
+    except Exception as e:
+        print("AUTH CALLBACK ERROR:", e)
+        messages.error(request, "Verification failed.")
+        return redirect("login")

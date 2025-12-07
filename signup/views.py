@@ -47,7 +47,7 @@ def signup_view(request):
                 "email": email,
                 "password": password1,
                 "options": {
-                    "email_redirect_to": "https://iskolarproject-340j.onrender.com/login/"
+                    "email_redirect_to": "https://iskolarproject-340j.onrender.com/auth/callback/"
                 }
             })
 
