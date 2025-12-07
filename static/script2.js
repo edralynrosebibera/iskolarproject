@@ -225,51 +225,56 @@ document.addEventListener('DOMContentLoaded', function () {
     scholarshipsContainer.innerHTML = posts
       .map((post) => {
         const deadline = post.deadline ? new Date(post.deadline) : null;
-        const safeLink =
-          post.scholarship_link && post.scholarship_link.trim() !== ''
-            ? post.scholarship_link
-            : '#';
+
+        // Decide redirect behavior
+        let viewHref = `/admin-page/view-description/${post.id}/`;
+        let target = "_self";
+
+        // If NO description but has link → use external link
+        if (!post.has_description && post.scholarship_link?.trim()) {
+            viewHref = post.scholarship_link;
+            target = "_blank";
+        }
 
         return `
-        <div class="scholarship-card">
-          <div class="card-header">
-            <h3 class="scholarship-title">${post.title ?? ''}</h3>
-            <div class="card-buttons">
-              <div class="tooltip">
-                <button class="icon-btn save-btn" data-id="${post.id}">
-                  <i class="fa-regular fa-bookmark"></i>
-                </button>
-                <span class="tooltiptext">Save this scholarship</span>
-              </div>
-              <div class="tooltip">
-                <button class="icon-btn archive-btn" data-id="${post.id}">
-                  <i class="fa-solid fa-box-archive"></i>
-                </button>
-                <span class="tooltiptext">Archive this scholarship</span>
-              </div>
-              <div class="tooltip">
-                <button class="icon-btn apply-btn" data-id="${post.id}">
-                  <i class="fa-regular fa-circle-check"></i>
-                </button>
-                <span class="tooltiptext">Apply for this scholarship</span>
+          <div class="scholarship-card">
+            <div class="card-header">
+              <h3 class="scholarship-title">${post.title ?? ''}</h3>
+              <div class="card-buttons">
+                <div class="tooltip">
+                  <button class="icon-btn save-btn" data-id="${post.id}">
+                    <i class="fa-regular fa-bookmark"></i>
+                  </button>
+                  <span class="tooltiptext">Save this scholarship</span>
+                </div>
+                <div class="tooltip">
+                  <button class="icon-btn archive-btn" data-id="${post.id}">
+                    <i class="fa-solid fa-box-archive"></i>
+                  </button>
+                  <span class="tooltiptext">Archive this scholarship</span>
+                </div>
+                <div class="tooltip">
+                  <button class="icon-btn apply-btn" data-id="${post.id}">
+                    <i class="fa-regular fa-circle-check"></i>
+                  </button>
+                  <span class="tooltiptext">Apply for this scholarship</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <p class="scholarship-description">${post.description ?? ''}</p>
-          <p><i class="fa-solid fa-location-dot"></i> Location: ${post.location ?? 'N/A'}</p>
-          <div class="deadline-tag" id="deadline-${post.id}">
-            <i class="fa-regular fa-calendar-check"></i> ${
-              deadline ? 'Due: ' + deadline.toDateString() : 'No deadline'
-            }
-          </div>
+            <p class="scholarship-description">${post.description ?? ''}</p>
+            <p><i class="fa-solid fa-location-dot"></i> Location: ${post.location ?? 'N/A'}</p>
+            <div class="deadline-tag" id="deadline-${post.id}">
+              <i class="fa-regular fa-calendar-check"></i>
+              ${deadline ? 'Due: ' + deadline.toDateString() : 'No deadline'}
+            </div>
 
-          <!-- ✅ always show button -->
-<a href="/admin-page/view-description/${post.id}/" class="view-link">
-    View Scholarship Details
-</a>
-        </div>
-      `;
+            <!-- Smart redirect button -->
+            <a href="${viewHref}" target="${target}" class="view-link">
+              View Scholarship Details
+            </a>
+          </div>
+        `;
       })
       .join('');
 

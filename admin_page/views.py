@@ -75,12 +75,53 @@ def create_post_view(request):
     if request.method == "GET":
         return render(request, "admin_page/create-post.html")
 
+# @csrf_exempt
+# def get_posts_view(request):
+#     try:
+#         data = supabase.table("posts").select("*").order("id", desc=True).execute()
+#         posts = []
+#         for post in data.data:
+#             posts.append({
+#                 "id": post.get("id"),
+#                 "title": post.get("title"),
+#                 "description": post.get("description"),
+#                 "location": post.get("location"),
+#                 "qualifications": post.get("qualifications"),
+#                 "deadline": post.get("deadline"),
+#                 "link": post.get("scholarship_link"),
+#                 "created_at": post.get("created_at")
+#             })
+#         return JsonResponse({"success": True, "data": posts})
+#     except Exception as e:
+#         print("⚠️ Error fetching posts:", e)
+#         return JsonResponse({"success": False, "error": str(e)})
+
+
 @csrf_exempt
 def get_posts_view(request):
     try:
-        data = supabase.table("posts").select("*").order("id", desc=True).execute()
+        res = supabase.table("posts").select("*").order("id", desc=True).execute()
+
+        # If Supabase returned nothing
+        if not res or not res.data:
+            return JsonResponse({"success": True, "data": []})
+
         posts = []
-        for post in data.data:
+
+        for post in res.data:
+
+            # Safe check for description
+            desc_res = (
+                supabase.table("descriptionpage")
+                .select("id")
+                .eq("post_id", post.get("id"))
+                .maybe_single()
+                .execute()
+            )
+
+            # Correct safe boolean check
+            has_description = bool(desc_res and desc_res.data)
+
             posts.append({
                 "id": post.get("id"),
                 "title": post.get("title"),
@@ -89,9 +130,12 @@ def get_posts_view(request):
                 "qualifications": post.get("qualifications"),
                 "deadline": post.get("deadline"),
                 "link": post.get("scholarship_link"),
-                "created_at": post.get("created_at")
+                "created_at": post.get("created_at"),
+                "has_description": has_description,
             })
+
         return JsonResponse({"success": True, "data": posts})
+
     except Exception as e:
         print("⚠️ Error fetching posts:", e)
         return JsonResponse({"success": False, "error": str(e)})

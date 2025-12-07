@@ -71,84 +71,12 @@ function updatePreview() {
 
 function updateTimers() {
   const now = new Date();
-  // if (postedDate) {
-  //   const diffPosted = now - postedDate;
-  //   preview.posted.textContent = `Posted ${formatTime(diffPosted)} ago`;
-  // }
-
-  // if (deadlineDate) {
-  //   const diffDeadline = deadlineDate - now;
-  //   if (diffDeadline <= 0) {
-  //     preview.remaining.textContent = "Expired";
-  //     preview.remaining.classList.add("expired");
-  //   } else {
-  //     preview.remaining.textContent = `Remaining ${formatTime(diffDeadline)}`;
-  //     const daysLeft = Math.floor(diffDeadline / (1000 * 60 * 60 * 24));
-  //     preview.remaining.classList.remove("expired", "warning");
-  //     if (daysLeft <= 3) preview.remaining.classList.add("warning");
-  //   }
-  // }
 }
 
 // setInterval(updateTimers, 1000);
 document.querySelectorAll("input, textarea").forEach(el => el.addEventListener("input", updatePreview));
 
-// saveBtn.addEventListener("click", async e => {
-//   e.preventDefault();
 
-//   const post = {
-//     title: document.getElementById("title").value.trim(),
-//     description: document.getElementById("description").value.trim(),
-//     location: document.getElementById("location").value.trim(),
-//     qualifications: document.getElementById("qualifications").value.trim(),
-//     postedDate: postedDate.toISOString(),
-//     deadline: document.getElementById("deadline").value,
-//     scholarshipLink: document.getElementById("scholarshipLink").value.trim(),
-//   };
-
-//   const editId = editingIdField.value;
-//   let endpoint = "/admin-page/create-post/";
-//   let successMessage = "🎉 Scholarship created successfully!";
-
-//   if (editId) {
-//     endpoint = `/admin-page/edit-post/${editId}/`;
-//     successMessage = "✅ Scholarship updated successfully!";
-//   }
-
-// try {
-//   const res = await fetch(endpoint, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(post),
-//   });
-
-//   const data = await res.json();
-
-//   if (data.success) {
-//     alert(successMessage);
-
-//     // ✅ Store the new post ID
-//     const newPostId = data.data[0].id;
-//     document.getElementById("editingId").value = newPostId;
-
-//     // ✅ Ask if the admin wants to make a description page now
-//     const goToDescription = confirm("Do you want to create a Description Page for this post?");
-//     if (goToDescription) {
-//       window.location.href = `/admin-page/create-description/?id=${newPostId}`;
-//     } else {
-//       window.location.href = "/admin-page/posts/";
-//     }
-
-//   } else {
-//     alert("❌ Failed: " + (data.error || "Unknown error"));
-//   }
-
-// } catch (err) {
-//   console.error(err);
-//   alert("⚠️ Error saving post.");
-// }
-
-// });
 
 saveBtn.addEventListener("click", async e => {
   e.preventDefault();
@@ -184,8 +112,6 @@ saveBtn.addEventListener("click", async e => {
     if (data.success) {
       alert(successMessage);
 
-      // ✅ Get the new post ID (the one Django/Supabase returns)
-      // const newPostId = data.data?.id || data.data?.[0]?.id || null;
       const newPostId = data.data && data.data.length > 0 ? data.data[0].id : null;
 
 
