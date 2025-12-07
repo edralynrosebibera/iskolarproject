@@ -7,6 +7,53 @@ console.log("🔌 Connected to Supabase project:", supabaseUrl);
 
 const container = document.getElementById("descriptionListContainer");
 
+window.confirm = () => { return true; };
+window.alert = () => {};
+
+
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("confirmModal");
+    const text = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    text.textContent = message;
+    modal.style.display = "flex";
+
+    yesBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    noBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+  });
+}
+
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+      <span>${message}</span>
+      <button class="close-btn">&times;</button>
+  `;
+
+  // Add to DOM
+  container.appendChild(toast);
+
+  // Close on click
+  toast.querySelector(".close-btn").onclick = () => toast.remove();
+
+  // Auto-remove
+  setTimeout(() => toast.remove(), duration);
+}
+
+
 async function loadDescriptions() {
   console.log("🟡 Fetching data from `descriptionpage` table...");
 
@@ -77,19 +124,22 @@ function editDescription(postId) {
 }
 
 async function deleteDescription(id) {
-  if (!confirm("Are you sure you want to delete this description page?")) return;
+  
+  const confirmed = await showConfirm("Are you sure you want to delete this description page?");
+    if (!confirmed) return;
 
   const { error } = await supabase.from("descriptionpage").delete().eq("id", id);
 
   if (error) {
-    alert("❌ Failed to delete description page.");
+    showToast("❌ Failed to delete description page.");
   } else {
-    alert("🗑️ Description deleted successfully!");
+    showToast("🗑️ Description deleted successfully!");
     loadDescriptions();
   }
 }
 
 loadDescriptions();
+
 
 
 

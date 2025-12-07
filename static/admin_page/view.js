@@ -187,7 +187,7 @@ async function deleteFile(i) {
   const req = requirements[i];
   if (!req.file_url) return alert("No file to delete.");
 
-  if (!confirm("Are you sure you want to delete this file?")) return;
+  if (!await showConfirm("Are you sure you want to delete this file?")) return;
 
   try {
     const fileName = req.file_url.split("/").pop();
@@ -216,6 +216,7 @@ async function deleteFile(i) {
   }
 }
 
+
 // --- UPDATE PROGRESS BAR ---
 function updateProgress() {
   const done = requirements.filter((r) => r.uploaded).length;
@@ -229,7 +230,7 @@ function updateProgress() {
 // --- SUBMIT ALL FILES TO DJANGO ---
 document.getElementById("submitAllBtn").addEventListener("click", async () => {
   if (requirements.some(r => !r.uploaded)) {
-    alert("⚠️ Please upload all required files before submitting.");
+    showToast("⚠️ Please upload all required files before submitting.");
     return;
   }
 
@@ -275,3 +276,46 @@ document.getElementById("submitAllBtn").addEventListener("click", async () => {
 
 // --- START ---
 loadDescription();
+
+
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("confirmModal");
+    const text = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    text.textContent = message;
+    modal.style.display = "flex";
+
+    yesBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    noBtn.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+  });
+}
+
+function showToast(message, type = "success", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+      <span>${message}</span>
+      <button class="close-btn">&times;</button>
+  `;
+
+  // Add to DOM
+  container.appendChild(toast);
+
+  // Close on click
+  toast.querySelector(".close-btn").onclick = () => toast.remove();
+
+  // Auto-remove
+  setTimeout(() => toast.remove(), duration);
+}
