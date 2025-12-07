@@ -19,9 +19,6 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from iSKOLARapp import views as admin_views
-from login.views import auth_callback_view   # <-- ADD THIS LINE
-
-
 
 
 urlpatterns = [
@@ -34,8 +31,6 @@ urlpatterns = [
     path("profile/", include("profile_app.urls")),
     path('admin-page/', include('admin_page.urls')),  
     path('logout/', admin_views.logout_view, name='logout'),
-    path("auth/callback/", auth_callback_view, name="auth_callback"),
-
 # include admin_page URLs
 ]
 
