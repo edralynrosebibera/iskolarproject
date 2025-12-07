@@ -14,6 +14,7 @@ def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
+        request.session.flush()
 
         # ---------------------------------------------------------
         # A) ADMIN LOGIN
@@ -38,7 +39,7 @@ def login_view(request):
             request.session["user_email"] = admin_user.email
             request.session["user_fullname"] = "Iskolar Admin"
 
-            return redirect("admin_page")
+            return redirect("posts")
 
         # ---------------------------------------------------------
         # B) TRY DJANGO LOGIN
@@ -48,7 +49,6 @@ def login_view(request):
         if user is not None:
             login(request, user)
 
-            # Try fetching Supabase user profile
             sb_user = (
                 supabase.table("users")
                 .select("*")
@@ -69,61 +69,67 @@ def login_view(request):
         # C) TRY SUPABASE LOGIN
         # ---------------------------------------------------------
         try:
+            # 1) Login with email & password
             response = supabase.auth.sign_in_with_password({
                 "email": username,
                 "password": password
             })
 
-            # If login fails in Supabase
-            if not response.user:
-                messages.error(request, "Invalid credentials or email not verified.")
+            # 2) Get authenticated user from Supabase session
+            auth_user = supabase.auth.get_user()
+
+            if not auth_user or not auth_user.user:
+                messages.error(request, "Invalid credentials.")
                 return redirect("login")
 
-            # Check email verification status
-            if not response.user.confirmed_at:
+            user_data = auth_user.user
+
+            # 3) Check email verification
+            if not user_data.confirmed_at:
                 messages.error(request, "Please verify your email before logging in.")
                 return redirect("login")
 
-            sb_uuid = str(response.user.id)  # UUID as string (important)
+            sb_uuid = str(user_data.id)
 
-            # Fetch profile from your Supabase "users" table
-            sb_user = (
+            # 4) Fetch user profile from YOUR profile table
+            sb_profile = (
                 supabase.table("users")
                 .select("*")
                 .eq("id", sb_uuid)
-                .single()
+                .maybe_single()
                 .execute()
                 .data
-            )
+            ) or {}
 
-            # Create Django mirror account if not exists
-            user, created = User.objects.get_or_create(
+            # 5) Mirror into Django user
+            django_user, created = User.objects.get_or_create(
                 username=username,
                 defaults={"email": username}
             )
 
             if created:
-                user.set_password(password)
-                user.first_name = sb_user.get("first_name", "")
-                user.last_name = sb_user.get("last_name", "")
-                user.save()
+                django_user.set_password(password)
+                django_user.first_name = sb_profile.get("first_name", "")
+                django_user.last_name = sb_profile.get("last_name", "")
+                django_user.save()
 
-            login(request, user)
+            login(request, django_user)
 
-            # Save session data
-            request.session["django_user_id"] = user.id
+            # 6) Save session
+            request.session["django_user_id"] = django_user.id
             request.session["supabase_user_id"] = sb_uuid
             request.session["user_email"] = username
-            request.session["user_fullname"] = f"{sb_user.get('first_name', '')} {sb_user.get('last_name', '')}".strip()
+            request.session["user_fullname"] = f"{sb_profile.get('first_name','')} {sb_profile.get('last_name','')}".strip()
 
             return redirect("homepage")
 
         except Exception as e:
             print("SUPABASE LOGIN ERROR:", e)
-            messages.error(request, "Invalid credentials or email not verified.")
+            messages.error(request, "Login failed.")
             return redirect("login")
 
     return render(request, "login/login.html")
+
 
 
 def forgot_view(request):
