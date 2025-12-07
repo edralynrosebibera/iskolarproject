@@ -17,10 +17,10 @@
         <p class="subtitle">Manage scholarships, applications, and users</p>
 
         <div class="tabs" role="tablist">
-          <button class="tab active" data-target="#pane-scholarships" role="tab" aria-selected="true">Scholarships</button>
-          <button class="tab" data-target="#pane-applications" role="tab" aria-selected="false">Applications</button>
-          <button class="tab" data-target="#pane-users" role="tab" aria-selected="false">Users</button>
-          <button class="tab" data-target="#pane-analytics" role="tab" aria-selected="false">Analytics</button>
+          <button type="button" class="tab active" data-target="#pane-scholarships" role="tab" aria-selected="true">Scholarships</button>
+          <button type="button" class="tab" data-target="#pane-applications" role="tab" aria-selected="false">Applications</button>
+          <button type="button" class="tab" data-target="#pane-users" role="tab" aria-selected="false">Users</button>
+          <button type="button" class="tab" data-target="#pane-analytics" role="tab" aria-selected="false">Analytics</button>
         </div>
 
         
@@ -53,7 +53,7 @@
               <option value="active">Active</option>
               <option value="expired">Expired</option>
             </select>
-            <button class="create-btn" onclick="goToCreatePost()" aria-label="Add Scholarship" style="margin-left:6px">
+            <button type="button" class="create-btn" onclick="goToCreatePost()" aria-label="Add Scholarship" style="margin-left:6px">
               <span class="create-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.59 13.41a3 3 0 0 0 4.24 0l3-3a3 3 0 0 0-4.24-4.24l-1.06 1.06"/><path d="M13.41 10.59a3 3 0 0 0-4.24 0l-3 3a3 3 0 0 0 4.24 4.24l1.06-1.06"/></svg>
               </span>
@@ -133,7 +133,7 @@
             <input id="userSearch" type="search" placeholder="Search users..." aria-label="Search users">
           </div>
           <div style="display:flex;align-items:center;gap:12px">
-            <button id="userFilterBtn" class="header-select" style="height:44px;border-radius:12px;padding:8px 12px;border:1px solid rgba(11,103,164,0.06);background:#fff;cursor:pointer">All Users ▾</button>
+            <button type="button" id="userFilterBtn" class="header-select" style="height:44px;border-radius:12px;padding:8px 12px;border:1px solid rgba(11,103,164,0.06);background:#fff;cursor:pointer">All Users ▾</button>
           </div>
         </div>
 
@@ -174,7 +174,7 @@
                     <td>{{ u.applications_count|default:"0" }}</td>
                     <td>
                       <div class="actions-cell">
-                        <button class="action-dots" aria-label="More">&middot;&middot;&middot;</button>
+                        <button type="button" class="action-dots" aria-label="More">&middot;&middot;&middot;</button>
                       </div>
                     </td>
                   </tr>
@@ -236,9 +236,9 @@
     <div class="dialog-box">
       <h3>Are you sure?</h3>
       <p>This action cannot be undone. This will permanently delete the scholarship post.</p>
-      <div class="dialog-actions">
-        <button id="cancelBtn" class="cancel-btn">Cancel</button>
-        <button id="deleteBtn" class="delete-btn">Delete</button>
+        <div class="dialog-actions">
+        <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+        <button type="button" id="deleteBtn" class="delete-btn">Delete</button>
       </div>
     </div>
   </div>
@@ -379,12 +379,12 @@
                 </span>
                 <span>View</span>
               </a>
-              <button class="action-btn btn-approve" data-app-id="${app.id}" title="Approve">
+              <button type="button" class="action-btn btn-approve" data-app-id="${app.id}" title="Approve">
                 <span class="action-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                 </span>
               </button>
-              <button class="action-btn btn-reject" data-app-id="${app.id}" title="Reject">
+              <button type="button" class="action-btn btn-reject" data-app-id="${app.id}" title="Reject">
                 <span class="action-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </span>
