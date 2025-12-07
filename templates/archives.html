@@ -70,7 +70,8 @@
                 </div>
             </div>
 
-            <div class="header-right">
+             <div class="header-right">
+         <div class="header-right">
                 <button class="profile-btn" id="profileToggle">
                     <img src="{% static 'images/students.jpg' %}" alt="Avatar" class="avatar" style="width:32px;height:32px;border-radius:50%;">
                 </button>
@@ -84,12 +85,13 @@
                     </div>
                     <ul class="profile-menu">
                         <li><a href="{% url 'view_profile' %}">View Profile<br><small>See your profile information</small></a></li>
+              
                     </ul>
                     <hr>
                     <a href="{% url 'login' %}" class="logout-link"><span class="icon">↩</span> Log Out<br><small>Sign out of your account</small></a>
                 </div>
-            </div>
-        </div>
+      </div>
+    </div>
     </header>
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
