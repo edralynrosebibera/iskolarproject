@@ -321,11 +321,16 @@
                 var cards = document.querySelectorAll('.cards-card');
                 cards.forEach(function(card){
                     var s = (card.getAttribute('data-status') || '').toLowerCase();
-                    if(status === 'all' || s === status){
-                        card.classList.remove('hidden');
+                    var show = false;
+                    if(status === 'all') show = true;
+                    else if(status === 'accepted'){
+                        // treat both admin 'Approved' and student 'Accepted' as accepted
+                        show = (s === 'accepted' || s === 'approved');
                     } else {
-                        card.classList.add('hidden');
+                        show = (s === status);
                     }
+
+                    if(show) card.classList.remove('hidden'); else card.classList.add('hidden');
                 });
             }
 
@@ -344,13 +349,3 @@
     
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
