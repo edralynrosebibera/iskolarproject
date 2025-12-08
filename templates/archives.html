@@ -149,9 +149,9 @@
             </div>
 
             <div class="cards-tabs" role="tablist">
-                <button class="cards-tab active" data-status="all" role="tab" aria-selected="true">All ({{ posts|length }})</button>
-                <button class="cards-tab" data-status="active" role="tab">Active</button>
-                <button class="cards-tab" data-status="expired" role="tab">Expired</button>
+                <button class="cards-tab active" data-status="all" role="tab" aria-selected="true">All ({{ total_count|default:0 }})</button>
+                <button class="cards-tab" data-status="active" role="tab">Active ({{ active_count|default:0 }})</button>
+                <button class="cards-tab" data-status="expired" role="tab">Expired ({{ expired_count|default:0 }})</button>
             </div>
         </section>
 

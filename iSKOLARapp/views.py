@@ -81,7 +81,8 @@ def applications_view(request):
     # 3. Count totals per status
     pending_count = sum(1 for p in posts if p["status"].lower() == "pending")
     review_count = sum(1 for p in posts if p["status"].lower() == "review")
-    accepted_count = sum(1 for p in posts if p["status"].lower() == "accepted")
+    # Accept both 'accepted' and legacy 'approved' set by admin actions
+    accepted_count = sum(1 for p in posts if p["status"].lower() in ("accepted", "approved"))
     rejected_count = sum(1 for p in posts if p["status"].lower() == "rejected")
 
     return render(request, "applications.html", {
@@ -118,7 +119,17 @@ def archives_view(request):
                 is_expired = False
         post["is_expired"] = is_expired
 
-    return render(request, "archives.html", {"posts": posts})
+    # counts for tabs
+    total_count = len(posts)
+    expired_count = sum(1 for p in posts if p.get("is_expired"))
+    active_count = total_count - expired_count
+
+    return render(request, "archives.html", {
+        "posts": posts,
+        "total_count": total_count,
+        "active_count": active_count,
+        "expired_count": expired_count,
+    })
 
 
 
