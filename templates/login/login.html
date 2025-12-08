@@ -71,6 +71,8 @@
      <p style="margin-top: 20px ;font-size: .8rem; color: #484444;"> By signing in, you agree to our Terms of Service and Privacy Policy</p>
   </div>
  
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
 
 <script>
   function togglePassword(id, icon) {
@@ -83,7 +85,78 @@
       icon.src = "{% static 'images/hide.png' %}"; 
     }
   }
+
+  // Show toast for suspended account
+  window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('suspended') === 'true') {
+      showToast('🚫 Your account has been suspended. Please contact the administrator.', 'error', 5000);
+    }
+  });
+
+  function showToast(message, type = 'error', duration = 5000) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = message;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
 </script>
+
+<style>
+  #toastContainer {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 350px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    animation: toastSlideIn 0.3s ease;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+    border-left: 4px solid;
+  }
+
+  .toast.error {
+    border-left-color: #ef4444;
+    color: #991b1b;
+    background: #fee;
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+</style>
 
 </body>
 </html>

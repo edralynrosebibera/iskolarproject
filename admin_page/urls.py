@@ -35,8 +35,8 @@ urlpatterns = [
 
     path("users/json/", views.users_json, name="users_json"),
     path("users/<uuid:user_id>/suspend/", views.suspend_user, name="suspend_user"),
-    path("users/<uuid:user_id>/delete/", views.delete_user, name="delete_user"),
     path("users/<uuid:user_id>/unsuspend/", views.unsuspend_user, name="unsuspend_user"),
+    path("users/<uuid:user_id>/update-role/", views.update_user_role, name="update_user_role"),
 
 
 ]

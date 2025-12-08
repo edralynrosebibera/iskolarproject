@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Application - {{ post.title }}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'applications.css' %}">
+    <style>
+        .app-container {
+            max-width: 900px;
+            margin: 80px auto 40px;
+            padding: 0 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #374151;
+            text-decoration: none;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e5e7eb;
+            transform: translateX(-4px);
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            padding: 32px;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .app-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .app-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .app-status.approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .app-status.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .app-body {
+            padding: 32px;
+        }
+
+        .app-section {
+            margin-bottom: 32px;
+        }
+
+        .app-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #06b6d4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-view {
+            padding: 8px 16px;
+            background: #06b6d4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #0891b2;
+            transform: translateY(-2px);
+        }
+
+        .no-files {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <a href="{% url 'applications' %}" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Applications
+        </a>
+
+        <div class="app-card">
+            <div class="app-header">
+                <div class="app-title">{{ post.title }}</div>
+                <span class="app-status {{ application.status|lower }}">{{ application.status }}</span>
+            </div>
+
+            <div class="app-body">
+                <!-- Scholarship Information -->
+                <div class="app-section">
+                    <h3 class="app-section-title">Scholarship Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Location</span>
+                            <span class="info-value">{{ post.location|default:'Not specified' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Deadline</span>
+                            <span class="info-value">{{ post.deadline }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Applied On</span>
+                            <span class="info-value">{{ application.created_at|date:'F d, Y' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Application Status</span>
+                            <span class="info-value">{{ application.status }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="app-section">
+                    <h3 class="app-section-title">Description</h3>
+                    <p style="color: #374151; line-height: 1.6;">{{ post.description }}</p>
+                </div>
+
+                <!-- Qualifications -->
+                <div class="app-section">
+                    <h3 class="app-section-title">Qualifications</h3>
+                    <p style="color: #374151; line-height: 1.6;">{{ post.qualifications }}</p>
+                </div>
+
+                <!-- Submitted Files -->
+                <div class="app-section">
+                    <h3 class="app-section-title">Submitted Requirements</h3>
+                    {% if files %}
+                        <div class="files-list">
+                            {% for file in files %}
+                            <div class="file-item">
+                                <div class="file-info">
+                                    <div class="file-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                                            <polyline points="13 2 13 9 20 9"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="file-name">{{ file.requirement_name }}</div>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <a href="{{ file.file_url }}" target="_blank" class="btn-view">View File</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-files">No files submitted yet.</div>
+                    {% endif %}
+                </div>
+
+                <!-- Scholarship Link -->
+                {% if post.scholarship_link %}
+                <div class="app-section">
+                    <a href="{{ post.scholarship_link }}" target="_blank" class="btn-view" style="display: inline-block;">
+                        Visit Scholarship Website
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

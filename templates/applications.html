@@ -59,14 +59,14 @@ padding: 14px 24px !important;
 
    .card-status.accepted,
     .card-status.approved {
-        /* Use your requested color for the SOLID background */
-        background: #00A3D6 !important; 
+        /* Light green background for approved status */
+        background: #86efac !important; 
         
-        /* Use White text for high contrast against the solid blue background */
-        color: white !important; 
+        /* Dark text for contrast */
+        color: #15803d !important; 
         
-        /* Use the same solid blue for the border */
-        border: 1px solid #00A3D6 !important; 
+        /* Light green border */
+        border: 1px solid #86efac !important; 
         font-weight: 700 !important;
     }
 
@@ -227,25 +227,11 @@ padding: 14px 24px !important;
                         <span class="meta-icon due-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V9h14v9z"/></svg>
                         </span>
-                        <span class="meta-due-text">Due {{ post.deadline|date:'F j, Y' }}</span>
-                    </li>
-
-                    <li class="meta-money">
-                        <span class="meta-icon money-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1v2.07A7 7 0 0 0 9 5.91 7 7 0 0 0 12 7a7 7 0 0 0 3-1.09V1h-3zM6 9v6a6 6 0 0 0 6 6v-2a4 4 0 0 1-4-4V9H6zm12 0h-2v6a4 4 0 0 1-4 4v2a6 6 0 0 0 6-6V9z"/></svg>
-                        </span>
-                        <strong>{{ post.amount|default:'—' }}</strong>
-                    </li>
-
-                    <li class="meta-applied">
-                        <span class="meta-icon applied-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm8 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                        </span>
-                        {{ post.applied_count|default:0 }} applied
+                        <span class="meta-due-text">Due {{ post.deadline }}</span>
                     </li>
                 </ul>
 
-                <a class="card-cta" href="{{ post.get_absolute_url|default:post.scholarship_link }}">View Scholarship Details</a>
+                <a class="card-cta" href="{% url 'view_my_application' post.id %}">View Application Details</a>
             </article>
             {% empty %}
                 <p class="no-cards">You have no applications yet.</p>

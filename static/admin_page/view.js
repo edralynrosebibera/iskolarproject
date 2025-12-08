@@ -251,26 +251,35 @@ document.getElementById("submitAllBtn").addEventListener("click", async () => {
     body: JSON.stringify(payload),
 });
 
-
-    // 🔥 FIX #1 — detect redirect BEFORE parsing JSON
-    if (res.redirected) {
-      window.location.href = res.url;
-      return;
-    }
-
-    // Parse JSON only if not redirected
+    console.log("Response status:", res.status);
+    
+    // Parse JSON response
     const result = await res.json();
+    console.log("Response data:", result);
 
     if (result.success) {
-      window.location.href = "/applications/";
+      // Redirect on success
+      if (result.redirect) {
+        window.location.href = result.redirect;
+      } else {
+        window.location.href = "/applications/";
+      }
       return;
     }
 
-    document.getElementById("submitMsg").textContent = "⚠️ Submission failed.";
+    // Check if user already applied
+    if (result.show_toast && result.error) {
+      console.log("Showing toast:", result.error);
+      showToast(result.error, "error", 4000);
+      return;
+    }
+
+    // Show generic error
+    showToast(result.error || "⚠️ Submission failed.", "error", 3000);
 
   } catch (err) {
     console.error("❌ Submit error:", err);
-    document.getElementById("submitMsg").textContent = "⚠️ Submission failed.";
+    showToast("⚠️ Network error. Please try again.", "error", 3000);
   }
 });
 
@@ -302,9 +311,15 @@ function showConfirm(message) {
 
 function showToast(message, type = "success", duration = 3000) {
   const container = document.getElementById("toastContainer");
+  
+  if (!container) {
+    console.error("Toast container not found!");
+    return;
+  }
 
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
+  toast.style.pointerEvents = "auto"; // Make toast clickable
   toast.innerHTML = `
       <span>${message}</span>
       <button class="close-btn">&times;</button>
@@ -312,6 +327,7 @@ function showToast(message, type = "success", duration = 3000) {
 
   // Add to DOM
   container.appendChild(toast);
+  console.log("Toast added to DOM:", message);
 
   // Close on click
   toast.querySelector(".close-btn").onclick = () => toast.remove();

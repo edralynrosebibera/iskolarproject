@@ -30,9 +30,28 @@ def student_required(view_func):
             return redirect("/admin-page/posts/")
         
         # If missing student UUID → force logout
-        if not request.session.get("supabase_user_id"):
+        supabase_user_id = request.session.get("supabase_user_id")
+        if not supabase_user_id:
             logout(request)
             return redirect("/login/")
+        
+        # Check if user is suspended
+        try:
+            user_data = (
+                supabase.table("users")
+                .select("is_active")
+                .eq("id", supabase_user_id)
+                .maybe_single()
+                .execute()
+                .data
+            )
+            
+            if user_data and user_data.get("is_active") == False:
+                messages.error(request, "Your account has been suspended. Please contact the administrator.")
+                logout(request)
+                return redirect("/login/?suspended=true")
+        except Exception as e:
+            print(f"Error checking user suspension: {e}")
         
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -122,6 +141,15 @@ def get_posts_view(request):
             # Correct safe boolean check
             has_description = bool(desc_res and desc_res.data)
 
+            # Count applicants for this post
+            applicants_res = (
+                supabase.table("applications")
+                .select("id", count="exact")
+                .eq("post_id", post.get("id"))
+                .execute()
+            )
+            applicants_count = applicants_res.count if applicants_res else 0
+
             posts.append({
                 "id": post.get("id"),
                 "title": post.get("title"),
@@ -132,6 +160,7 @@ def get_posts_view(request):
                 "link": post.get("scholarship_link"),
                 "created_at": post.get("created_at"),
                 "has_description": has_description,
+                "applicants_count": applicants_count,
             })
 
         return JsonResponse({"success": True, "data": posts})
@@ -141,12 +170,12 @@ def get_posts_view(request):
         return JsonResponse({"success": False, "error": str(e)})
 
 @csrf_exempt
-@admin_required
-
 def edit_post_view(request, post_id):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            print(f"Editing post {post_id} with data:", data)
+            
             res = supabase.table("posts").update({
                 "title": data.get("title"),
                 "description": data.get("description"),
@@ -156,10 +185,13 @@ def edit_post_view(request, post_id):
                 "scholarship_link": data.get("scholarshipLink"),
             }).eq("id", post_id).execute()
 
+            print("Supabase update result:", res.data)
+            
             if not res.data:
                 return JsonResponse({"success": False, "error": "Post not found or not updated."})
             return JsonResponse({"success": True, "data": res.data})
         except Exception as e:
+            print(f"Error editing post {post_id}:", e)
             return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": False, "error": "Invalid request method"})
 
@@ -326,19 +358,24 @@ def submit_requirements(request, post_id):
         )
 
         if existing.data:
-            application_id = existing.data[0]["id"]
-        else:
-            # Create new application
-            new_app = (
-                supabase.table("applications")
-                .insert({
-                    "user_id": user_id,
-                    "post_id": post_id,
-                    "status": "Pending",
-                })
-                .execute()
-            )
-            application_id = new_app.data[0]["id"]
+            # User already applied - return error for toast
+            return JsonResponse({
+                "success": False, 
+                "error": "You have already applied to this scholarship.",
+                "show_toast": True
+            }, status=400)
+        
+        # Create new application
+        new_app = (
+            supabase.table("applications")
+            .insert({
+                "user_id": user_id,
+                "post_id": post_id,
+                "status": "Pending",
+            })
+            .execute()
+        )
+        application_id = new_app.data[0]["id"]
 
         # Insert requirement files
         for req in reqs:
@@ -348,7 +385,7 @@ def submit_requirements(request, post_id):
                 "file_url": req["file_url"],
             }).execute()
 
-        return redirect("/applications/")
+        return JsonResponse({"success": True, "redirect": "/applications/"})
 
     except Exception as e:
         print("SUBMIT ERROR:", e)
@@ -666,6 +703,7 @@ def users_json(request):
                 "user_role": u.get("user_role", "student"),
                 "created_at": u.get("created_at", ""),
                 "applications_count": applications_count,
+                "is_active": u.get("is_active", True),
             })
 
         return JsonResponse({"success": True, "data": formatted})
@@ -680,8 +718,10 @@ def suspend_user(request, user_id):
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
     try:
+        print(f"Suspending user: {user_id}")
         # Mark user as suspended
-        supabase.table("users").update({"is_active": False}).eq("id", user_id).execute()
+        result = supabase.table("users").update({"is_active": False}).eq("id", user_id).execute()
+        print(f"Suspend result: {result.data}")
         return JsonResponse({"success": True})
 
     except Exception as e:
@@ -694,7 +734,9 @@ def unsuspend_user(request, user_id):
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
     try:
-        supabase.table("users").update({"is_active": True}).eq("id", str(user_id)).execute()
+        print(f"Unsuspending user: {user_id}")
+        result = supabase.table("users").update({"is_active": True}).eq("id", str(user_id)).execute()
+        print(f"Unsuspend result: {result.data}")
         return JsonResponse({"success": True})
 
     except Exception as e:
@@ -702,14 +744,20 @@ def unsuspend_user(request, user_id):
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 @csrf_exempt
-def delete_user(request, user_id):
+def update_user_role(request, user_id):
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
 
     try:
-        supabase.table("users").delete().eq("id", user_id).execute()
-        return JsonResponse({"success": True})
+        data = json.loads(request.body)
+        new_role = data.get("role")
+        
+        if new_role not in ["student", "admin"]:
+            return JsonResponse({"success": False, "error": "Invalid role"}, status=400)
+        
+        supabase.table("users").update({"user_role": new_role}).eq("id", user_id).execute()
+        return JsonResponse({"success": True, "role": new_role})
 
     except Exception as e:
-        print("DELETE USER ERROR:", e)
+        print("UPDATE USER ROLE ERROR:", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)

@@ -10,6 +10,7 @@ urlpatterns = [
     path("saved_scholarships/", views.saved_scholarships_view, name="saved_scholarships"),
     path("saved_scholarships/unsave/<str:post_id>/", views.unsave_post, name="unsave_post"),
     path("applications/", views.applications_view, name="applications"),
+    path("applications/view/<uuid:post_id>/", views.view_my_application, name="view_my_application"),
     
     
 ]

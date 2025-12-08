@@ -23,8 +23,6 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)
-
             sb_user = (
                 supabase.table("users")
                 .select("*")
@@ -33,6 +31,13 @@ def login_view(request):
                 .execute()
                 .data
             )
+
+            # Check if user is suspended
+            if sb_user and sb_user.get("is_active") == False:
+                messages.error(request, "Your account has been suspended. Please contact the administrator.")
+                return redirect("login")
+
+            login(request, user)
 
             role = sb_user.get("user_role", "student") if sb_user else "student"
 
@@ -95,6 +100,11 @@ def login_view(request):
                 )
 
             role = sb_profile.get("user_role", "student")
+            
+            # Check if user is suspended
+            if sb_profile.get("is_active") == False:
+                messages.error(request, "Your account has been suspended. Please contact the administrator.")
+                return redirect("login")
 
             # Mirror profile into Django user model
             django_user, created = User.objects.get_or_create(

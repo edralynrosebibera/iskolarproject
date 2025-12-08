@@ -9,11 +9,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
 from datetime import datetime, timezone
+from admin_page.views import student_required
 
 url: str = settings.SUPABASE_URL
 key: str = settings.SUPABASE_KEY
 supabase: Client = create_client(url, key)
 
+@student_required
 def homepage_view(request):
     now = datetime.now().isoformat()
 

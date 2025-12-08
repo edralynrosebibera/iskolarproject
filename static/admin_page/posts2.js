@@ -53,7 +53,7 @@ function renderTableRows(posts) {
     const countdownId = `countdown-${post.id}`;
     const postedAgoId = `posted-${post.id}`;
 
-    const applicants = post.applicants != null ? post.applicants : "-";
+    const applicants = post.applicants_count != null ? post.applicants_count : "-";
     const status = post.status || (deadlineDate && deadlineDate < new Date() ? 'expired' : 'active');
 
     const tr = document.createElement('tr');

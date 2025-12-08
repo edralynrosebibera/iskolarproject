@@ -547,7 +547,12 @@
                 </div>
               </td>
               <td>${escapeHtml(user.email || '')}</td>
-              <td><span class="role-pill">${escapeHtml(role)}</span></td>
+              <td>
+                <select class="role-dropdown" data-user-id="${user.id}" data-current-role="${role}">
+                  <option value="student" ${role === 'student' ? 'selected' : ''}>student</option>
+                  <option value="admin" ${role === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+              </td>
               <td><span class="status-badge ${active ? 'status-active' : 'status-suspended'}">${active ? 'Active' : 'Suspended'}</span></td>
               <td>${escapeHtml(joined)}</td>
               <td>${apps}</td>
@@ -559,8 +564,6 @@
                       ? `<button class="menu-item suspend">Suspend User</button>`
                       : `<button class="menu-item unsuspend">Unsuspend User</button>`
                     }
-                    <div class="divider"></div>
-                    <button class="menu-item delete">Delete User</button>
                   </div>
                 </div>
               </td>
@@ -573,7 +576,6 @@
           const btn = row.querySelector('.action-dots');
           const menu = row.querySelector('.user-actions-menu');
           const suspendBtn = row.querySelector('.menu-item.suspend');
-          const deleteBtn = row.querySelector('.menu-item.delete');
           const userId = row.dataset.userId;
           const unsuspendBtn = row.querySelector('.menu-item.unsuspend');
 
@@ -592,72 +594,213 @@
             suspendBtn.addEventListener('click', async (ev) => {
               ev.preventDefault();
               if(!confirm('Suspend this user?')) return;
-              // call backend suspend endpoint (placeholder)
+              
               try{
-                const resp = await fetch(`/admin-page/users/${userId}/suspend/`, { method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''} });
-                if(resp.ok){
-                  row.querySelector('.status-badge').textContent = 'Suspended';
-                  row.querySelector('.status-badge').className = 'status-badge status-suspended';
+                const resp = await fetch(`/admin-page/users/${userId}/suspend/`, { 
+                  method: 'POST', 
+                  credentials: 'same-origin', 
+                  headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''} 
+                });
+                
+                const data = await resp.json();
+                
+                if(resp.ok && data.success){
+                  // Update status badge
+                  const badge = row.querySelector('.status-badge');
+                  badge.textContent = 'Suspended';
+                  badge.className = 'status-badge status-suspended';
+                  
+                  // Replace suspend button with unsuspend button
+                  menu.innerHTML = `
+                    <button class="menu-item unsuspend">Unsuspend User</button>
+                  `;
+                  
+                  // Re-attach event listeners to new buttons
+                  const newUnsuspendBtn = menu.querySelector('.menu-item.unsuspend');
+                  
+                  if(newUnsuspendBtn) {
+                    newUnsuspendBtn.addEventListener('click', async (e) => {
+                      e.preventDefault();
+                      if(!confirm('Unsuspend this user?')) return;
+                      
+                      try {
+                        const unsuspendResp = await fetch(`/admin-page/users/${userId}/unsuspend/`, {
+                          method: 'POST',
+                          credentials: 'same-origin',
+                          headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''}
+                        });
+                        
+                        const unsuspendData = await unsuspendResp.json();
+                        
+                        if(unsuspendResp.ok && unsuspendData.success) {
+                          badge.textContent = 'Active';
+                          badge.className = 'status-badge status-active';
+                          
+                          menu.innerHTML = `
+                            <button class="menu-item suspend">Suspend User</button>
+                          `;
+                          
+                          menu.classList.remove('show');
+                          showToast('✅ User unsuspended successfully', 'success');
+                        } else {
+                          showToast('❌ Failed to unsuspend user', 'error');
+                        }
+                      } catch(err) {
+                        console.error(err);
+                        showToast('⚠️ Network error', 'error');
+                      }
+                    });
+                  }
+                  
                   menu.classList.remove('show');
-                } else { alert('Failed to suspend user'); }
-              }catch(e){ console.error(e); alert('Network error'); }
+                  showToast('✅ User suspended successfully', 'success');
+                } else { 
+                  showToast('❌ Failed to suspend user', 'error');
+                }
+              }catch(e){ 
+                console.error(e); 
+                showToast('⚠️ Network error', 'error');
+              }
             });
           }
 
           if (unsuspendBtn) {
-    unsuspendBtn.addEventListener('click', async (ev) => {
-        ev.preventDefault();
-        if (!confirm('Unsuspend this user?')) return;
+            unsuspendBtn.addEventListener('click', async (ev) => {
+              ev.preventDefault();
+              if (!confirm('Unsuspend this user?')) return;
 
-        try {
-            const resp = await fetch(`/admin-page/users/${userId}/unsuspend/`, {
+              try {
+                const resp = await fetch(`/admin-page/users/${userId}/unsuspend/`, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''}
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok && data.success) {
+                  // Update status badge
+                  const badge = row.querySelector('.status-badge');
+                  badge.textContent = 'Active';
+                  badge.className = 'status-badge status-active';
+
+                  // Replace menu options
+                  menu.innerHTML = `
+                    <button class="menu-item suspend">Suspend User</button>
+                  `;
+
+                  menu.classList.remove('show');
+                  showToast('✅ User unsuspended successfully', 'success');
+                } else {
+                  showToast('❌ Failed to unsuspend user', 'error');
+                }
+              } catch (e) {
+                console.error(e);
+                showToast('⚠️ Network error', 'error');
+              }
+            });
+          }
+        });
+
+        // Add role dropdown change handlers
+        container.querySelectorAll('.role-dropdown').forEach(dropdown => {
+          dropdown.addEventListener('change', async (ev) => {
+            const userId = dropdown.dataset.userId;
+            const newRole = dropdown.value;
+            const currentRole = dropdown.dataset.currentRole;
+            
+            if(newRole === currentRole) return;
+            
+            // Show custom modal instead of confirm
+            const confirmed = await showRoleModal(`Change user role to ${newRole}?`);
+            
+            if(!confirmed) {
+              dropdown.value = currentRole;
+              return;
+            }
+            
+            try {
+              const resp = await fetch(`/admin-page/users/${userId}/update-role/`, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
-                    'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''
-                }
-            });
-
-            if (resp.ok) {
-                // Update UI
-                const badge = row.querySelector('.status-badge');
-                badge.textContent = 'Active';
-                badge.className = 'status-badge status-active';
-
-                // Replace menu options
-                menu.innerHTML = `
-                    <button class="menu-item suspend">Suspend User</button>
-                    <div class="divider"></div>
-                    <button class="menu-item delete">Delete User</button>
-                `;
-
-                menu.classList.remove('show');
-            } else {
-                alert('Failed to unsuspend user.');
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''
+                },
+                body: JSON.stringify({ role: newRole })
+              });
+              
+              const data = await resp.json();
+              
+              if(resp.ok && data.success) {
+                dropdown.dataset.currentRole = newRole;
+                showToast(`✅ User role updated to ${newRole}`, 'success');
+              } else {
+                dropdown.value = currentRole;
+                showToast('❌ Failed to update role: ' + (data.error || 'Unknown error'), 'error');
+              }
+            } catch(e) {
+              console.error(e);
+              dropdown.value = currentRole;
+              showToast('⚠️ Network error', 'error');
             }
-        } catch (e) {
-            console.error(e);
-            alert('Network error.');
-        }
-    });
-}
-
-          if(deleteBtn){
-            deleteBtn.addEventListener('click', async (ev) => {
-              ev.preventDefault();
-              if(!confirm('Permanently delete this user? This cannot be undone.')) return;
-              try{
-                const resp = await fetch(`/admin-page/users/${userId}/delete/`, { method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': (document.cookie.match(/(^| )csrftoken=([^;]+)/)||[])[2] || ''} });
-                if(resp.ok){ row.remove(); } else { alert('Failed to delete user'); }
-              }catch(e){ console.error(e); alert('Network error'); }
-            });
-          }
+          });
         });
 
     } catch (err) {
         console.error("fetchUsers error:", err);
     }
 }
+
+    // Modal helper function
+    function showRoleModal(message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('roleModal');
+        const messageEl = document.getElementById('roleModalMessage');
+        const confirmBtn = document.getElementById('roleModalConfirm');
+        const cancelBtn = document.getElementById('roleModalCancel');
+
+        messageEl.textContent = message;
+        modal.style.display = 'flex';
+
+        const handleConfirm = () => {
+          modal.style.display = 'none';
+          cleanup();
+          resolve(true);
+        };
+
+        const handleCancel = () => {
+          modal.style.display = 'none';
+          cleanup();
+          resolve(false);
+        };
+
+        const cleanup = () => {
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+        };
+
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+      });
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success', duration = 3000) {
+      const container = document.getElementById('toastContainer');
+      if(!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = message;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
 
     // close any open user action menus when clicking elsewhere
     document.addEventListener('click', function(){
@@ -666,5 +809,21 @@
     });
     })();
   </script>
+
+  <!-- Role Change Confirmation Modal -->
+  <div id="roleModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h3 id="roleModalTitle" style="margin-bottom:10px;color:#0f172a;">Change User Role</h3>
+      <p id="roleModalMessage" style="color:#64748b;margin-bottom:20px;">Are you sure you want to change this user's role?</p>
+      <div class="modal-actions">
+        <button id="roleModalCancel" class="modal-btn cancel">Cancel</button>
+        <button id="roleModalConfirm" class="modal-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
+
 </body>
 </html>

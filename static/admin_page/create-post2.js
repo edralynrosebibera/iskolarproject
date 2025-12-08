@@ -122,20 +122,36 @@ saveBtn.addEventListener("click", async e => {
     successMessage = "✅ Scholarship updated successfully!";
   }
 
+  // Get CSRF token
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  console.log("Sending to endpoint:", endpoint);
+  console.log("Post data:", post);
+  console.log("Edit ID:", editId);
+
   try {
     const res = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie('csrftoken') || ''
+      },
       body: JSON.stringify(post),
     });
 
+    console.log("Response status:", res.status);
     const data = await res.json();
     console.log("FRONTEND RECEIVED:", data);
 
     if (data.success) {
         showToast(successMessage);
 
-        const newPostId = data.data && data.data.length > 0 ? data.data[0].id : null;
+        const newPostId = editId || (data.data && data.data.length > 0 ? data.data[0].id : null);
 
         if (!newPostId) {
             showToast("⚠️ Post saved but no post ID was returned.");

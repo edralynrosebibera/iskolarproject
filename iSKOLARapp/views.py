@@ -10,6 +10,7 @@ from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
+from admin_page.views import student_required
 
 url: str = settings.SUPABASE_URL
 key: str = settings.SUPABASE_KEY
@@ -23,6 +24,7 @@ def iSKOLARapp_view(request):
 # ---------------------------------------------------------
 # SAVED SCHOLARSHIPS
 # ---------------------------------------------------------
+@student_required
 def saved_scholarships_view(request):
     try:
         resp = supabase.table("posts").select("*").eq("is_saved", True).execute()
@@ -37,6 +39,7 @@ def saved_scholarships_view(request):
 # ---------------------------------------------------------
 # STUDENT APPLICATIONS
 # ---------------------------------------------------------
+@student_required
 def applications_view(request):
 
     # 🔥 FIX — USE SUPABASE UUID
@@ -97,6 +100,7 @@ def applications_view(request):
 # ---------------------------------------------------------
 # ARCHIVES
 # ---------------------------------------------------------
+@student_required
 def archives_view(request):
     resp = supabase.table("posts").select("*").eq("is_archived", True).execute()
     posts = resp.data if resp.data else []
@@ -161,3 +165,64 @@ def unsave_post(request, post_id):
 def logout_view(request):
     logout(request)
     return redirect("/login/")
+
+@student_required
+def view_my_application(request, post_id):
+    """View student's own application details for a specific scholarship"""
+    supabase_user_id = request.session.get("supabase_user_id")
+    
+    if not supabase_user_id:
+        return redirect("login")
+    
+    try:
+        # Get the application
+        app_res = (
+            supabase.table("applications")
+            .select("*")
+            .eq("user_id", supabase_user_id)
+            .eq("post_id", post_id)
+            .maybe_single()
+            .execute()
+        )
+        
+        application = app_res.data
+        
+        if not application:
+            messages.error(request, "Application not found.")
+            return redirect("applications")
+        
+        # Get the post/scholarship details
+        post_res = (
+            supabase.table("posts")
+            .select("*")
+            .eq("id", post_id)
+            .maybe_single()
+            .execute()
+        )
+        
+        post = post_res.data
+        
+        if not post:
+            messages.error(request, "Scholarship not found.")
+            return redirect("applications")
+        
+        # Get submitted files
+        files_res = (
+            supabase.table("application_files")
+            .select("*")
+            .eq("application_id", application["id"])
+            .execute()
+        )
+        
+        files = files_res.data or []
+        
+        return render(request, "view_my_application.html", {
+            "application": application,
+            "post": post,
+            "files": files,
+        })
+        
+    except Exception as e:
+        print(f"Error viewing application: {e}")
+        messages.error(request, "An error occurred while loading your application.")
+        return redirect("applications")

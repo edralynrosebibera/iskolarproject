@@ -255,6 +255,7 @@ button.ghost {
   font-size: 16px;
   cursor: pointer;
   opacity: 0.7;
+  color: #000;
 }
 
 .toast .close-btn:hover {
