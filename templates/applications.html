@@ -11,53 +11,67 @@
     <link rel="stylesheet" href="{% static 'applications_cards.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-    /* 1. BRING THE HEADER TO THE FRONT */
-    .header {
-        z-index: 9999 !important; 
-        position: fixed !important; /* Ensure it stays fixed at top */
+
+.header {
+z-index: 9999 !important; 
+position: fixed !important; 
+}
+
+.sidebar {
+ z-index: 10000 !important; 
+}
+.sidebar-overlay {
+ z-index: 9998 !important;
+}
+ 
+
+
+.profile-dropdown {
+width: 320px !important;
+border-radius: 16px !important;
+border: 1px solid #eee !important;
+box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+ top: 64px !important; 
+ right: 10px !important;
+ padding: 0 !important;
+ background: #fff !important;
+ z-index: 10000 !important;
+}
+
+
+ .profile-header {
+ padding: 20px 24px 16px 24px !important;
+ background: #f7fafd !important;
+ border-bottom: 1px solid #eee !important;
+display: flex !important;
+ gap: 16px !important;
+ align-items: center !important;
+}
+
+
+.profile-menu li a, 
+ .logout-link {
+padding: 14px 24px !important;
+ font-size: 16px !important;
+ display: block !important;
+ text-decoration: none !important; 
+ }
+
+   .card-status.accepted,
+    .card-status.approved {
+        /* Use your requested color for the SOLID background */
+        background: #00A3D6 !important; 
+        
+        /* Use White text for high contrast against the solid blue background */
+        color: white !important; 
+        
+        /* Use the same solid blue for the border */
+        border: 1px solid #00A3D6 !important; 
+        font-weight: 700 !important;
     }
 
-    /* --- SIDEBAR FIX ADDED HERE --- */
-    /* This ensures the sidebar is clickable by placing it ABOVE the header */
-    .sidebar {
-        z-index: 10000 !important; 
-    }
-    .sidebar-overlay {
-        z-index: 9998 !important;
-    }
-    /* ------------------------------ */
 
-    /* 2. Profile Dropdown Styles */
-    .profile-dropdown {
-        width: 320px !important;
-        border-radius: 16px !important;
-        border: 1px solid #eee !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
-        top: 64px !important; /* Adjusted to match header height exactly */
-        right: 10px !important;
-        padding: 0 !important;
-        background: #fff !important;
-        z-index: 10000 !important; /* One level higher than the header */
-    }
 
-    /* Fix Header Padding */
-    .profile-header {
-        padding: 20px 24px 16px 24px !important;
-        background: #f7fafd !important;
-        border-bottom: 1px solid #eee !important;
-        display: flex !important;
-        gap: 16px !important;
-        align-items: center !important;
-    }
-    
-    /* Fix Link Spacing */
-    .profile-menu li a, 
-    .logout-link {
-        padding: 14px 24px !important;
-        font-size: 16px !important;
-        display: block !important;
-        text-decoration: none !important; /* Removes underline blue link style */
-    }
 </style>
 </head>
 <body>
@@ -247,9 +261,9 @@
         const dropdown = document.getElementById('profileDropdown');
 
         if(toggle && dropdown) {
-            // 1. Toggle the dropdown when clicking the profile picture
+           
             toggle.addEventListener('click', function(e){
-                e.stopPropagation(); // Prevents the click from closing it immediately
+                e.stopPropagation();
                 if (dropdown.style.display === 'block') {
                     dropdown.style.display = 'none';
                 } else {
@@ -257,7 +271,7 @@
                 }
             });
 
-            // 2. Close the dropdown if clicking anywhere else on the screen
+           
             document.addEventListener('click', function(e){
                 if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
                     dropdown.style.display = 'none';
@@ -265,7 +279,7 @@
             });
         }
     })();
-        // Countdown "Due in ..." update for each card
+       
         (function(){
             function pad(n){return n<10?('0'+n):n}
             function updateCountdown(el){
@@ -277,7 +291,7 @@
                 var diff = d - now;
                 var textEl = el.querySelector('.meta-due-text');
                 if(diff <= 0){
-                    // past due: show date
+                 
                     textEl.textContent = 'Due ' + d.toLocaleDateString();
                     return;
                 }
@@ -285,7 +299,7 @@
                 var days = Math.floor(secs/86400); secs -= days*86400;
                 var hrs = Math.floor(secs/3600); secs -= hrs*3600;
                 var mins = Math.floor(secs/60); secs -= mins*60;
-                // Format like: 'Due in 1d 17h 33m 55s'
+               
                 var parts = [];
                 if(days>0) parts.push(days+'d');
                 if(hrs>0 || days>0) parts.push(hrs+'h');
@@ -306,7 +320,7 @@
         })();
         </script>
         <script>
-        // Tabs: client-side filtering of .cards-card by data-status
+        
         (function(){
             function activateTab(tab){
                 document.querySelectorAll('.cards-tab').forEach(function(t){
@@ -324,7 +338,7 @@
                     var show = false;
                     if(status === 'all') show = true;
                     else if(status === 'accepted'){
-                        // treat both admin 'Approved' and student 'Accepted' as accepted
+                        
                         show = (s === 'accepted' || s === 'approved');
                     } else {
                         show = (s === status);
