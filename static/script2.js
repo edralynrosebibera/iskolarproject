@@ -253,12 +253,6 @@ document.addEventListener('DOMContentLoaded', function () {
                   </button>
                   <span class="tooltiptext">Archive this scholarship</span>
                 </div>
-                <div class="tooltip">
-                  <button class="icon-btn apply-btn" data-id="${post.id}">
-                    <i class="fa-regular fa-circle-check"></i>
-                  </button>
-                  <span class="tooltiptext">Apply for this scholarship</span>
-                </div>
               </div>
             </div>
 
@@ -271,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <!-- Smart redirect button -->
             <a href="${viewHref}" target="${target}" class="view-link">
-              View Scholarship Details
+              Apply For This Scholarship
             </a>
           </div>
         `;
